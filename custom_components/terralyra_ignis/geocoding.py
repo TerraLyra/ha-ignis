@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import math
 import sqlite3
+from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -96,7 +97,7 @@ class PlaceNameResolver:
 
     def _validate_database(self) -> bool:
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 row = connection.execute(
                     "SELECT value FROM metadata WHERE key = 'source'"
                 ).fetchone()
@@ -108,7 +109,7 @@ class PlaceNameResolver:
         self, latitude: float, longitude: float
     ) -> tuple[str, str, float] | None:
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 for radius_km in SEARCH_RADII_KM:
                     candidates = _query_candidates(
                         connection, latitude, longitude, radius_km
@@ -133,7 +134,7 @@ class PlaceNameResolver:
     ) -> tuple[MapPlace, ...]:
         west, south, east, north = bbox
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 rows = connection.execute(
                     "SELECT latitude, longitude, name FROM places "
                     "WHERE latitude BETWEEN ? AND ? "
