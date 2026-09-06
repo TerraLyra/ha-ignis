@@ -13,6 +13,7 @@ from homeassistant.core import (
     SupportsResponse,
 )
 from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 
@@ -73,6 +74,8 @@ class IgnisRuntimeData:
 
 
 type IgnisConfigEntry = ConfigEntry[IgnisRuntimeData]
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
