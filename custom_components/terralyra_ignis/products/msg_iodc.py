@@ -11,7 +11,12 @@ from typing import Any
 
 import h5py
 import numpy as np
-from aiohttp import BasicAuth, ClientError, ClientSession, ClientTimeout
+from aiohttp import (
+    ClientError,
+    ClientSession,
+    ClientTimeout,
+    encode_basic_auth,
+)
 
 from .http import parse_retry_after
 
@@ -98,15 +103,17 @@ async def async_fetch_latest_list_product(
     """Fetch one bounded List Product without following redirects."""
     if not username or not password:
         raise MsgIodcAuthenticationError("LSA SAF credentials are not configured")
-    auth = BasicAuth(username, password)
+    headers = {
+        "Authorization": encode_basic_auth(username, password),
+        "User-Agent": USER_AGENT,
+    }
     try:
         for filename, url in candidate_list_products(
             now or datetime.now(UTC), lookback_slots=lookback_slots
         ):
             async with session.get(
                 url,
-                auth=auth,
-                headers={"User-Agent": USER_AGENT},
+                headers=headers,
                 allow_redirects=False,
                 timeout=TIMEOUT,
             ) as response:
