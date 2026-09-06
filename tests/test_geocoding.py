@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import math
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 import pytest
@@ -88,16 +89,19 @@ async def test_map_places_reject_invalid_bounds(hass, tmp_path: Path) -> None:
 
 
 def test_bounding_box_handles_date_line() -> None:
-    connection = sqlite3.connect(":memory:")
-    connection.execute(
-        "CREATE TABLE places (latitude REAL, longitude REAL, name TEXT, country_code TEXT)"
-    )
-    connection.executemany(
-        "INSERT INTO places VALUES (?, ?, ?, ?)",
-        [(0.0, 179.95, "East", "FJ"), (0.0, -179.95, "West", "FJ")],
-    )
+    with closing(sqlite3.connect(":memory:")) as connection:
+        connection.execute(
+            "CREATE TABLE places (latitude REAL, longitude REAL, name TEXT, country_code TEXT)"
+        )
+        connection.executemany(
+            "INSERT INTO places VALUES (?, ?, ?, ?)",
+            [(0.0, 179.95, "East", "FJ"), (0.0, -179.95, "West", "FJ")],
+        )
 
-    names = {row[2] for row in _query_candidates(connection, 0.0, 179.99, 25.0)}
+        names = {
+            row[2]
+            for row in _query_candidates(connection, 0.0, 179.99, 25.0)
+        }
 
     assert names == {"East", "West"}
 
