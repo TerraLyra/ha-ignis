@@ -323,9 +323,11 @@ def _number_attr(
 ) -> float | None:
     value = attrs.get(name)
     if value is None:
+        if default is not None:
+            return default
         if required:
             raise GoesDecodeError(f"GOES attribute {name} is missing")
-        return default
+        return None
     values = np.asarray(value).reshape(-1)
     if values.size != 1:
         raise GoesDecodeError(f"GOES attribute {name} is invalid")

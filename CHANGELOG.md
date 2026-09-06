@@ -13,6 +13,9 @@
 - Add regression tests proving that Tokyo reports one active NASA FIRMS source
   plus a separate inactive Himawari opportunity, while locations outside the
   conservative Himawari gate do not report it.
+- Accept current NOAA GOES floating-point science fields when optional NetCDF
+  packing attributes are absent, while preserving strict units, range, shape,
+  projection and source validation.
 
 ## 0.14.0
 

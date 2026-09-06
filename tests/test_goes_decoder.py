@@ -142,6 +142,29 @@ def test_decode_tiny_product_preserves_quality_and_optional_values(
     assert len({d.source_detection_id for d in snapshot.detections}) == 4
 
 
+def test_decode_accepts_native_float_science_values_without_packing_attrs(
+    tmp_path: Path,
+) -> None:
+    """Current NOAA float fields legitimately omit scale and offset metadata."""
+    path = tmp_path / FILENAME
+    _fixture(path)
+    with h5py.File(path, "r+") as product:
+        for name in ("Power", "Temp", "Area"):
+            del product[name].attrs["scale_factor"]
+            del product[name].attrs["add_offset"]
+
+    snapshot = _decode(path)
+
+    good = next(
+        detection
+        for detection in snapshot.detections
+        if detection.classification == "good" and not detection.temporal_filtered
+    )
+    assert good.frp_mw == 25.0
+    assert good.fire_temperature_k == 300.0
+    assert good.fire_area_km2 == 2.0
+
+
 @pytest.mark.asyncio
 async def test_provider_downloads_decodes_and_normalizes_tiny_product(
     tmp_path: Path,
