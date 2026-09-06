@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis.const import (
     CONF_FIRMS_MAP_KEY,
     CONF_MONITORED_LOCATIONS,
     CONF_MONITORING_CENTER_NAME,
@@ -15,10 +15,15 @@ from custom_components.terralyra.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
 )
-from custom_components.terralyra.diagnostics import async_get_config_entry_diagnostics
-from custom_components.terralyra.models import ProviderStatus
-from custom_components.terralyra.monitoring import MonitoredLocation
-from custom_components.terralyra.products.fire_risk import FireRiskDay, FireRiskForecast
+from custom_components.terralyra_ignis.diagnostics import (
+    async_get_config_entry_diagnostics,
+)
+from custom_components.terralyra_ignis.models import ProviderStatus
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.products.fire_risk import (
+    FireRiskDay,
+    FireRiskForecast,
+)
 
 
 @pytest.mark.asyncio

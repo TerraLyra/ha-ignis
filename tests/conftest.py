@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for the TerraLyra custom integration."""
+"""Shared pytest fixtures for the TerraLyra IGNIS custom integration."""
 from __future__ import annotations
 
 import pytest

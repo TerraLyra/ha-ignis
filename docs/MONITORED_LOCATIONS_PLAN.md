@@ -1,6 +1,8 @@
 # Monitored Locations implementation plan
 
-Status: implementation plan for the existing `ha-terralyra` integration.
+Status: historical implementation plan, completed before the IGNIS product
+migration. Current naming and repository boundaries are defined in
+`PRODUCT_ARCHITECTURE.md`.
 
 This plan applies the TerraLyra PRDs incrementally. It does not authorize a
 rewrite, cloud dependency, account requirement, subscription gate, or an
@@ -149,8 +151,8 @@ IncidentLocationMatch
 
 Files:
 
-- `custom_components/terralyra/monitoring.py`
-- `custom_components/terralyra/const.py`
+- `custom_components/terralyra_ignis/monitoring.py`
+- `custom_components/terralyra_ignis/const.py`
 - `tests/test_monitoring.py`
 
 Changes:
@@ -173,9 +175,9 @@ Acceptance criteria:
 
 Files:
 
-- `custom_components/terralyra/__init__.py`
-- `custom_components/terralyra/config_flow.py`
-- `custom_components/terralyra/const.py`
+- `custom_components/terralyra_ignis/__init__.py`
+- `custom_components/terralyra_ignis/config_flow.py`
+- `custom_components/terralyra_ignis/const.py`
 - translation JSON files
 - `tests/test_config_flow.py`
 
@@ -200,10 +202,10 @@ Acceptance criteria:
 
 Files:
 
-- `custom_components/terralyra/models.py`
-- `custom_components/terralyra/tracking.py`
-- `custom_components/terralyra/trends.py`
-- `custom_components/terralyra/coordinator.py`
+- `custom_components/terralyra_ignis/models.py`
+- `custom_components/terralyra_ignis/tracking.py`
+- `custom_components/terralyra_ignis/trends.py`
+- `custom_components/terralyra_ignis/coordinator.py`
 - tracking, trend, and coordinator tests
 
 Changes:
@@ -230,7 +232,7 @@ Acceptance criteria:
 
 Files:
 
-- `custom_components/terralyra/coordinator.py`, or a new focused storage module
+- `custom_components/terralyra_ignis/coordinator.py`, or a new focused storage module
 - persistence tests
 
 Target store sections:
@@ -254,7 +256,7 @@ Changes:
 
 Files:
 
-- `custom_components/terralyra/config_flow.py`
+- `custom_components/terralyra_ignis/config_flow.py`
 - `strings.json` and all translations
 - `tests/test_config_flow.py`
 
@@ -272,10 +274,10 @@ The flow should use ordinary Home Assistant forms and remain usable on mobile.
 
 Files:
 
-- `custom_components/terralyra/sensor.py`
-- `custom_components/terralyra/event.py`
-- `custom_components/terralyra/geo_location.py`
-- `custom_components/terralyra/coordinator.py`
+- `custom_components/terralyra_ignis/sensor.py`
+- `custom_components/terralyra_ignis/event.py`
+- `custom_components/terralyra_ignis/geo_location.py`
+- `custom_components/terralyra_ignis/coordinator.py`
 - translations and notification tests
 
 Changes:
@@ -308,10 +310,10 @@ Acceptance criteria:
 
 Files:
 
-- `custom_components/terralyra/providers/factory.py`
-- `custom_components/terralyra/providers/goes*.py`
-- `custom_components/terralyra/providers/firms.py`
-- `custom_components/terralyra/coordinator.py`
+- `custom_components/terralyra_ignis/providers/factory.py`
+- `custom_components/terralyra_ignis/providers/goes*.py`
+- `custom_components/terralyra_ignis/providers/firms.py`
+- `custom_components/terralyra_ignis/coordinator.py`
 
 Changes:
 
@@ -356,7 +358,8 @@ The monitored-location work must not also introduce:
 - FIRMS-only new-fire alerts;
 - news or AI-based incident creation;
 - a premature shared Python framework;
-- immediate repository splitting or IGNIS renaming;
+- immediate repository splitting or IGNIS renaming (completed later in
+  v0.14.0, outside this implementation phase);
 - environmental-product extraction in the same migration.
 
 ## Recommended release sequence

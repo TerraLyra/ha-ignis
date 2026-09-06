@@ -8,39 +8,39 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from custom_components.terralyra.api import (
+from custom_components.terralyra_ignis.api import (
     LsaSafAuthError,
     LsaSafError,
     LsaSafRateLimitError,
     LsaSafTimeoutError,
 )
-from custom_components.terralyra.clustering import cluster_detections
-from custom_components.terralyra.coverage import plan_location_sources
-from custom_components.terralyra.models import (
+from custom_components.terralyra_ignis.clustering import cluster_detections
+from custom_components.terralyra_ignis.coverage import plan_location_sources
+from custom_components.terralyra_ignis.models import (
     FireDetection,
     ProviderSnapshot,
     ProviderStatus,
 )
-from custom_components.terralyra.monitoring import MonitoredLocation
-from custom_components.terralyra.products.fire import (
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.products.fire import (
     FirePixel,
     LsaSafNoDataError,
     Product,
 )
-from custom_components.terralyra.providers.base import (
+from custom_components.terralyra_ignis.providers.base import (
     ProviderAuthenticationError,
     ProviderInvalidResponseError,
     ProviderNoDataError,
     ProviderRateLimitError,
     ProviderTimeoutError,
 )
-from custom_components.terralyra.providers.mtg import (
+from custom_components.terralyra_ignis.providers.mtg import (
     PRODUCT,
     PROVIDER,
     SATELLITE,
     MtgActiveFireProvider,
 )
-from custom_components.terralyra.sensor import (
+from custom_components.terralyra_ignis.sensor import (
     ActiveFireCountSensor,
     ActiveFireProviderSensor,
     CombinedFireCountSensor,
@@ -454,13 +454,13 @@ def test_monitored_location_sources_sensor_is_readable_and_equal_peer() -> None:
 @pytest.mark.parametrize(
     "data", [None, SimpleNamespace(active_clusters=[], tracked_fires=[])]
 )
-def test_active_fire_summary_identifies_terralyra_map_source(data: object) -> None:
+def test_active_fire_summary_identifies_ignis_map_source(data: object) -> None:
     """Map-card support information stays explicit even with no detections."""
     entity = object.__new__(ActiveFireCountSensor)
     entity.entry = SimpleNamespace(data={})
     entity.coordinator = SimpleNamespace(data=data)
 
-    assert entity.extra_state_attributes["map_source"] == "terralyra"
+    assert entity.extra_state_attributes["map_source"] == "terralyra_ignis"
     assert entity.extra_state_attributes["map_markers"] == 0
 
 

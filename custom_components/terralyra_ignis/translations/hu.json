@@ -1,0 +1,401 @@
+{
+  "title": "TerraLyra IGNIS",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Aktívtűz-adatforrás kiválasztása",
+        "description": "Európában és a környező térségekben az ingyenes fiókot igénylő LSA SAF ajánlott. A NOAA GOES a biztonságosan lefedett nyugati féltekén használható fiók nélkül, de további műholdas adatokat tölt le.",
+        "data": {
+          "active_fire_provider": "Aktívtűz-adatforrás"
+        }
+      },
+      "monitoring_center": {
+        "title": "Aktívtűz-figyelőközpont kiválasztása",
+        "description": "Normál használathoz válaszd az Otthont, vagy adj meg másik helyet teszteléshez vagy külön terület megfigyeléséhez. Ez a központ hat az aktívtűz-adatokra, távolságokra, riasztásokra, NASA FIRMS-re és tűzjelölőkre. Az FRMv3 tűzkockázat és a felszínhőmérséklet továbbra is az Otthonhoz kötődik.",
+        "data": {
+          "use_custom_monitoring_center": "Egyedi figyelőközpont használata",
+          "monitoring_center_name": "Figyelőközpont neve",
+          "monitoring_latitude": "Szélességi fok",
+          "monitoring_longitude": "Hosszúsági fok"
+        },
+        "data_description": {
+          "use_custom_monitoring_center": "Kikapcsolva a Home Assistant Otthon helyét használja.",
+          "monitoring_center_name": "Rövid, felismerhető név, például New York vagy Nyaraló.",
+          "monitoring_latitude": "Tizedes fok -90 és 90 között.",
+          "monitoring_longitude": "Tizedes fok -180 és 180 között."
+        }
+      },
+      "sources": {
+        "title": "Opcionális aktívtűz-források kapcsolása",
+        "description": "A TerraLyra IGNIS minden figyelt helyhez automatikusan hozzárendeli az összes releváns forrást. A NOAA GOES nem igényel hozzáférési adatot. A lefedettséget LSA SAF hozzáféréssel és/vagy NASA FIRMS MAP_KEY-jel bővítheted; az üresen hagyott forrás kimarad.",
+        "data": {
+          "username": "LSA SAF felhasználónév (opcionális)",
+          "password": "LSA SAF jelszó (opcionális)",
+          "firms_map_key": "NASA FIRMS MAP_KEY (opcionális)"
+        }
+      },
+      "lsa_saf": {
+        "title": "Kapcsolódás az LSA SAF Data Service-hez",
+        "description": "Add meg az ingyenes LSA SAF Data Service fiókod adatait. Az integráció MTG aktívtűz-észlelést és FRMv3 tűzkockázati előrejelzést biztosít.",
+        "data": {
+          "username": "Felhasználónév",
+          "password": "Jelszó"
+        },
+        "data_description": {
+          "username": "LSA SAF Data Service felhasználónév",
+          "password": "LSA SAF Data Service jelszó"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Újrahitelesítés szükséges",
+        "description": "Az LSA SAF Data Service elutasította a mentett hitelesítési adatokat. Add meg újra a fiók felhasználónevét és jelszavát.",
+        "data": {
+          "username": "Felhasználónév",
+          "password": "Jelszó"
+        },
+        "data_description": {
+          "username": "Az eredeti LSA SAF fiók felhasználóneve",
+          "password": "Az LSA SAF Data Service aktuális jelszava"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nem sikerült kapcsolódni az LSA SAF Data Service-hez",
+      "goes_not_available": "A kiválasztott figyelőközpont kívül esik a NOAA GOES biztonságos lefedettségi területén",
+      "invalid_monitoring_center": "Adj meg érvényes figyelőközpont-nevet és koordinátákat",
+      "invalid_auth": "Hibás felhasználónév vagy jelszó",
+      "invalid_firms_key": "A NASA FIRMS elutasította a MAP_KEY-t",
+      "lsa_credentials_incomplete": "Add meg az LSA SAF felhasználónevet és jelszót is, vagy hagyd mindkettőt üresen",
+      "no_source_available": "Ezt a helyet nem fedi le automatikus forrás. Adj meg LSA SAF hozzáférést vagy NASA FIRMS MAP_KEY-t"
+    },
+    "abort": {
+      "already_configured": "Ez az LSA SAF fiók már be van állítva",
+      "reauth_successful": "A hitelesítési adatok frissítve lettek",
+      "wrong_account": "Az új hitelesítési adatok egy másik LSA SAF fiókhoz tartoznak"
+    }
+  },
+  "selector": {
+    "active_fire_provider": {
+      "options": {
+        "eumetsat_lsa_saf": "EUMETSAT LSA SAF (fiók szükséges)",
+        "noaa_goes": "NOAA GOES-18/19 (nem szükséges fiók)"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aktív tűzfigyelés beállításai",
+        "data": {
+          "radius_km": "Figyelési sugár",
+          "manage_monitored_locations": "Figyelt helyek kezelése",
+          "use_custom_monitoring_center": "Egyedi aktívtűz-figyelőközpont használata",
+          "monitoring_center_name": "Figyelőközpont neve",
+          "monitoring_latitude": "Figyelőközpont szélességi koordinátája",
+          "monitoring_longitude": "Figyelőközpont hosszúsági koordinátája",
+          "fire_risk_radius_km": "Tűzkockázati előrejelzés sugara",
+          "min_confidence": "Minimális megbízhatóság",
+          "min_frp_mw": "Minimális tűzsugárzási teljesítmény",
+          "scan_interval_minutes": "Ellenőrzési gyakoriság",
+          "dedup_radius_km": "Azonos tűz illesztési sugara",
+          "dedup_hours": "Azonos tűz megjegyzési ideje",
+          "fire_history_hours": "Megjelenített tűzelőzmény időablaka",
+          "resolve_place_names": "Közeli helynevek megjelenítése a térképen",
+          "enable_land_surface_temperature": "Felszínhőmérséklet engedélyezése",
+          "enable_firms": "NASA FIRMS használata, ahol elérhető",
+          "firms_map_key": "NASA FIRMS MAP_KEY"
+        },
+        "data_description": {
+          "radius_km": "Csak az aktívtűz-figyelőközponttól ezen a távolságon belüli észlelések számítanak.",
+          "manage_monitored_locations": "Jelöld be és mentsd a figyelt helyek hozzáadásához, szerkesztéséhez, ki- és bekapcsolásához vagy törléséhez.",
+          "use_custom_monitoring_center": "Kikapcsolva a Home Assistant Otthon helyét használja. Bekapcsolva az alábbi külön nevet és koordinátákat használja az aktívtűz-adatokhoz, távolságokhoz, riasztásokhoz és a NASA FIRMS-hez. A tűzkockázat és a felszínhőmérséklet továbbra is az Otthon helyéhez kötődik.",
+          "monitoring_center_name": "A szolgáltatói részletekben és a tűzriasztásokban megjelenő rövid név. Csak az egyedi központ bekapcsolásakor használatos.",
+          "monitoring_latitude": "Tizedes fok -90 és 90 között. Csak az egyedi központ bekapcsolásakor használatos.",
+          "monitoring_longitude": "Tizedes fok -180 és 180 között. Csak az egyedi központ bekapcsolásakor használatos.",
+          "fire_risk_radius_km": "Az FRMv3 térképen megjelenő és a legmagasabb regionális tűzkockázathoz vizsgált terület. Az aktívtűz-riasztások sugarát nem módosítja.",
+          "min_confidence": "A 0 minden észlelést enged; az 1 a legszigorúbb szűrés.",
+          "min_frp_mw": "Az ennél gyengébb FRP-jű észlelések figyelmen kívül maradnak.",
+          "scan_interval_minutes": "Milyen gyakran ellenőrizze a Home Assistant az automatikusan hozzárendelt aktívtűz-források újabb termékeit.",
+          "dedup_radius_km": "A közelmúltban látott tűzhöz közeli észlelés ugyanannak a tűznek számít, így nem keletkezik új esemény.",
+          "dedup_hours": "Ennyi ideig nyomja el az azonos helyen jelentkező ismételt új-tűz eseményt.",
+          "fire_history_hours": "Ennyi ideig maradnak láthatók az inaktív tűzjelölések a térképen. Az ismételt riasztások elnyomását nem hosszabbítja meg.",
+          "resolve_place_names": "A legközelebbi települést helyben keresi meg a csomagolt GeoNames cities500 adatbázisból. Koordinátát nem küld külső szolgáltatásnak.",
+          "enable_land_surface_temperature": "Opcionális és alapból kikapcsolt. Bekapcsolva a Home Assistant körülbelül 15 percenként elküldi az Otthon szélességi és hosszúsági koordinátáját az LSA SAF hivatalos adaguc.lsasvcs.ipma.pt WMS-szolgáltatásának a legfrissebb műholdas felszínhőmérséklet lekéréséhez.",
+          "enable_firms": "Bekapcsolva a NASA FIRMS NOAA-20/21 VIIRS és Terra/Aqua MODIS észlelései minden figyelt helyhez egyenrangú műholdas bizonyítékként lesznek hozzárendelve. A Home Assistant minden engedélyezett hely körüli kis határolóterületet elküldi a hivatalos FIRMS API-nak. Saját ingyenes MAP_KEY szükséges.",
+          "firms_map_key": "Titkos adatként kerül a Home Assistant konfigurációs bejegyzésébe, és a diagnosztikából ki van takarva. Hagyd üresen a már mentett kulcs megtartásához."
+        }
+      },
+      "monitored_locations": {
+        "title": "Figyelt helyek kezelése",
+        "menu_options": {
+          "add_location": "Hely hozzáadása",
+          "edit_location": "Hely szerkesztése",
+          "toggle_location": "Hely be- vagy kikapcsolása",
+          "delete_location": "Hely törlése"
+        }
+      },
+      "add_location": {
+        "title": "Figyelt hely hozzáadása",
+        "data": {
+          "name": "Név",
+          "latitude": "Szélesség",
+          "longitude": "Hosszúság",
+          "radius_km": "Figyelési sugár",
+          "enabled": "Bekapcsolva"
+        }
+      },
+      "edit_location": {
+        "title": "Figyelt hely szerkesztése",
+        "data": {
+          "location_id": "Hely",
+          "name": "Név",
+          "latitude": "Szélesség",
+          "longitude": "Hosszúság",
+          "radius_km": "Figyelési sugár",
+          "enabled": "Bekapcsolva"
+        }
+      },
+      "toggle_location": {
+        "title": "Hely be- vagy kikapcsolása",
+        "data": {
+          "location_id": "Hely"
+        }
+      },
+      "delete_location": {
+        "title": "Hely törlése",
+        "data": {
+          "location_id": "Hely"
+        }
+      }
+    },
+    "error": {
+      "firms_key_required": "A megerősítés engedélyezése előtt add meg a NASA FIRMS MAP_KEY értékét",
+      "invalid_firms_key": "A NASA FIRMS elutasította a MAP_KEY értékét",
+      "firms_cannot_connect": "A NASA FIRMS MAP_KEY ellenőrzése nem sikerült",
+      "invalid_monitoring_center": "Adj meg érvényes figyelőközpont-nevet és koordinátákat",
+      "invalid_monitored_location": "Adj meg érvényes nevet, koordinátákat és sugarat",
+      "one_location_required": "Legalább egy figyelt helynek bekapcsolva kell maradnia",
+      "too_many_locations": "Legfeljebb 10 figyelt hely használható"
+    }
+  },
+  "issues": {
+    "provider_authentication": {
+      "title": "Sikertelen hitelesítés egy aktívtűz-adatforrásnál",
+      "description": "A TerraLyra IGNIS nem tud hitelesíteni az egyik beállított aktívtűz-adatforrásnál. Nyisd meg az integráció beállításait, ellenőrizd a hozzáférési adatokat, majd töltsd újra az integrációt."
+    },
+    "provider_outage": {
+      "title": "Az aktívtűz-adatforrások ismételten nem érhetők el",
+      "description": "Minden hozzárendelt aktívtűz-adatforrás {failures} egymást követő frissítésnél hibázott. Ellenőrizd a forrásszolgáltatásokat és a Home Assistant internetkapcsolatát, majd töltsd újra az integrációt. A TerraLyra IGNIS többi terméke ettől még frissülhet."
+    },
+    "upstream_provider_issue": {
+      "title": "A(z) {service} figyelmet igényel",
+      "description": "A(z) {service} {failure} hibát jelzett {failures} egymást követő frissítésnél. A TerraLyra IGNIS korlátozott késleltetéssel újrapróbálkozik, miközben a többi működő forrás tovább frissül. Ha a hiba tartós, ellenőrizd a hozzáférést és a szolgáltatás elérhetőségét."
+    },
+    "upstream_goes_issue": {
+      "title": "A NOAA GOES adatai figyelmet igényelnek",
+      "description": "A(z) {service} {failure} hibát jelzett {failures} egymást követő frissítésnél. A NOAA GOES nem igényel hozzáférési adatot. A TerraLyra IGNIS korlátozott késleltetéssel automatikusan újrapróbálkozik, miközben a többi működő forrás tovább frissül; ha a hiba tartós, ellenőrizd a NOAA szolgáltatás elérhetőségét."
+    },
+    "fire_risk_outage": {
+      "title": "A tűzkockázati előrejelzés szolgáltatása ismételten nem érhető el",
+      "description": "Az FRMv3 előrejelzési szolgáltatás {failures} egymást követő frissítésnél hibázott (utolsó ok: {reason}). A TerraLyra IGNIS korlátozott késleltetéssel automatikusan újrapróbálkozik; az aktívtűz-figyelés és a többi működő termék közben folytatódik. Az értesítés helyreállás után eltűnik."
+    },
+    "provider_coverage": {
+      "title": "Néhány figyelt helyet egyetlen beállított tűzforrás sem fed le",
+      "description": "A TerraLyra IGNIS jelenleg nem tud használható forrást rendelni ezekhez: {locations}. Adj meg LSA SAF hozzáférést vagy NASA FIRMS MAP_KEY-t, illetve módosítsd a helyeket. A többi hely frissítése folytatódik."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "nearest_fire": {
+        "name": "Legközelebbi aktív tűz"
+      },
+      "active_fire_count": {
+        "name": "Aktív tűzcsoportok"
+      },
+      "supplemental_fire_count": {
+        "name": "NASA FIRMS által észlelt tűzcsoportok"
+      },
+      "combined_fire_count": {
+        "name": "Összes aktív tűzcsoport"
+      },
+      "raw_pixel_count": {
+        "name": "Tűzpixelek a körön belül"
+      },
+      "product_time": {
+        "name": "Legfrissebb tűztermék ideje"
+      },
+      "product_age": {
+        "name": "Tűztermék kora"
+      },
+      "provider_status": {
+        "name": "Aktívtűz-adatok állapota",
+        "state": {
+          "initializing": "Indítás",
+          "available": "Elérhető",
+          "delayed": "Késik",
+          "no_product": "Nincs friss termék",
+          "outage": "Szolgáltatói kiesés",
+          "auth_error": "Hitelesítési hiba"
+        }
+      },
+      "active_fire_provider": {
+        "name": "Hozzárendelt aktívtűz-források",
+        "state": {
+          "automatic": "Automatikus",
+          "unavailable": "Nem érhető el"
+        }
+      },
+      "monitored_location_sources": {
+        "name": "{location_name} aktívtűz-forrásai"
+      },
+      "monitored_location_status": {
+        "name": "{location_name} megfigyelési állapota",
+        "state": {
+          "available": "Minden forrás elérhető",
+          "partial": "Részben elérhető",
+          "initializing": "Inicializálás",
+          "unavailable": "Nem érhető el"
+        }
+      },
+      "monitored_location_next_update": {
+        "name": "{location_name} következő várható aktívtűz-frissítése"
+      },
+      "provider_coverage": {
+        "name": "Figyelt helyek forráslefedettsége",
+        "state": {
+          "covered": "Lefedett",
+          "partial": "Részben lefedett",
+          "not_covered": "Nem lefedett",
+          "unknown": "Ismeretlen"
+        }
+      },
+      "fire_risk_today": {
+        "name": "Tűzkockázat az otthon közelében",
+        "state": {
+          "low": "Alacsony",
+          "moderate": "Mérsékelt",
+          "high": "Magas",
+          "very_high": "Nagyon magas",
+          "extreme": "Szélsőséges",
+          "unknown": "Ismeretlen"
+        }
+      },
+      "fire_risk_area_maximum": {
+        "name": "Legmagasabb tűzkockázat a figyelési körzetben",
+        "state": {
+          "low": "Alacsony",
+          "moderate": "Mérsékelt",
+          "high": "Magas",
+          "very_high": "Nagyon magas",
+          "extreme": "Szélsőséges",
+          "unknown": "Ismeretlen"
+        }
+      },
+      "fire_risk_update": {
+        "name": "Tűzkockázati előrejelzés legutóbbi frissítése"
+      },
+      "recent_detections": {
+        "name": "Tűzészlelések az elmúlt órában"
+      },
+      "fire_activity_frp_change": {
+        "name": "Tűzaktivitás FRP-változása egy óra alatt"
+      },
+      "new_incidents_24h": {
+        "name": "Új tűzesetek az elmúlt 24 órában"
+      },
+      "active_fire_situation": {
+        "name": "Aktív tűzhelyzet",
+        "state": {
+          "normal": "Normál",
+          "elevated": "Emelkedett",
+          "high": "Magas",
+          "critical": "Kritikus",
+          "unknown": "Ismeretlen"
+        }
+      },
+      "fire_source_confirmation": {
+        "name": "Független tűzforrás-megerősítés",
+        "state": {
+          "disabled": "Kikapcsolva",
+          "not_available": "Nem érhető el",
+          "no_active_fire": "Nincs aktív tűz",
+          "single_source": "Egyetlen forrás",
+          "multi_source": "Több forrás"
+        }
+      },
+      "nearest_fire_evidence": {
+        "name": "A legközelebbi tűzészlelés bizonyítékerőssége",
+        "state": {
+          "no_active_fire": "Nincs aktív tűz",
+          "limited": "Korlátozott",
+          "moderate": "Közepes",
+          "strong": "Erős"
+        }
+      },
+      "land_surface_temperature": {
+        "name": "Felszínhőmérséklet az otthonnál"
+      }
+    },
+    "event": {
+      "new_fire": {
+        "name": "Új aktív tűz"
+      },
+      "fire_risk_increase": {
+        "name": "Tűzkockázat emelkedése"
+      },
+      "fire_trend": {
+        "name": "Tűzeset trendváltozása"
+      }
+    },
+    "select": {
+      "fire_risk_day": {
+        "name": "Tűzkockázati előrejelzés napja",
+        "state": {
+          "today": "Ma",
+          "tomorrow": "Holnap",
+          "in_2_days": "2 nap múlva",
+          "in_3_days": "3 nap múlva",
+          "in_4_days": "4 nap múlva",
+          "in_5_days": "5 nap múlva",
+          "in_6_days": "6 nap múlva",
+          "in_7_days": "7 nap múlva",
+          "in_8_days": "8 nap múlva",
+          "in_9_days": "9 nap múlva"
+        }
+      }
+    },
+    "camera": {
+      "fire_risk_map": {
+        "name": "Tűzkockázati előrejelzési térkép"
+      }
+    },
+    "calendar": {
+      "fire_risk_forecast": {
+        "name": "10 napos tűzkockázati előrejelzés"
+      }
+    },
+    "number": {
+      "monitoring_radius": {
+        "name": "Aktív tűz figyelési sugár"
+      },
+      "fire_risk_radius": {
+        "name": "Tűzkockázati előrejelzés sugara"
+      },
+      "fire_history_hours": {
+        "name": "Tűzelőzmény időablaka"
+      }
+    }
+  },
+  "services": {
+    "probe_msg_iodc": {
+      "name": "MSG-IODC kompatibilitás ellenőrzése",
+      "description": "A mentett LSA SAF-fiókkal letölt egy aktuális, méretkorlátos MSG-IODC List Product fájlt, és kizárólag metaadatokat ad vissza. Nem módosítja az automatikus forráshozzárendelést, nem őrzi meg a fájlt, és nem olvassa ki a tűzészlelési értékeket.",
+      "fields": {
+        "config_entry_id": {
+          "name": "TerraLyra IGNIS-konfiguráció",
+          "description": "Az a konfigurációs bejegyzés, amelynek mentett LSA SAF hozzáférését az ellenőrzés használja."
+        }
+      }
+    }
+  }
+}

@@ -6,25 +6,25 @@ from unittest.mock import Mock, patch
 
 from homeassistant.helpers import issue_registry as ir
 
-from custom_components.terralyra.coverage import LocationCoverage
-from custom_components.terralyra.repairs import (
+from custom_components.terralyra_ignis.coverage import LocationCoverage
+from custom_components.terralyra_ignis.models import ProviderStatus
+from custom_components.terralyra_ignis.providers.pool import ProviderHealth
+from custom_components.terralyra_ignis.repairs import (
     OUTAGE_REPAIR_THRESHOLD,
-    async_set_fire_risk_outage_issue,
     async_set_authentication_issue,
+    async_set_fire_risk_outage_issue,
     async_set_provider_outage_issue,
-    async_sync_provider_health_issues,
     async_sync_coverage_issue,
+    async_sync_provider_health_issues,
 )
-from custom_components.terralyra.models import ProviderStatus
-from custom_components.terralyra.providers.pool import ProviderHealth
 
 
 def _entry() -> Mock:
     return Mock(entry_id="entry-1")
 
 
-@patch("custom_components.terralyra.repairs.ir.async_delete_issue")
-@patch("custom_components.terralyra.repairs.ir.async_create_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
 def test_authentication_issue_is_actionable_and_clears(
     create_issue: Mock, delete_issue: Mock
 ) -> None:
@@ -37,12 +37,12 @@ def test_authentication_issue_is_actionable_and_clears(
 
     async_set_authentication_issue(hass, entry, active=False)
     delete_issue.assert_called_once_with(
-        hass, "terralyra", "entry-1_provider_authentication"
+        hass, "terralyra_ignis", "entry-1_provider_authentication"
     )
 
 
-@patch("custom_components.terralyra.repairs.ir.async_delete_issue")
-@patch("custom_components.terralyra.repairs.ir.async_create_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
 def test_outage_issue_waits_for_repeated_failures_and_clears_on_success(
     create_issue: Mock, delete_issue: Mock
 ) -> None:
@@ -63,11 +63,11 @@ def test_outage_issue_waits_for_repeated_failures_and_clears_on_success(
     }
 
     async_set_provider_outage_issue(hass, entry, consecutive_failures=0)
-    delete_issue.assert_called_once_with(hass, "terralyra", "entry-1_provider_outage")
+    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_provider_outage")
 
 
-@patch("custom_components.terralyra.repairs.ir.async_delete_issue")
-@patch("custom_components.terralyra.repairs.ir.async_create_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
 def test_fire_risk_issue_is_warning_and_clears_after_recovery(
     create_issue: Mock, delete_issue: Mock
 ) -> None:
@@ -85,11 +85,11 @@ def test_fire_risk_issue_is_warning_and_clears_after_recovery(
     }
 
     async_set_fire_risk_outage_issue(hass, entry, consecutive_failures=0)
-    delete_issue.assert_called_once_with(hass, "terralyra", "entry-1_fire_risk_outage")
+    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_fire_risk_outage")
 
 
-@patch("custom_components.terralyra.repairs.ir.async_delete_issue")
-@patch("custom_components.terralyra.repairs.ir.async_create_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
 def test_coverage_issue_lists_only_uncovered_locations_and_clears(
     create_issue: Mock, delete_issue: Mock
 ) -> None:
@@ -104,11 +104,11 @@ def test_coverage_issue_lists_only_uncovered_locations_and_clears(
     }
 
     async_sync_coverage_issue(hass, entry, (covered,))
-    delete_issue.assert_called_once_with(hass, "terralyra", "entry-1_provider_coverage")
+    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_provider_coverage")
 
 
-@patch("custom_components.terralyra.repairs.ir.async_delete_issue")
-@patch("custom_components.terralyra.repairs.ir.async_create_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
 def test_provider_health_creates_one_bounded_issue_and_clears(
     create_issue: Mock, delete_issue: Mock
 ) -> None:
@@ -138,10 +138,10 @@ def test_provider_health_creates_one_bounded_issue_and_clears(
         "failure": "rate_limit",
         "failures": str(OUTAGE_REPAIR_THRESHOLD),
     }
-    delete_issue.assert_called_once_with(hass, "terralyra", "entry-1_provider_mtg")
+    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_provider_mtg")
 
 
-@patch("custom_components.terralyra.repairs.ir.async_create_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
 def test_provider_authentication_issue_is_immediate(create_issue: Mock) -> None:
     health = ProviderHealth(
         "mtg",
@@ -158,7 +158,7 @@ def test_provider_authentication_issue_is_immediate(create_issue: Mock) -> None:
     assert create_issue.call_args.kwargs["severity"] is ir.IssueSeverity.ERROR
 
 
-@patch("custom_components.terralyra.repairs.ir.async_create_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
 def test_goes_provider_issue_uses_credential_free_guidance(
     create_issue: Mock,
 ) -> None:

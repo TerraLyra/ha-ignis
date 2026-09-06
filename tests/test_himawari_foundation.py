@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.terralyra.providers.himawari import (
+from custom_components.terralyra_ignis.providers.himawari import (
     MAX_USABLE_CENTRAL_ANGLE_DEGREES,
     select_himawari_satellite,
 )

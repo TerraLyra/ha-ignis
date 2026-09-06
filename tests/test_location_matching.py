@@ -3,20 +3,20 @@ from datetime import UTC, datetime
 
 import pytest
 
-from custom_components.terralyra.coordinator import (
+from custom_components.terralyra_ignis.coordinator import (
     _apply_location_matches,
     _attach_location_matches,
     _inside_any_location,
 )
-from custom_components.terralyra.location_matching import (
+from custom_components.terralyra_ignis.location_matching import (
     match_incident_to_locations,
 )
-from custom_components.terralyra.models import (
+from custom_components.terralyra_ignis.models import (
     DistanceTrend,
     FireCluster,
     FireDetection,
 )
-from custom_components.terralyra.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
 
 
 def _location(

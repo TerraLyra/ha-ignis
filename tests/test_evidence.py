@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from custom_components.terralyra.evidence import assess_fire_evidence
-from custom_components.terralyra.models import ConfirmationLevel, FireCluster
+from custom_components.terralyra_ignis.evidence import assess_fire_evidence
+from custom_components.terralyra_ignis.models import ConfirmationLevel, FireCluster
 
 NOW = datetime(2026, 8, 28, 12, tzinfo=UTC)
 

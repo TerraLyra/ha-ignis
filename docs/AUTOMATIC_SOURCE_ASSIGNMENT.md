@@ -30,7 +30,7 @@ provider, attribution and marker rendering. Consequently:
   base-map tiles, not from TerraLyra or its satellite providers;
 - the standard card may render geolocation markers as initials rather than the
   entity's fire icon;
-- the map source selector correctly shows `terralyra`, because all upstream
+- the map source selector correctly shows `terralyra_ignis`, because all upstream
   satellite observations are normalized and deduplicated by this integration.
 
 For a clear dashboard title use **TerraLyra active fires** rather than the

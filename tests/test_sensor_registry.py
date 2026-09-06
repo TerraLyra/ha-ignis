@@ -1,12 +1,12 @@
-"""Tests for TerraLyra sensor entity-registry maintenance."""
+"""Tests for TerraLyra IGNIS sensor entity-registry maintenance."""
 from __future__ import annotations
 
 from types import SimpleNamespace
 from unittest.mock import Mock, call
 
-from custom_components.terralyra import sensor
-from custom_components.terralyra.coverage import LocationSourcePlan
-from custom_components.terralyra.models import ProviderStatus
+from custom_components.terralyra_ignis import sensor
+from custom_components.terralyra_ignis.coverage import LocationSourcePlan
+from custom_components.terralyra_ignis.models import ProviderStatus
 
 
 def test_remove_orphaned_location_source_entities(monkeypatch) -> None:

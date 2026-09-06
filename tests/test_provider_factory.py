@@ -3,13 +3,15 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis.const import (
     ACTIVE_FIRE_PROVIDER_GOES,
     ACTIVE_FIRE_PROVIDER_LSA_SAF,
 )
-from custom_components.terralyra.providers.factory import build_primary_provider
-from custom_components.terralyra.providers.goes_active import GoesActiveFireProvider
-from custom_components.terralyra.providers.mtg import MtgActiveFireProvider
+from custom_components.terralyra_ignis.providers.factory import build_primary_provider
+from custom_components.terralyra_ignis.providers.goes_active import (
+    GoesActiveFireProvider,
+)
+from custom_components.terralyra_ignis.providers.mtg import MtgActiveFireProvider
 
 
 async def _executor(function, *args):

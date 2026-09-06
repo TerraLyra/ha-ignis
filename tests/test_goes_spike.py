@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from custom_components.terralyra.providers.goes_spike import (
+from custom_components.terralyra_ignis.providers.goes_spike import (
     expected_bucket,
     is_primary_candidate_for,
     parse_fdc_filename,

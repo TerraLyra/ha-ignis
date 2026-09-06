@@ -9,14 +9,16 @@ import h5py
 import numpy as np
 import pytest
 
-from custom_components.terralyra.models import ProviderStatus
-from custom_components.terralyra.products.goes import parse_catalogue
-from custom_components.terralyra.products.goes_decoder import (
+from custom_components.terralyra_ignis.models import ProviderStatus
+from custom_components.terralyra_ignis.products.goes import parse_catalogue
+from custom_components.terralyra_ignis.products.goes_decoder import (
     GoesDecodeError,
     decode_goes_fdc,
 )
-from custom_components.terralyra.providers.goes_active import GoesActiveFireProvider
-from custom_components.terralyra.providers.goes_spike import parse_fdc_filename
+from custom_components.terralyra_ignis.providers.goes_active import (
+    GoesActiveFireProvider,
+)
+from custom_components.terralyra_ignis.providers.goes_spike import parse_fdc_filename
 
 FILENAME = (
     "OR_ABI-L2-FDCF-M6_G19_s20262401200200_"

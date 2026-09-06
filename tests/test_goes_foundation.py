@@ -6,16 +6,16 @@ from datetime import UTC, datetime
 
 import pytest
 
-from custom_components.terralyra.products.goes import (
+from custom_components.terralyra_ignis.products.goes import (
+    MAX_LIST_BYTES,
     GoesDiscoveryClient,
     GoesDiscoveryError,
     GoesProductClient,
     GoesProductError,
-    MAX_LIST_BYTES,
     catalogue_prefix,
     parse_catalogue,
 )
-from custom_components.terralyra.providers.goes import select_goes_satellite
+from custom_components.terralyra_ignis.providers.goes import select_goes_satellite
 
 
 def _catalogue(key: str, size: int = 8_000_000) -> bytes:

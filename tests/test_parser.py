@@ -1,12 +1,12 @@
 """Parser tests using a synthetic MTFRPPixel CSV payload."""
-from datetime import UTC
 import gzip
+from datetime import UTC
 
 import pytest
 
-from custom_components.terralyra.api import LsaSafError, validate_service_url
-from custom_components.terralyra.clustering import haversine_km
-from custom_components.terralyra.products.fire import (
+from custom_components.terralyra_ignis.api import LsaSafError, validate_service_url
+from custom_components.terralyra_ignis.clustering import haversine_km
+from custom_components.terralyra_ignis.products.fire import (
     MAX_COMPRESSED_BYTES,
     MAX_UNCOMPRESSED_BYTES,
     parse_product,

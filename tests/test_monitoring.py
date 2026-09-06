@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis.const import (
     CONF_MONITORED_LOCATIONS,
     CONF_MONITORING_CENTER_NAME,
     CONF_MONITORING_LATITUDE,
@@ -20,14 +20,14 @@ from custom_components.terralyra.const import (
     LOCATION_SOURCE,
     LOCATION_SOURCE_MANUAL,
 )
-from custom_components.terralyra.monitoring import (
+from custom_components.terralyra_ignis.monitoring import (
     MonitoredLocation,
     monitored_location_from_dict,
-    resolve_monitoring_center,
     resolve_monitored_locations,
+    resolve_monitoring_center,
     update_primary_location_radius,
-    validate_monitoring_center,
     validate_monitored_locations,
+    validate_monitoring_center,
 )
 
 

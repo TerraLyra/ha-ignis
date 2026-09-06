@@ -3,13 +3,13 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from custom_components.terralyra.models import (
+from custom_components.terralyra_ignis.models import (
     DistanceTrend,
     FireCluster,
     MetricTrend,
     ProviderStatus,
 )
-from custom_components.terralyra.situation import SituationLevel, assess_situation
+from custom_components.terralyra_ignis.situation import SituationLevel, assess_situation
 
 NOW = datetime(2026, 8, 28, 12, 0, tzinfo=UTC)
 

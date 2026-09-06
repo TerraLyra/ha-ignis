@@ -7,22 +7,22 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from custom_components.terralyra.clustering import cluster_detections
-from custom_components.terralyra.const import LOCATION_SOURCE_MANUAL
-from custom_components.terralyra.models import FireDetection
-from custom_components.terralyra.monitoring import MonitoredLocation
-from custom_components.terralyra.products.msg_iodc import (
+from custom_components.terralyra_ignis.clustering import cluster_detections
+from custom_components.terralyra_ignis.const import LOCATION_SOURCE_MANUAL
+from custom_components.terralyra_ignis.models import FireDetection
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.products.msg_iodc import (
     MsgIodcAuthenticationError,
     MsgIodcPixel,
     MsgIodcProduct,
     MsgIodcSchemaError,
 )
-from custom_components.terralyra.providers.base import (
+from custom_components.terralyra_ignis.providers.base import (
     ProviderAuthenticationError,
     ProviderInvalidResponseError,
 )
-from custom_components.terralyra.providers.factory import build_provider_pool
-from custom_components.terralyra.providers.msg_iodc import (
+from custom_components.terralyra_ignis.providers.factory import build_provider_pool
+from custom_components.terralyra_ignis.providers.msg_iodc import (
     PRODUCT,
     PROVIDER,
     SATELLITE,
@@ -79,12 +79,12 @@ async def test_provider_normalizes_decoded_iodc_pixels() -> None:
 
     with (
         patch(
-            "custom_components.terralyra.providers.msg_iodc."
+            "custom_components.terralyra_ignis.providers.msg_iodc."
             "async_fetch_latest_list_product",
             new=AsyncMock(return_value=("safe-product", b"payload")),
         ),
         patch(
-            "custom_components.terralyra.providers.msg_iodc.decode_list_product",
+            "custom_components.terralyra_ignis.providers.msg_iodc.decode_list_product",
             return_value=product,
         ),
     ):
@@ -119,7 +119,7 @@ async def test_provider_normalizes_iodc_errors(
     )
     with (
         patch(
-            "custom_components.terralyra.providers.msg_iodc."
+            "custom_components.terralyra_ignis.providers.msg_iodc."
             "async_fetch_latest_list_product",
             new=AsyncMock(side_effect=source_error),
         ),

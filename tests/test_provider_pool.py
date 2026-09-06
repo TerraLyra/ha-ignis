@@ -6,17 +6,17 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from custom_components.terralyra.models import (
+from custom_components.terralyra_ignis.models import (
     FireDetection,
     ProviderSnapshot,
     ProviderStatus,
 )
-from custom_components.terralyra.providers.base import (
+from custom_components.terralyra_ignis.providers.base import (
     ProviderAuthenticationError,
     ProviderRateLimitError,
     ProviderUnavailableError,
 )
-from custom_components.terralyra.providers.pool import (
+from custom_components.terralyra_ignis.providers.pool import (
     MultiProviderPool,
     ProviderBinding,
 )

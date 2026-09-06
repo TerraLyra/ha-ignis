@@ -33,15 +33,15 @@ jobs:
           import json
           from pathlib import Path
 
-          manifest = json.loads(Path("custom_components/terralyra/manifest.json").read_text())
+          manifest = json.loads(Path("custom_components/terralyra_ignis/manifest.json").read_text())
           dependencies = manifest.get("requirements", [])
-          Path("/tmp/terralyra-runtime-requirements.txt").write_text(
+          Path("/tmp/terralyra_ignis-runtime-requirements.txt").write_text(
               "\n".join(dependencies), encoding="utf-8"
           )
           print(f"Runtime dependencies declared by the integration: {len(dependencies)}")
           PY
-          if [ -s /tmp/terralyra-runtime-requirements.txt ]; then
-            pip-audit -r /tmp/terralyra-runtime-requirements.txt
+          if [ -s /tmp/terralyra_ignis-runtime-requirements.txt ]; then
+            pip-audit -r /tmp/terralyra_ignis-runtime-requirements.txt
           else
             echo "No third-party runtime dependencies to audit"
           fi

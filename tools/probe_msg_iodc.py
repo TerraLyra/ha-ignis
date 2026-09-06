@@ -8,23 +8,23 @@ written to disk, and dataset values are never read.
 from __future__ import annotations
 
 import base64
-from datetime import UTC, datetime
 import importlib.util
 import json
 import os
-from pathlib import Path
 import sys
 import urllib.error
 import urllib.request
+from datetime import UTC, datetime
+from pathlib import Path
 
 MODULE_PATH = (
     Path(__file__).parents[1]
     / "custom_components"
-    / "terralyra"
+    / "terralyra_ignis"
     / "products"
     / "msg_iodc.py"
 )
-SPEC = importlib.util.spec_from_file_location("terralyra_msg_iodc_probe", MODULE_PATH)
+SPEC = importlib.util.spec_from_file_location("terralyra_ignis_msg_iodc_probe", MODULE_PATH)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError("Could not load the MSG-IODC schema module")
 MSG_IODC = importlib.util.module_from_spec(SPEC)

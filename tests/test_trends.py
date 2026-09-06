@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from custom_components.terralyra.models import FireCluster
-from custom_components.terralyra.trends import (
+from custom_components.terralyra_ignis.models import FireCluster
+from custom_components.terralyra_ignis.trends import (
     MAX_STORED_SAMPLES,
     _distance_trend,
     _metric_trend,

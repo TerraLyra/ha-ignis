@@ -1,12 +1,12 @@
-"""Tests for TerraLyra map entities and cluster metadata."""
+"""Tests for TerraLyra IGNIS map entities and cluster metadata."""
 from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from custom_components.terralyra.activity import ActivitySummary
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis.activity import ActivitySummary
+from custom_components.terralyra_ignis.const import (
     ATTR_ACTIVITY_TREND,
     ATTR_DETECTIONS_TOTAL,
     ATTR_DISTANCE_TREND,
@@ -24,26 +24,26 @@ from custom_components.terralyra.const import (
     ATTR_TRACK_ID,
     DOMAIN,
 )
-from custom_components.terralyra.coordinator import (
+from custom_components.terralyra_ignis.coordinator import (
     CoordinatorData,
     FireCluster,
     _tracked_fire_clusters,
     _tracks_inside_locations,
 )
-from custom_components.terralyra.geo_location import (
-    TerraLyraFireLocation,
+from custom_components.terralyra_ignis.geo_location import (
+    IgnisFireLocation,
     _async_remove_expired_entity,
     _display_name,
     _suggested_object_id,
 )
-from custom_components.terralyra.models import (
+from custom_components.terralyra_ignis.models import (
     DistanceTrend,
     FireLifecycle,
     MetricTrend,
     ProviderStatus,
 )
-from custom_components.terralyra.monitoring import MonitoredLocation
-from custom_components.terralyra.situation import assess_situation
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.situation import assess_situation
 
 
 def _cluster(**changes) -> FireCluster:
@@ -72,8 +72,8 @@ def _cluster(**changes) -> FireCluster:
     return FireCluster(**values)
 
 
-def _entity(cluster: FireCluster) -> TerraLyraFireLocation:
-    entity = object.__new__(TerraLyraFireLocation)
+def _entity(cluster: FireCluster) -> IgnisFireLocation:
+    entity = object.__new__(IgnisFireLocation)
     entity._cluster = cluster
     entity.entry = SimpleNamespace(data={})
     entity.coordinator = SimpleNamespace(
@@ -195,7 +195,7 @@ def test_same_place_incidents_can_receive_stable_distinct_names() -> None:
 def test_map_entity_object_id_is_bound_to_incident_not_place_name() -> None:
     assert (
         _suggested_object_id("firms-812165abcdef")
-        == "terralyra_fire_firms-812165abcdef"
+        == "terralyra_ignis_fire_firms-812165abcdef"
     )
 
 

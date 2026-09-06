@@ -6,17 +6,19 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from custom_components.terralyra.models import ProviderSnapshot, ProviderStatus
-from custom_components.terralyra.products.goes import GoesDiscoveryError
-from custom_components.terralyra.providers.base import (
+from custom_components.terralyra_ignis.models import ProviderSnapshot, ProviderStatus
+from custom_components.terralyra_ignis.products.goes import GoesDiscoveryError
+from custom_components.terralyra_ignis.providers.base import (
     ProviderInvalidResponseError,
     ProviderNoDataError,
     ProviderRateLimitError,
     ProviderTimeoutError,
     ProviderUnavailableError,
 )
-from custom_components.terralyra.providers.goes_active import GoesActiveFireProvider
-from custom_components.terralyra.providers.goes_spike import parse_fdc_filename
+from custom_components.terralyra_ignis.providers.goes_active import (
+    GoesActiveFireProvider,
+)
+from custom_components.terralyra_ignis.providers.goes_spike import parse_fdc_filename
 
 NOW = datetime(2026, 8, 29, 12, 15, tzinfo=UTC)
 FILENAME = (

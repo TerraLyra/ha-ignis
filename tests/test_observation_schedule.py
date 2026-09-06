@@ -7,9 +7,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from custom_components.terralyra.coverage import LocationSourcePlan
-from custom_components.terralyra.models import ProviderStatus
-from custom_components.terralyra.observation_schedule import (
+from custom_components.terralyra_ignis.coverage import LocationSourcePlan
+from custom_components.terralyra_ignis.models import ProviderStatus
+from custom_components.terralyra_ignis.observation_schedule import (
     location_update_estimates,
     next_polar_overpass_window,
     next_usable_update,

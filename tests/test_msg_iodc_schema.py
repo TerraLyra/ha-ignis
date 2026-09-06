@@ -8,7 +8,7 @@ import h5py
 import numpy as np
 import pytest
 
-from custom_components.terralyra.products.msg_iodc import (
+from custom_components.terralyra_ignis.products.msg_iodc import (
     FILE_PREFIX,
     MsgIodcSchemaError,
     candidate_list_products,

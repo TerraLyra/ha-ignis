@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import math
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 import pytest
 
-from custom_components.terralyra.geocoding import (
+from custom_components.terralyra_ignis.geocoding import (
     GEONAMES_ATTRIBUTION,
     PlaceLookupError,
     PlaceNameResolver,

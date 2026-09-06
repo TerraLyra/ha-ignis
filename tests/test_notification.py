@@ -5,13 +5,15 @@ from datetime import UTC, datetime
 
 import pytest
 
-from custom_components.terralyra.coordinator import (
+from custom_components.terralyra_ignis.coordinator import (
     _notification_location_context,
     _notification_text,
 )
-from custom_components.terralyra.location_matching import match_incident_to_locations
-from custom_components.terralyra.models import FireCluster
-from custom_components.terralyra.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.location_matching import (
+    match_incident_to_locations,
+)
+from custom_components.terralyra_ignis.models import FireCluster
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
 
 
 def test_hungarian_notification_prefers_settlement() -> None:

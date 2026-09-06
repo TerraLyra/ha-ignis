@@ -1,4 +1,4 @@
-"""Tests for the TerraLyra config, reauth, and options flows."""
+"""Tests for the TerraLyra IGNIS config, reauth, and options flows."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResultType, InvalidData
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.terralyra.api import LsaSafAuthError, LsaSafError
-from custom_components.terralyra.config_flow import _replace_location_options
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis.api import LsaSafAuthError, LsaSafError
+from custom_components.terralyra_ignis.config_flow import _replace_location_options
+from custom_components.terralyra_ignis.const import (
     ACTIVE_FIRE_PROVIDER_GOES,
     CONF_ACTIVE_FIRE_PROVIDER,
     CONF_DEDUP_HOURS,
@@ -58,11 +58,11 @@ from custom_components.terralyra.const import (
     LOCATION_SOURCE_MANUAL,
     MAX_MONITORED_LOCATIONS,
 )
-from custom_components.terralyra.products.firms import (
+from custom_components.terralyra_ignis.monitoring import MonitoringCenter
+from custom_components.terralyra_ignis.products.firms import (
     FirmsAuthenticationError,
     FirmsError,
 )
-from custom_components.terralyra.monitoring import MonitoringCenter
 
 USERNAME = "testuser"
 PASSWORD = "testpass"
@@ -94,7 +94,7 @@ def _default_options_input() -> dict:
 def mock_test_auth() -> AsyncMock:
     """Mock the network authentication probe."""
     with patch(
-        "custom_components.terralyra.config_flow.ActiveFireClient.async_test_auth",
+        "custom_components.terralyra_ignis.config_flow.ActiveFireClient.async_test_auth",
         new_callable=AsyncMock,
     ) as mocked:
         yield mocked
@@ -141,7 +141,7 @@ async def test_user_flow_success(hass, mock_test_auth: AsyncMock) -> None:
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "TerraLyra"
+    assert result["title"] == "TerraLyra IGNIS"
     assert result["data"] == {
         CONF_USERNAME: USERNAME,
         CONF_PASSWORD: PASSWORD,
@@ -245,7 +245,7 @@ async def test_goes_user_flow_accepts_custom_covered_center(hass) -> None:
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "TerraLyra · New York"
+    assert result["title"] == "TerraLyra IGNIS · New York"
     location = result["options"][CONF_MONITORED_LOCATIONS][0]
     assert location[LOCATION_LATITUDE] == 40.7128
     assert location[LOCATION_SOURCE] == LOCATION_SOURCE_MANUAL
@@ -280,7 +280,7 @@ async def test_sources_report_firms_validation_errors(
     """FIRMS setup keeps authentication and connectivity failures distinct."""
     result = await _start_lsa_saf_flow(hass)
     with patch(
-        "custom_components.terralyra.config_flow.FirmsClient.async_area",
+        "custom_components.terralyra_ignis.config_flow.FirmsClient.async_area",
         new_callable=AsyncMock,
         side_effect=side_effect,
     ):
@@ -301,7 +301,7 @@ async def test_sources_validate_and_store_firms_key(hass) -> None:
     """A valid FIRMS key is tested and stored in config-entry data."""
     result = await _start_lsa_saf_flow(hass)
     with patch(
-        "custom_components.terralyra.config_flow.FirmsClient.async_area",
+        "custom_components.terralyra_ignis.config_flow.FirmsClient.async_area",
         new_callable=AsyncMock,
         return_value=(),
     ) as validate:
@@ -828,7 +828,7 @@ async def test_options_enable_firms_validates_and_stores_secret(hass) -> None:
     }
 
     with patch(
-        "custom_components.terralyra.config_flow.FirmsClient.async_area",
+        "custom_components.terralyra_ignis.config_flow.FirmsClient.async_area",
         new_callable=AsyncMock,
         return_value=(),
     ) as validate:
@@ -864,7 +864,7 @@ async def test_options_enable_firms_reuses_saved_secret(hass) -> None:
     }
 
     with patch(
-        "custom_components.terralyra.config_flow.FirmsClient.async_area",
+        "custom_components.terralyra_ignis.config_flow.FirmsClient.async_area",
         new_callable=AsyncMock,
         return_value=(),
     ):
@@ -930,7 +930,7 @@ async def test_options_firms_validation_errors_recover(
     }
 
     with patch(
-        "custom_components.terralyra.config_flow.FirmsClient.async_area",
+        "custom_components.terralyra_ignis.config_flow.FirmsClient.async_area",
         new_callable=AsyncMock,
         side_effect=side_effect,
     ):

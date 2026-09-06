@@ -5,7 +5,7 @@ import importlib
 
 import pytest
 
-from custom_components.terralyra.const import DOMAIN, PLATFORMS
+from custom_components.terralyra_ignis.const import DOMAIN, PLATFORMS
 
 
 @pytest.mark.parametrize("platform", PLATFORMS)

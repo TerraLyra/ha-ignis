@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import argparse
 import csv
-from pathlib import Path
 import sqlite3
 import zipfile
+from pathlib import Path
 
 
 def build(source: Path, destination: Path) -> None:

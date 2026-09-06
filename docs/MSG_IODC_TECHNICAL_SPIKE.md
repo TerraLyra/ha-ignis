@@ -18,7 +18,7 @@ Directory listings alone were not used as a parser contract. The development-onl
 `tools/probe_msg_iodc.py` utility retrieves one recent product using credentials
 from process environment variables, keeps it only in memory, reads metadata but
 not science-array values, and emits bounded JSON suitable for schema review.
-The response-only `terralyra.probe_msg_iodc` Home Assistant action applies the
+The response-only `terralyra_ignis.probe_msg_iodc` Home Assistant action applies the
 same limits using the credentials already stored in the selected TerraLyra
 configuration entry. It returns the sanitized schema to the caller without
 persisting either the product or the result.

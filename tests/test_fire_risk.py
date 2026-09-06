@@ -10,18 +10,18 @@ import pytest
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from PIL import Image
 
-from custom_components.terralyra.fire_risk_coordinator import (
+from custom_components.terralyra_ignis.fire_risk_coordinator import (
     FIRE_RISK_RETRY_MAX,
     FireRiskCoordinator,
     _retry_interval,
     _staggered_interval,
 )
-from custom_components.terralyra.geocoding import MapPlace
-from custom_components.terralyra.map_render import (
+from custom_components.terralyra_ignis.geocoding import MapPlace
+from custom_components.terralyra_ignis.map_render import (
     COUNTRY_BORDERS,
     annotate_fire_risk_map,
 )
-from custom_components.terralyra.products.fire_risk import (
+from custom_components.terralyra_ignis.products.fire_risk import (
     FireRiskAuthenticationError,
     FireRiskClient,
     FireRiskDay,
@@ -556,7 +556,7 @@ async def test_fire_risk_coordinator_keeps_forecast_when_map_layer_fails(
     coordinator = FireRiskCoordinator(hass, entry, FakeClient())
 
     monkeypatch.setattr(
-        "custom_components.terralyra.fire_risk_coordinator.async_set_fire_risk_outage_issue",
+        "custom_components.terralyra_ignis.fire_risk_coordinator.async_set_fire_risk_outage_issue",
         lambda *args, **kwargs: calls(*args, **kwargs),
     )
     result = await coordinator._async_update_data()
@@ -611,11 +611,11 @@ async def test_fire_risk_coordinator_retries_with_backoff_on_forecast_failure_th
     coordinator = FireRiskCoordinator(hass, entry, client)
 
     monkeypatch.setattr(
-        "custom_components.terralyra.fire_risk_coordinator.async_set_fire_risk_outage_issue",
+        "custom_components.terralyra_ignis.fire_risk_coordinator.async_set_fire_risk_outage_issue",
         lambda *args, **kwargs: calls(*args, **kwargs),
     )
     monkeypatch.setattr(
-        "custom_components.terralyra.fire_risk_coordinator.analyze_risk_map",
+        "custom_components.terralyra_ignis.fire_risk_coordinator.analyze_risk_map",
         lambda *args: (2, 47.5, 19.0),
     )
     with pytest.raises(UpdateFailed):
@@ -659,7 +659,7 @@ async def test_fire_risk_coordinator_uses_server_retry_after_when_available(
     coordinator = FireRiskCoordinator(hass, entry, FakeClient())
 
     monkeypatch.setattr(
-        "custom_components.terralyra.fire_risk_coordinator.async_set_fire_risk_outage_issue",
+        "custom_components.terralyra_ignis.fire_risk_coordinator.async_set_fire_risk_outage_issue",
         lambda *args, **kwargs: calls(*args, **kwargs),
     )
 

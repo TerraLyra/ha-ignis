@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.terralyra.providers.msg_iodc import (
+from custom_components.terralyra_ignis.providers.msg_iodc import (
     MAX_USABLE_CENTRAL_ANGLE_DEGREES,
     select_msg_iodc_satellite,
 )

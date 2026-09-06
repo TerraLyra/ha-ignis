@@ -1,34 +1,39 @@
-# TerraLyra for Home Assistant
+# TerraLyra IGNIS for Home Assistant
 
-A HACS-compatible environmental monitoring and early-warning integration for
-Home Assistant. TerraLyra automatically assigns every geographically relevant
+A HACS-compatible wildfire intelligence and early-warning integration for
+Home Assistant. TerraLyra IGNIS automatically assigns every geographically
+relevant
 active-fire source to each monitored location: **EUMETSAT LSA SAF MTG** and
 **Meteosat-9 MSG-IODC** in their safe coverage areas, **NOAA GOES-18/19** in
 the Western Hemisphere, and optional **NASA FIRMS** global observations.
 Assigned sources are equal peers: none is
 labelled primary or secondary, and independent observations can corroborate
-the same incident. TerraLyra also includes additional LSA SAF environmental
-products.
+the same incident. Fire-risk forecasting and land-surface temperature remain
+available where they directly support wildfire awareness.
 
-Repository: `https://github.com/TerraLyra/ha-terralyra`
+Repository: `https://github.com/TerraLyra/ha-ignis`
 
-> TerraLyra is an independent project. It is not an official EUMETSAT, LSA SAF,
+> TerraLyra IGNIS is an independent project. It is not an official EUMETSAT, LSA SAF,
 > NASA, or FIRMS integration.
 
-> **Clean-break release:** TerraLyra uses the new `terralyra` Home Assistant
-> domain and does not migrate settings or entity IDs from the earlier
-> `lsa_saf` development integration. Remove the old integration before enabling
-> TerraLyra to avoid duplicate polling and alerts, then configure TerraLyra as
-> a new integration. Existing dashboards and automations must be updated to the
-> new entity IDs and `terralyra_*` event names.
+> **One-time product migration:** release 0.14.0 uses the new
+> `terralyra_ignis` Home Assistant domain. Remove the pre-release **TerraLyra**
+> (`terralyra`) integration before installing this version, then add
+> **TerraLyra IGNIS** as a new integration. Settings and entity IDs cannot be
+> moved safely across Home Assistant integration domains. Update dashboards,
+> map source filters and automations to the new `terralyra_ignis_*` identities.
+> Follow the complete [0.14 migration checklist](docs/MIGRATION_TO_IGNIS.md)
+> before deleting the old integration.
 
-## Why one integration?
+## Product boundary
 
-TerraLyra keeps provider access, scientific-product parsing and Home Assistant
-entities in separate modules. One installation can therefore combine related
-environmental observations without presenting a different HACS repository for
-every dataset. Provider names and attribution remain visible; TerraLyra does
-not relabel third-party data as its own.
+IGNIS is TerraLyra's wildfire product. It combines relevant observations from
+multiple providers into location-aware incidents without relabelling
+third-party data as its own. Future earthquake, flood and atmospheric-hazard
+products can live in separate integrations without sharing IGNIS's Home
+Assistant domain or entity namespace. The durable naming and repository rules
+are recorded in
+[`docs/PRODUCT_ARCHITECTURE.md`](docs/PRODUCT_ARCHITECTURE.md).
 
 ## Product status
 
@@ -73,7 +78,7 @@ ListProduct from:
 `MTG / MTFRPPixel / NATIVE`
 
 When the same LSA SAF account has a monitored location inside the conservative
-IODC coverage gate, TerraLyra also reads the bounded HDF5 List Product from:
+IODC coverage gate, TerraLyra IGNIS also reads the bounded HDF5 List Product from:
 
 `MSG-IODC / FRP-PIXEL / HDF5`
 
@@ -85,7 +90,7 @@ For covered Western Hemisphere locations, NOAA GOES uses the public
 ABI-L2-FDCF full-disk product without provider credentials. Every assigned
 provider passes normalized detections to the same filtering, cross-source
 deduplication, clustering, tracking and alert pipeline. On first setup
-TerraLyra seeds the current snapshot
+TerraLyra IGNIS seeds the current snapshot
 without emitting `new_fire` events, so already-existing fires do not cause an
 alert flood.
 
@@ -142,13 +147,13 @@ same-fire matching radius. Inactive markers remain visible for the independent
 **Fire history window** (1–48 hours) and are removed automatically afterward.
 Changing this display window does not extend repeat-alert suppression.
 
-Add a **Map** card to a dashboard and select the `terralyra` geolocation source, or
+Add a **Map** card to a dashboard and select the `terralyra_ignis` geolocation source, or
 use this YAML configuration:
 
 ```yaml
 type: map
 geo_location_sources:
-  - source: terralyra
+  - source: terralyra_ignis
     label_mode: icon
 hours_to_show: 24
 ```
@@ -171,7 +176,7 @@ options.
 Every newly detected/deduplicated nearby fire also fires:
 
 ```text
-terralyra_new_fire
+terralyra_ignis_new_fire
 ```
 
 Event data includes:
@@ -221,12 +226,12 @@ For incidents relevant to multiple configured places, scalar distance and
 location fields refer to the nearest place whose monitoring radius contains
 the incident. `location_matches` retains the bounded per-location detail, and
 `affected_locations` lists the places named in the single new-fire event and
-notification. TerraLyra does not emit one duplicate event per place.
+notification. TerraLyra IGNIS does not emit one duplicate event per place.
 
 Meaningful incident trend transitions also fire:
 
 ```text
-terralyra_fire_trend
+terralyra_ignis_fire_trend
 ```
 
 Its `event_type` is one of `fire_intensity_increasing`,
@@ -285,7 +290,7 @@ the time Home Assistant received the product. Failed refreshes retain the last
 successful data and persistent fire tracks; they are never converted into a
 false zero-fire observation.
 
-Each assigned source is retried independently. TerraLyra honors bounded
+Each assigned source is retried independently. TerraLyra IGNIS honors bounded
 `Retry-After` advice and uses exponential backoff for repeated failures, while
 healthy equal peers continue normally. Provider health attributes and
 privacy-safe diagnostics distinguish authentication, rate-limit, timeout,
@@ -295,34 +300,34 @@ retry time.
 Provider health and geographic coverage are intentionally separate. The
 **Monitored-location source coverage** evaluates every enabled location using
 conservative pre-download satellite geometry and reports `covered`, `partially
-covered`, or `not covered`. TerraLyra also creates one **active-fire sources**
+covered`, or `not covered`. TerraLyra IGNIS also creates one **active-fire sources**
 sensor per location. Its state is the assigned source count and its attributes
 show the readable provider names, satellites and the equal-peer relationship
 without exposing the location coordinates.
 
-Every TerraLyra map marker separately names the provider or providers that
+Every TerraLyra IGNIS map marker separately names the provider or providers that
 supplied the incident evidence: LSA SAF, NOAA GOES, NASA FIRMS, or multiple
 sources. Home Assistant map cards may also combine geolocation entities from
 other integrations.
 
 ## Installation through HACS
 
-1. In HACS, add `TerraLyra/ha-terralyra` as a **Custom repository** of type
+1. In HACS, add `TerraLyra/ha-ignis` as a **Custom repository** of type
    **Integration**.
-2. Install **TerraLyra**.
+2. Install **TerraLyra IGNIS**.
 3. Restart Home Assistant.
-4. Go to **Settings → Devices & services → Add integration → TerraLyra**.
+4. Go to **Settings → Devices & services → Add integration → TerraLyra IGNIS**.
 5. Keep **Home** as the initial monitored location or manage additional named
    locations in the integration options.
 6. Optionally enter LSA SAF Data Service credentials to add geographically
    relevant MTG and Meteosat-9 MSG-IODC observations
    where its safe footprint covers a location.
-7. TerraLyra automatically adds GOES-18/19 where geographically relevant and
+7. TerraLyra IGNIS automatically adds GOES-18/19 where geographically relevant and
    optional NASA FIRMS observations when a personal MAP_KEY is configured.
 
 A free LSA SAF Data Service account is required only for the MTFRPPixel
 provider. GOES downloads the newest validated public NOAA full-disk product and
-therefore adds network, storage, decoder and memory cost. TerraLyra rejects
+therefore adds network, storage, decoder and memory cost. TerraLyra IGNIS rejects
 unsafe navigation results, and GOES is assigned only to locations inside its
 conservative coverage gate.
 
@@ -350,11 +355,11 @@ conservative coverage gate.
 ## Optional NASA FIRMS source
 
 NASA FIRMS is disabled by default. To enable it, create a personal FIRMS
-MAP_KEY, open **Settings → Devices & services → TerraLyra → Configure**, enable
-NASA FIRMS observations and enter the key. TerraLyra validates the key before
+MAP_KEY, open **Settings → Devices & services → TerraLyra IGNIS → Configure**, enable
+NASA FIRMS observations and enter the key. TerraLyra IGNIS validates the key before
 saving the option.
 
-When enabled, TerraLyra requests only the bounded areas around all enabled
+When enabled, TerraLyra IGNIS requests only the bounded areas around all enabled
 monitored locations from the NOAA-20 and NOAA-21 VIIRS plus Terra and Aqua
 MODIS near-real-time feeds.
 Overlapping safe boxes are merged; geographically distant boxes remain
@@ -387,7 +392,7 @@ keeps the complete source-by-source estimate in its attributes:
 
 - MTG and GOES use the official 10-minute product cadence, anchored to the
   latest successfully received product.
-- NASA FIRMS uses TerraLyra's bounded 15-minute API refresh interval. Its
+- NASA FIRMS uses TerraLyra IGNIS's bounded 15-minute API refresh interval. Its
   attributes also include a broad longitude-adjusted NOAA-20/21 VIIRS and
   Terra/Aqua MODIS nominal overpass window.
 
@@ -400,10 +405,10 @@ additional external service.
 ## Example iPhone notification automation
 
 ```yaml
-alias: TerraLyra - new fire notification
+alias: TerraLyra IGNIS - new fire notification
 triggers:
   - trigger: event
-    event_type: terralyra_new_fire
+    event_type: terralyra_ignis_new_fire
 actions:
   - action: notify.mobile_app_iphone_13_pro
     data:
@@ -449,7 +454,7 @@ localized color legend. Country boundaries use a compact bundled extract from
 Natural Earth at 1:110m scale and require no additional network request.
 
 For the full outlook without YAML templates, add Home Assistant's standard
-**Calendar** card to a dashboard and select the TerraLyra **10-day fire-risk
+**Calendar** card to a dashboard and select the TerraLyra IGNIS **10-day fire-risk
 forecast** calendar. Each all-day entry shows that day's localized risk level.
 For free pan, zoom, time navigation and layer opacity controls, open the
 [official LSA SAF ADAGUC viewer](https://adaguc.lsasvcs.ipma.pt/) and choose
@@ -457,9 +462,9 @@ For free pan, zoom, time navigation and layer opacity controls, open the
 viewer directly and needs no API key.
 
 Home Assistant's **Visit website** link under **Settings → Devices & services →
-TerraLyra → TerraLyra** opens the TerraLyra project and support page. To put a
-one-tap shortcut to the official interactive LSA SAF viewer on a dashboard, add
-this Button card:
+TerraLyra IGNIS → TerraLyra IGNIS** opens the IGNIS project and support page.
+To put a one-tap shortcut to the official interactive LSA SAF viewer on a
+dashboard, add this Button card:
 
 ```yaml
 type: button
@@ -474,13 +479,13 @@ Example dashboard card:
 
 ```yaml
 type: picture-entity
-entity: camera.terralyra_fire_risk_forecast_map
+entity: camera.terralyra_ignis_fire_risk_forecast_map
 camera_view: auto
 show_name: true
 show_state: false
 ```
 
-Add `select.terralyra_fire_risk_forecast_day` beside the image to choose a named
+Add `select.terralyra_ignis_fire_risk_forecast_day` beside the image to choose a named
 forecast day. Forecast data refreshes every 12 hours; generated map images are
 cached for one hour. The most recent valid, size-bounded PNG can be reused for
 the exact same date and bounds for up to 24 hours during a temporary outage,
@@ -501,7 +506,7 @@ Home Assistant generated a different one:
 type: markdown
 title: 10-day fire-risk outlook
 content: >-
-  {% set forecast = state_attr('sensor.terralyra_fire_risk_near_home', 'forecast') or [] %}
+  {% set forecast = state_attr('sensor.terralyra_ignis_fire_risk_near_home', 'forecast') or [] %}
   {% set labels = {'low':'🟦 Low','moderate':'🟩 Moderate','high':'🟨 High','very_high':'🟧 Very high','extreme':'🟥 Extreme','unknown':'⬜ Unknown'} %}
   {% for day in forecast %}
   **{{ as_timestamp(day.date) | timestamp_custom('%a, %d %b') }}** — {{ labels.get(day.risk, day.risk) }}<br>
@@ -515,7 +520,7 @@ extent and regional maximum-risk sampling.
 ## Architecture
 
 ```text
-custom_components/terralyra/
+custom_components/terralyra_ignis/
 ├── __init__.py
 ├── api.py                 # shared Data Service authentication/client base
 ├── models.py              # provider-neutral detections and clusters
@@ -551,18 +556,22 @@ custom_components/terralyra/
     └── lst.py             # optional MTLST WMS client/parser
 ```
 
-The domain is intentionally the generic `terralyra`, not `terralyra_mtg_fire`, so future products can be added to the same installed integration.
+The `terralyra_ignis` domain is intentionally product-specific and
+collision-resistant. Future TerraLyra products will use their own integration
+domains and repositories while reusable abstractions are extracted only after
+real cross-product reuse is proven.
 
 ### Migrating an existing map card
 
 Dashboard geolocation-source selections belong to the user's dashboard and
 cannot be rewritten by an integration update. If a map card was created for the
-older development integration, edit that card, remove the legacy `lsa_saf`
-value from **Geolocation sources**, and select `terralyra`. Single-source
+older development integration, edit that card, remove the legacy `lsa_saf` or
+`terralyra` value from **Geolocation sources**, and select
+`terralyra_ignis`. Single-source
 markers name their observing provider and corroborated incidents retain all
 contributors. Home Assistant only lists sources that currently have a loaded
 `geo_location` entity. If no recent fire marker exists, leave the source filter
-empty temporarily or enter `terralyra` in the card's YAML as shown above.
+empty temporarily or enter `terralyra_ignis` in the card's YAML as shown above.
 
 ## Roadmap
 
@@ -580,13 +589,13 @@ empty temporarily or enter `terralyra` in the card's YAML as shown above.
 - continue localization and usability review on real Home Assistant dashboards;
   every enabled location now has a translated operational-status entity with
   equal-source health, timestamps and local incident-confirmation counts
-- submit TerraLyra artwork to the upstream Home Assistant brands repository
+- submit TerraLyra IGNIS artwork to the upstream Home Assistant brands repository
 
 ### MSG-IODC compatibility check
 
 The active Meteosat-9 source can also be inspected without exposing the saved
 LSA SAF password. In **Developer tools → Actions**, run
-**TerraLyra: Inspect MSG-IODC compatibility** and select the TerraLyra
+**TerraLyra IGNIS: Inspect MSG-IODC compatibility** and select the TerraLyra IGNIS
 configuration. The explicit action downloads at most one small current List
 Product, keeps it in memory, reads only bounded HDF5 metadata and returns the
 sanitized schema in the action response. This diagnostic action does not alter
@@ -644,7 +653,7 @@ normal source updates use the separately bounded production decoder.
 
 ## Home Assistant Repairs
 
-TerraLyra creates one actionable Home Assistant repair notice for each upstream
+TerraLyra IGNIS creates one actionable Home Assistant repair notice for each upstream
 provider whose credentials are rejected or which fails at least three
 consecutive attempts, and also when no configured source geographically covers
 one or more enabled monitored locations. A successful update or corrected

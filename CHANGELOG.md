@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.14.0
+
+- Rename the wildfire product to **TerraLyra IGNIS** and move its repository to
+  `TerraLyra/ha-ignis`, establishing the product boundary needed for future
+  TerraLyra integrations such as TREMOR, FLUMEN and AERIS.
+- Adopt the collision-resistant `terralyra_ignis` Home Assistant domain now,
+  before public distribution. This intentionally creates new config entries,
+  entity IDs, map-source IDs, service names and event names.
+- Rename the Python package and internal integration classes to IGNIS-specific
+  identities while keeping provider-normalization and incident logic intact.
+- Update HACS metadata, documentation links, user agents, workflows,
+  translations, examples and regression tests for the new identity.
+- Document the one-time clean migration from the pre-release `terralyra`
+  integration. Automatic cross-domain migration is deliberately not attempted.
+
 ## 0.13.0
 
 - Activate Meteosat-9 MSG-IODC FRP-PIXEL as an equal active-fire source for

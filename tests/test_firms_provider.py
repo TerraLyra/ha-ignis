@@ -6,25 +6,25 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from custom_components.terralyra.products.firms import (
+from custom_components.terralyra_ignis.products.firms import (
     FirmsError,
     FirmsInvalidResponseError,
     FirmsRateLimitError,
     FirmsTimeoutError,
     parse_firms_csv,
 )
-from custom_components.terralyra.providers.firms import (
+from custom_components.terralyra_ignis.providers.base import (
+    ProviderInvalidResponseError,
+    ProviderRateLimitError,
+    ProviderTimeoutError,
+    ProviderUnavailableError,
+)
+from custom_components.terralyra_ignis.providers.firms import (
     FirmsActiveFireProvider,
     FirmsMultiAreaProvider,
     FirmsMultiSatelliteProvider,
     merge_monitoring_bounds,
     monitoring_bounds,
-)
-from custom_components.terralyra.providers.base import (
-    ProviderInvalidResponseError,
-    ProviderRateLimitError,
-    ProviderTimeoutError,
-    ProviderUnavailableError,
 )
 
 HEADER = (

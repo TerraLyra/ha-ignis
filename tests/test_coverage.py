@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import pytest
 
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis.const import (
     ACTIVE_FIRE_PROVIDER_GOES,
     ACTIVE_FIRE_PROVIDER_LSA_SAF,
     ACTIVE_FIRE_PROVIDER_MSG_IODC,
     LOCATION_SOURCE_MANUAL,
 )
-from custom_components.terralyra.coverage import (
+from custom_components.terralyra_ignis.coverage import (
     _central_angle,
     assess_location_coverage,
     plan_location_sources,
     summarize_coverage,
     summarize_source_plans,
 )
-from custom_components.terralyra.monitoring import MonitoredLocation
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
 
 
 def _location(

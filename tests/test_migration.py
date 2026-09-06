@@ -1,4 +1,4 @@
-"""Tests for versioned TerraLyra config-entry migration."""
+"""Tests for versioned TerraLyra IGNIS config-entry migration."""
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -6,8 +6,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from custom_components.terralyra import async_migrate_entry
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis import async_migrate_entry
+from custom_components.terralyra_ignis.const import (
     CONF_MONITORED_LOCATIONS,
     CONF_MONITORING_CENTER_NAME,
     CONF_MONITORING_LATITUDE,

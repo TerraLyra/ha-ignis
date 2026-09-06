@@ -9,15 +9,15 @@ import pytest
 from homeassistant.config_entries import ConfigEntryState
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.terralyra import async_setup
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis import async_setup
+from custom_components.terralyra_ignis.const import (
     ATTR_CONFIG_ENTRY_ID,
     CONF_PASSWORD,
     CONF_USERNAME,
     DOMAIN,
     SERVICE_PROBE_MSG_IODC,
 )
-from custom_components.terralyra.products.msg_iodc import (
+from custom_components.terralyra_ignis.products.msg_iodc import (
     MsgIodcAuthenticationError,
     async_fetch_latest_list_product,
 )
@@ -100,18 +100,18 @@ async def test_home_assistant_action_returns_only_sanitized_schema(hass) -> None
     entry.mock_state(hass, ConfigEntryState.LOADED)
     await async_setup(hass, {})
     schema = {
-        "format": "terralyra-msg-iodc-schema-v1",
+        "format": "terralyra-ignis-msg-iodc-schema-v1",
         "payload_bytes": 512,
         "objects": [],
     }
 
     with (
         patch(
-            "custom_components.terralyra.async_fetch_latest_list_product",
+            "custom_components.terralyra_ignis.async_fetch_latest_list_product",
             new=AsyncMock(return_value=("safe-product", b"payload")),
         ),
         patch(
-            "custom_components.terralyra.inspect_list_product_schema",
+            "custom_components.terralyra_ignis.inspect_list_product_schema",
             return_value=schema,
         ),
     ):

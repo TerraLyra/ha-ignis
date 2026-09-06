@@ -5,9 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-
-TRANSLATIONS = Path("custom_components/terralyra/translations")
-SOURCE_STRINGS = Path("custom_components/terralyra/strings.json")
+TRANSLATIONS = Path("custom_components/terralyra_ignis/translations")
+SOURCE_STRINGS = Path("custom_components/terralyra_ignis/strings.json")
 SUPPORTED_LANGUAGES = {"de", "en", "es", "fr", "hu", "it"}
 EXPECTED_ENGLISH_IDENTICAL_PATHS = {
     "hu": {

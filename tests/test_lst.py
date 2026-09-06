@@ -5,8 +5,8 @@ import json
 
 import pytest
 
-from custom_components.terralyra.lst_coordinator import _staggered_interval
-from custom_components.terralyra.products.lst import (
+from custom_components.terralyra_ignis.lst_coordinator import _staggered_interval
+from custom_components.terralyra_ignis.products.lst import (
     LandSurfaceTemperatureError,
     parse_feature_info,
 )

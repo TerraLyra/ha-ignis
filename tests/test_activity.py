@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from custom_components.terralyra.activity import (
+from custom_components.terralyra_ignis.activity import (
     MAX_ACTIVITY_RECORDS,
     summarize_activity,
     update_activity_history,

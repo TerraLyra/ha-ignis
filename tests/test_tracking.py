@@ -3,13 +3,13 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from custom_components.terralyra.const import (
+from custom_components.terralyra_ignis.const import (
     EVENT_FIRE_ACTIVITY_INCREASING,
     EVENT_FIRE_APPROACHING,
     EVENT_FIRE_INTENSITY_INCREASING,
 )
-from custom_components.terralyra.models import FireCluster, FireLifecycle
-from custom_components.terralyra.tracking import _trend_events, update_incidents
+from custom_components.terralyra_ignis.models import FireCluster, FireLifecycle
+from custom_components.terralyra_ignis.tracking import _trend_events, update_incidents
 
 BASE = datetime(2026, 8, 27, 12, 0, tzinfo=UTC)
 

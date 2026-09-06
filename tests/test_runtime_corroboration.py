@@ -4,13 +4,13 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
-from custom_components.terralyra.correlation import correlate_detections
-from custom_components.terralyra.coordinator import (
+from custom_components.terralyra_ignis.coordinator import (
     _annotate_corroboration,
     _firms_only_clusters,
     _remove_overlapping_firms_tracks,
 )
-from custom_components.terralyra.models import (
+from custom_components.terralyra_ignis.correlation import correlate_detections
+from custom_components.terralyra_ignis.models import (
     ConfirmationLevel,
     FireCluster,
     FireDetection,

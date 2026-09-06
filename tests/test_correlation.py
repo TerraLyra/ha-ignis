@@ -5,8 +5,8 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from custom_components.terralyra.correlation import correlate_detections
-from custom_components.terralyra.models import FireDetection
+from custom_components.terralyra_ignis.correlation import correlate_detections
+from custom_components.terralyra_ignis.models import FireDetection
 
 NOW = datetime(2026, 8, 28, 12, tzinfo=UTC)
 
