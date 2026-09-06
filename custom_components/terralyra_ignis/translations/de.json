@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Datenquelle für aktive Brände auswählen",
-        "description": "LSA SAF wird für Europa und angrenzende Regionen empfohlen und erfordert ein kostenloses Konto. NOAA GOES ist für sicher abgedeckte Standorte in der westlichen Hemisphäre gedacht, benötigt kein Konto und lädt zusätzliche Satellitendaten herunter.",
+        "description": "TerraLyra IGNIS weist jedem überwachten Ort automatisch alle passenden Quellen zu. Die öffentlichen Quellen NOAA GOES und Sentinel-3 SLSTR benötigen kein Konto; LSA SAF und das optionale NASA FIRMS verwenden Ihre eigenen Zugangsdaten.",
         "data": {
           "active_fire_provider": "Datenquelle für aktive Brände"
         }
@@ -27,7 +27,7 @@
       },
       "sources": {
         "title": "Optionale Aktivbrandquellen verbinden",
-        "description": "TerraLyra IGNIS weist jedem überwachten Ort automatisch alle passenden Quellen zu. NOAA GOES benötigt keine Zugangsdaten. LSA-SAF-Zugangsdaten und/oder NASA-FIRMS-MAP_KEY erweitern die Abdeckung; leere Felder überspringen die Quelle.",
+        "description": "TerraLyra IGNIS weist jedem überwachten Ort automatisch alle passenden Quellen zu. Die öffentlichen Quellen NOAA GOES und Sentinel-3A/3B SLSTR benötigen keine Zugangsdaten. Geben Sie für die optionalen Quellen LSA SAF und NASA FIRMS Ihre eigenen Zugangsdaten ein; leere Felder überspringen sie.",
         "data": {
           "username": "LSA-SAF-Benutzername (optional)",
           "password": "LSA-SAF-Passwort (optional)",
@@ -66,7 +66,7 @@
       "invalid_auth": "Ungültiger Benutzername oder ungültiges Passwort",
       "invalid_firms_key": "Der NASA-FIRMS-MAP_KEY wurde abgelehnt",
       "lsa_credentials_incomplete": "Benutzername und Passwort für LSA SAF eingeben oder beide Felder leer lassen",
-      "no_source_available": "Keine automatische Quelle deckt diesen Ort ab. LSA-SAF-Zugangsdaten oder NASA-FIRMS-MAP_KEY hinzufügen"
+      "no_source_available": "Keine automatische Satellitenquelle deckt diesen Ort ab. Wählen Sie einen Ort innerhalb eines unterstützten Beobachtungsbereichs"
     },
     "abort": {
       "already_configured": "Dieses LSA SAF-Konto ist bereits eingerichtet",
@@ -201,7 +201,7 @@
     },
     "provider_coverage": {
       "title": "Keine konfigurierte Aktivbrandquelle deckt einige Orte ab",
-      "description": "TerraLyra IGNIS kann derzeit keine nutzbare Quelle zuweisen für: {locations}. Ergänzen Sie LSA-SAF-Zugangsdaten oder einen NASA-FIRMS-MAP_KEY, oder ändern Sie die Orte. Andere Orte werden weiter aktualisiert."
+      "description": "TerraLyra IGNIS kann derzeit keine nutzbare Satellitenquelle zuweisen für: {locations}. Verschieben oder deaktivieren Sie Orte außerhalb der unterstützten Beobachtungsbereiche. Andere Orte werden weiter aktualisiert."
     }
   },
   "entity": {

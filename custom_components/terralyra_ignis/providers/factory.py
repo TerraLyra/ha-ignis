@@ -11,17 +11,22 @@ from ..const import (
     ACTIVE_FIRE_PROVIDER_GOES,
     ACTIVE_FIRE_PROVIDER_LSA_SAF,
     ACTIVE_FIRE_PROVIDER_MSG_IODC,
+    ACTIVE_FIRE_PROVIDER_SENTINEL3A,
+    ACTIVE_FIRE_PROVIDER_SENTINEL3B,
 )
 from ..coverage import NASA_FIRMS_SATELLITES, plan_location_sources
 from ..monitoring import MonitoredLocation
 from ..products.fire import ActiveFireClient
 from ..products.firms import FirmsClient
+from ..products.sentinel3 import Sentinel3Client
 from .base import ActiveFireProvider
 from .firms import FirmsMultiAreaProvider, monitoring_bounds
 from .goes_active import GoesActiveFireProvider
 from .msg_iodc import MsgIodcActiveFireProvider
 from .mtg import MtgActiveFireProvider
 from .pool import MultiProviderPool, ProviderBinding
+from .sentinel3 import SATELLITES as SENTINEL3_SATELLITES
+from .sentinel3 import Sentinel3ActiveFireProvider
 
 
 def build_primary_provider(
@@ -72,6 +77,49 @@ def build_provider_pool(
         for location in enabled_locations
     )
     bindings: list[ProviderBinding] = []
+
+    shared_bounds = tuple(
+        monitoring_bounds(
+            location.latitude,
+            location.longitude,
+            location.radius_km,
+        )
+        for location in enabled_locations
+    )
+
+    sentinel3_locations = tuple(
+        location
+        for location, plan in zip(enabled_locations, plans, strict=True)
+        if ACTIVE_FIRE_PROVIDER_SENTINEL3A in plan.providers
+    )
+    sentinel3_bounds = tuple(
+        monitoring_bounds(
+            location.latitude,
+            location.longitude,
+            location.radius_km,
+        )
+        for location in sentinel3_locations
+    )
+    if sentinel3_bounds:
+        sentinel3_client = Sentinel3Client(session)
+        for provider_id, satellite in zip(
+            (ACTIVE_FIRE_PROVIDER_SENTINEL3A, ACTIVE_FIRE_PROVIDER_SENTINEL3B),
+            SENTINEL3_SATELLITES,
+            strict=True,
+        ):
+            bindings.append(
+                ProviderBinding(
+                    provider_id,
+                    f"EUMETSAT Sentinel-3{satellite[-1]} SLSTR",
+                    satellite,
+                    tuple(location.id for location in sentinel3_locations),
+                    Sentinel3ActiveFireProvider(
+                        sentinel3_client,
+                        satellite=satellite,
+                        bounds=sentinel3_bounds,
+                    ),
+                )
+            )
 
     mtg_location_ids = tuple(
         plan.location_id
@@ -135,14 +183,6 @@ def build_provider_pool(
         )
 
     if firms_available:
-        bounds = tuple(
-            monitoring_bounds(
-                location.latitude,
-                location.longitude,
-                location.radius_km,
-            )
-            for location in enabled_locations
-        )
         bindings.append(
             ProviderBinding(
                 "nasa_firms",
@@ -151,7 +191,7 @@ def build_provider_pool(
                 tuple(location.id for location in enabled_locations),
                 FirmsMultiAreaProvider(
                     FirmsClient(session, str(firms_map_key)),
-                    bounds,
+                    shared_bounds,
                 ),
             )
         )

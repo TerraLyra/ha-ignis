@@ -199,7 +199,7 @@ async def test_goes_user_flow_needs_no_credentials(hass) -> None:
     assert CONF_PASSWORD not in result["data"]
 
 
-async def test_goes_user_flow_rejects_unsafe_coverage(hass) -> None:
+async def test_user_flow_rejects_location_outside_all_source_coverage(hass) -> None:
     """Test setup explains when no automatic source covers a location."""
     result = await _start_user_flow(hass)
     result = await hass.config_entries.flow.async_configure(
@@ -208,9 +208,9 @@ async def test_goes_user_flow_rejects_unsafe_coverage(hass) -> None:
             hass,
             **{
                 CONF_USE_CUSTOM_MONITORING_CENTER: True,
-                CONF_MONITORING_CENTER_NAME: "Budapest",
-                CONF_MONITORING_LATITUDE: 47.4979,
-                CONF_MONITORING_LONGITUDE: 19.0402,
+                CONF_MONITORING_CENTER_NAME: "Extreme Arctic",
+                CONF_MONITORING_LATITUDE: 89.0,
+                CONF_MONITORING_LONGITUDE: 0.0,
             },
         ),
     )

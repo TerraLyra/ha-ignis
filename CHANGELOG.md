@@ -2,6 +2,19 @@
 
 ## 0.15.0
 
+- Add public EUMETSAT Sentinel-3A and Sentinel-3B SLSTR Level 2 near-real-time
+  FRP observations as separate, credential-free equal peers for locations
+  between 82°S and 82°N.
+- Query only bounded monitored-location areas through the official EUMETView
+  WFS, with a one-day time window, 15-minute cache, fixed host and layer names,
+  no redirects, strict size/count limits and fail-closed GeoJSON validation.
+- Preserve FRP, uncertainty, confidence, MWIR channel, pixel dimensions,
+  satellite identity and acquisition time for normalized incident processing.
+- Keep each Sentinel-3 satellite's health and backoff independent while
+  suppressing duplicate, non-actionable Repairs for a shared public-service
+  outage; provider health and diagnostics still report the failure.
+- Add schedule, coverage, parsing, normalization, truncation, identity and
+  failure-isolation regression tests plus implementation/privacy documentation.
 - Identify whether each assigned active-fire feed is geostationary or
   polar-orbiting in the per-location source details.
 - Expose safe Himawari-9 geographic coverage as an inactive opportunity for

@@ -63,7 +63,9 @@ def test_outage_issue_waits_for_repeated_failures_and_clears_on_success(
     }
 
     async_set_provider_outage_issue(hass, entry, consecutive_failures=0)
-    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_provider_outage")
+    delete_issue.assert_called_once_with(
+        hass, "terralyra_ignis", "entry-1_provider_outage"
+    )
 
 
 @patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
@@ -85,7 +87,9 @@ def test_fire_risk_issue_is_warning_and_clears_after_recovery(
     }
 
     async_set_fire_risk_outage_issue(hass, entry, consecutive_failures=0)
-    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_fire_risk_outage")
+    delete_issue.assert_called_once_with(
+        hass, "terralyra_ignis", "entry-1_fire_risk_outage"
+    )
 
 
 @patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
@@ -104,7 +108,9 @@ def test_coverage_issue_lists_only_uncovered_locations_and_clears(
     }
 
     async_sync_coverage_issue(hass, entry, (covered,))
-    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_provider_coverage")
+    delete_issue.assert_called_once_with(
+        hass, "terralyra_ignis", "entry-1_provider_coverage"
+    )
 
 
 @patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
@@ -138,7 +144,9 @@ def test_provider_health_creates_one_bounded_issue_and_clears(
         "failure": "rate_limit",
         "failures": str(OUTAGE_REPAIR_THRESHOLD),
     }
-    delete_issue.assert_called_once_with(hass, "terralyra_ignis", "entry-1_provider_mtg")
+    delete_issue.assert_called_once_with(
+        hass, "terralyra_ignis", "entry-1_provider_mtg"
+    )
 
 
 @patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
@@ -175,3 +183,30 @@ def test_goes_provider_issue_uses_credential_free_guidance(
     async_sync_provider_health_issues(Mock(), _entry(), (health,))
 
     assert create_issue.call_args.kwargs["translation_key"] == "upstream_goes_issue"
+
+
+@patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
+@patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
+def test_public_sentinel3_outage_remains_status_only(
+    create_issue: Mock, delete_issue: Mock
+) -> None:
+    health = ProviderHealth(
+        "eumetsat_sentinel3a",
+        "EUMETSAT Sentinel-3A SLSTR",
+        "S3A",
+        ("tokyo",),
+        ProviderStatus.OUTAGE,
+        "service_outage",
+        OUTAGE_REPAIR_THRESHOLD,
+    )
+
+    hass = Mock()
+    entry = _entry()
+    async_sync_provider_health_issues(hass, entry, (health,))
+
+    create_issue.assert_not_called()
+    delete_issue.assert_called_once_with(
+        hass,
+        "terralyra_ignis",
+        "entry-1_provider_eumetsat_sentinel3a",
+    )

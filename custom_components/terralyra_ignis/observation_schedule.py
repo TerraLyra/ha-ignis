@@ -11,6 +11,7 @@ from .models import ProviderStatus
 GEOSTATIONARY_REFRESH = timedelta(minutes=10)
 MSG_IODC_REFRESH = timedelta(minutes=15)
 FIRMS_REFRESH = timedelta(minutes=15)
+SENTINEL3_REFRESH = timedelta(minutes=15)
 VIIRS_WINDOW_HALF_WIDTH = timedelta(minutes=45)
 _POLAR_LOCAL_SOLAR_TIMES = (
     time(1, 30),
@@ -102,19 +103,27 @@ def location_update_estimates(
             overpass = next_polar_overpass_window(
                 float(location.longitude), now=current
             )
-            estimates.append(
-                SourceUpdateEstimate(
-                    provider,
-                    getattr(item, "label", None) or provider,
-                    satellite,
-                    status.value,
-                    expected,
-                    "api_refresh_with_nominal_polar_overpass_window",
-                    15,
-                    overpass[0],
-                    overpass[1],
-                )
+        elif provider in {"eumetsat_sentinel3a", "eumetsat_sentinel3b"}:
+            expected = _next_refresh(received_at, current, SENTINEL3_REFRESH)
+            overpass = next_polar_overpass_window(
+                float(location.longitude), now=current
             )
+        else:
+            continue
+
+        estimates.append(
+            SourceUpdateEstimate(
+                provider,
+                getattr(item, "label", None) or provider,
+                satellite,
+                status.value,
+                expected,
+                "api_refresh_with_nominal_polar_overpass_window",
+                15,
+                overpass[0],
+                overpass[1],
+            )
+        )
     return tuple(estimates)
 
 

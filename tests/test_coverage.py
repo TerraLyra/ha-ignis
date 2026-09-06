@@ -98,28 +98,46 @@ def test_sources_are_automatically_assigned_as_equal_peers() -> None:
         "eumetsat_lsa_saf",
         "eumetsat_lsa_saf_iodc",
         "nasa_firms",
+        "eumetsat_sentinel3a",
+        "eumetsat_sentinel3b",
     )
     assert europe.satellites == (
         "MTG",
         "Meteosat-9 IODC",
         "NOAA-20/NOAA-21 VIIRS + Terra/Aqua MODIS",
+        "S3A",
+        "S3B",
     )
-    assert california.providers == ("noaa_goes", "nasa_firms")
+    assert california.providers == (
+        "noaa_goes",
+        "nasa_firms",
+        "eumetsat_sentinel3a",
+        "eumetsat_sentinel3b",
+    )
     assert california.satellites == (
         "G18",
         "NOAA-20/NOAA-21 VIIRS + Terra/Aqua MODIS",
+        "S3A",
+        "S3B",
     )
     assert summarize_source_plans((europe, california)) == "covered"
     assert europe.attrs()["source_names"] == [
         "EUMETSAT LSA SAF",
         "EUMETSAT LSA SAF IODC",
         "NASA FIRMS",
+        "EUMETSAT Sentinel-3A SLSTR",
+        "EUMETSAT Sentinel-3B SLSTR",
     ]
-    assert california.attrs()["source_names"] == ["NOAA GOES", "NASA FIRMS"]
+    assert california.attrs()["source_names"] == [
+        "NOAA GOES",
+        "NASA FIRMS",
+        "EUMETSAT Sentinel-3A SLSTR",
+        "EUMETSAT Sentinel-3B SLSTR",
+    ]
     assert california.attrs()["relationship"] == "equal_peers"
 
 
-def test_unconfigured_global_source_leaves_unsupported_location_uncovered() -> None:
+def test_polar_orbit_limit_leaves_extreme_arctic_location_uncovered() -> None:
     arctic = plan_location_sources(
         _location("arctic", "Arctic", 89.0, 0.0),
         lsa_saf_available=False,
@@ -128,6 +146,7 @@ def test_unconfigured_global_source_leaves_unsupported_location_uncovered() -> N
 
     assert arctic.covered is False
     assert arctic.providers == ()
+    assert arctic.satellites == ()
     assert summarize_source_plans((arctic,)) == "not_covered"
 
 
@@ -139,12 +158,16 @@ def test_tokyo_reports_himawari_as_inactive_coverage_opportunity() -> None:
         firms_available=True,
     )
 
-    assert tokyo.providers == ("nasa_firms",)
+    assert tokyo.providers == (
+        "nasa_firms",
+        "eumetsat_sentinel3a",
+        "eumetsat_sentinel3b",
+    )
     assert tokyo.covered is True
     attrs = tokyo.attrs()
-    assert attrs["source_count"] == 1
+    assert attrs["source_count"] == 3
     assert attrs["geostationary_source_count"] == 0
-    assert attrs["polar_orbiting_source_count"] == 1
+    assert attrs["polar_orbiting_source_count"] == 3
     assert attrs["inactive_coverage_opportunities"] == [
         {
             "provider": "himawari_ahi_frp",

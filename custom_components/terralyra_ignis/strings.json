@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Configure active-fire data sources",
-        "description": "TerraLyra IGNIS automatically assigns every relevant source to each monitored location. LSA SAF requires a free account, while NOAA GOES needs no account.",
+        "description": "TerraLyra IGNIS automatically assigns every relevant source to each monitored location. Public NOAA GOES and Sentinel-3 SLSTR need no account; LSA SAF and optional NASA FIRMS use your own credentials.",
         "data": {
           "active_fire_provider": "Active-fire data source"
         }
@@ -27,7 +27,7 @@
       },
       "sources": {
         "title": "Connect optional active-fire sources",
-        "description": "TerraLyra IGNIS automatically assigns every relevant source to each monitored location. NOAA GOES needs no credentials. Add LSA SAF credentials and/or a NASA FIRMS MAP_KEY to extend coverage; leave fields blank to skip that source.",
+        "description": "TerraLyra IGNIS automatically assigns every relevant source to each monitored location. Public NOAA GOES and Sentinel-3A/3B SLSTR need no credentials. Add LSA SAF credentials and/or a NASA FIRMS MAP_KEY for those optional sources; leave their fields blank to skip them.",
         "data": {
           "username": "LSA SAF username (optional)",
           "password": "LSA SAF password (optional)",
@@ -66,7 +66,7 @@
       "invalid_auth": "Invalid username or password",
       "invalid_firms_key": "The NASA FIRMS MAP_KEY was rejected",
       "lsa_credentials_incomplete": "Enter both the LSA SAF username and password, or leave both blank",
-      "no_source_available": "No automatic source covers this location. Add LSA SAF credentials or a NASA FIRMS MAP_KEY"
+      "no_source_available": "No automatic satellite source covers this location. Choose a location inside a supported observation footprint"
     },
     "abort": {
       "already_configured": "This LSA SAF account is already configured",
@@ -178,7 +178,7 @@
     },
     "provider_coverage": {
       "title": "No configured active-fire source covers some monitored locations",
-      "description": "TerraLyra IGNIS cannot currently assign a usable source to: {locations}. Add the required LSA SAF credentials or NASA FIRMS MAP_KEY, or change the monitored locations. Other covered locations continue updating."
+      "description": "TerraLyra IGNIS cannot currently assign a usable satellite source to: {locations}. Move or disable locations outside the supported observation footprints. Other covered locations continue updating."
     }
   },
   "entity": {

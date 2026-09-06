@@ -5,7 +5,8 @@ Home Assistant. TerraLyra IGNIS automatically assigns every geographically
 relevant
 active-fire source to each monitored location: **EUMETSAT LSA SAF MTG** and
 **Meteosat-9 MSG-IODC** in their safe coverage areas, **NOAA GOES-18/19** in
-the Western Hemisphere, and optional **NASA FIRMS** global observations.
+the Western Hemisphere, public **Sentinel-3A/3B SLSTR** observations outside
+the extreme polar caps, and optional **NASA FIRMS** global observations.
 Assigned sources are equal peers: none is
 labelled primary or secondary, and independent observations can corroborate
 the same incident. Fire-risk forecasting and land-surface temperature remain
@@ -42,6 +43,7 @@ are recorded in
 | MTG Fire Radiative Power Pixel | LSA-509 / MTFRPPIXEL | ~1 km / 10 min | **Implemented** |
 | MSG-IODC Fire Radiative Power Pixel | LSA-502 / FRPPixel | ~3.1 km / 15 min | **Implemented, coverage-gated** |
 | GOES ABI Fire/Hot Spot Characterization | ABI-L2-FDCF | ~2 km / 10 min full disk | **Implemented, coverage-gated** |
+| Sentinel-3 SLSTR Level 2 NRT Fire Radiative Power | EO:EUM:DAT:0417 / public EUMETView WFS | ~1 km / polar overpasses, normally within 3 h | **Implemented, automatically enabled** |
 | Fire Risk Map v3 Forecast | FRMv3 | Europe / daily, day 0…9 | **Implemented** |
 | MTG Land Surface Temperature | LSA-007 / MTLST | ~2 km / 10 min; up to 60 min publication delay | **Implemented, optional** |
 | Independent active-fire corroboration | NASA FIRMS NOAA-20/NOAA-21 VIIRS + Terra/Aqua MODIS NRT | ~375 m–1 km / provider-dependent NRT latency | **Implemented, optional** |
@@ -93,6 +95,16 @@ deduplication, clustering, tracking and alert pipeline. On first setup
 TerraLyra IGNIS seeds the current snapshot
 without emitting `new_fire` events, so already-existing fires do not cause an
 alert flood.
+
+Sentinel-3A and Sentinel-3B use the public EUMETView WFS layers for the SLSTR
+Level 2 near-real-time FRP product. They need no account or API key and are
+separate equal peers, so a nearby observation from each satellite can
+corroborate an incident. IGNIS requests only the small bounding boxes around
+enabled monitored locations, with a fixed 24-hour time window, a 15-minute
+cache and strict response-size, feature-count, identity, timestamp and science
+field validation. A current empty feature collection means a valid zero-fire
+observation, not an outage. The product confidence field is normalized to the
+common 0–1 model but is not presented as a calibrated probability of fire.
 
 ### Entities
 
@@ -322,8 +334,9 @@ other integrations.
 6. Optionally enter LSA SAF Data Service credentials to add geographically
    relevant MTG and Meteosat-9 MSG-IODC observations
    where its safe footprint covers a location.
-7. TerraLyra IGNIS automatically adds GOES-18/19 where geographically relevant and
-   optional NASA FIRMS observations when a personal MAP_KEY is configured.
+7. TerraLyra IGNIS automatically adds GOES-18/19 where geographically relevant,
+   plus public Sentinel-3A/3B SLSTR coverage outside the extreme polar caps.
+   NASA FIRMS observations are added when a personal MAP_KEY is configured.
 
 A free LSA SAF Data Service account is required only for the MTFRPPixel
 provider. GOES downloads the newest validated public NOAA full-disk product and
@@ -351,6 +364,23 @@ conservative coverage gate.
   sends Home coordinates to the official LSA SAF WMS while enabled.
 - **NASA FIRMS corroboration**: enables independent VIIRS and MODIS comparison and
   requires the user's own FIRMS MAP_KEY.
+
+## Public Sentinel-3 SLSTR source
+
+Sentinel-3A and Sentinel-3B are enabled automatically for monitored locations
+between 82°S and 82°N. They are polar-orbiting sources, so the 15-minute API
+check interval is not a promise of a new satellite pass every 15 minutes.
+Product observations arrive in swaths and may be delayed by processing and
+publication; cloud, the orbit path, filtering and a genuine absence of active
+fire can all produce no detections for a location.
+
+Home Assistant sends each enabled location's bounded monitoring-area rectangle
+to the official public EUMETView WFS. No TerraLyra account, EUMETSAT account or
+secret is sent. The service receives coordinates and ordinary HTTP metadata,
+so users who do not want their monitoring areas disclosed to EUMETSAT should
+not install or enable this integration until a per-source switch is available.
+Temporary Sentinel-3 service failures remain visible in provider-health
+attributes and diagnostics, but do not create duplicate non-actionable Repairs.
 
 ## Optional NASA FIRMS source
 

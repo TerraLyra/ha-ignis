@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Aktívtűz-adatforrás kiválasztása",
-        "description": "Európában és a környező térségekben az ingyenes fiókot igénylő LSA SAF ajánlott. A NOAA GOES a biztonságosan lefedett nyugati féltekén használható fiók nélkül, de további műholdas adatokat tölt le.",
+        "description": "A TerraLyra IGNIS minden figyelt helyhez automatikusan hozzárendeli a releváns forrásokat. A nyilvános NOAA GOES és Sentinel-3 SLSTR nem igényel fiókot; az LSA SAF és az opcionális NASA FIRMS a saját hozzáférési adataidat használja.",
         "data": {
           "active_fire_provider": "Aktívtűz-adatforrás"
         }
@@ -27,7 +27,7 @@
       },
       "sources": {
         "title": "Opcionális aktívtűz-források kapcsolása",
-        "description": "A TerraLyra IGNIS minden figyelt helyhez automatikusan hozzárendeli az összes releváns forrást. A NOAA GOES nem igényel hozzáférési adatot. A lefedettséget LSA SAF hozzáféréssel és/vagy NASA FIRMS MAP_KEY-jel bővítheted; az üresen hagyott forrás kimarad.",
+        "description": "A TerraLyra IGNIS minden figyelt helyhez automatikusan hozzárendeli az összes releváns forrást. A nyilvános NOAA GOES és Sentinel-3A/3B SLSTR nem igényel hozzáférési adatot. Az opcionális LSA SAF-hoz és NASA FIRMS-hez add meg a saját hozzáférésedet; az üresen hagyott forrás kimarad.",
         "data": {
           "username": "LSA SAF felhasználónév (opcionális)",
           "password": "LSA SAF jelszó (opcionális)",
@@ -66,7 +66,7 @@
       "invalid_auth": "Hibás felhasználónév vagy jelszó",
       "invalid_firms_key": "A NASA FIRMS elutasította a MAP_KEY-t",
       "lsa_credentials_incomplete": "Add meg az LSA SAF felhasználónevet és jelszót is, vagy hagyd mindkettőt üresen",
-      "no_source_available": "Ezt a helyet nem fedi le automatikus forrás. Adj meg LSA SAF hozzáférést vagy NASA FIRMS MAP_KEY-t"
+      "no_source_available": "Ezt a helyet nem fedi le automatikus műholdas forrás. Válassz támogatott megfigyelési területen belüli helyet"
     },
     "abort": {
       "already_configured": "Ez az LSA SAF fiók már be van állítva",
@@ -201,7 +201,7 @@
     },
     "provider_coverage": {
       "title": "Néhány figyelt helyet egyetlen beállított tűzforrás sem fed le",
-      "description": "A TerraLyra IGNIS jelenleg nem tud használható forrást rendelni ezekhez: {locations}. Adj meg LSA SAF hozzáférést vagy NASA FIRMS MAP_KEY-t, illetve módosítsd a helyeket. A többi hely frissítése folytatódik."
+      "description": "A TerraLyra IGNIS jelenleg nem tud használható műholdas forrást rendelni ezekhez: {locations}. Helyezd át vagy kapcsold ki a támogatott megfigyelési területeken kívüli helyeket. A többi hely frissítése folytatódik."
     }
   },
   "entity": {

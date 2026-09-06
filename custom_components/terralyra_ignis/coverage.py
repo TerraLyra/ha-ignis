@@ -9,6 +9,8 @@ from .const import (
     ACTIVE_FIRE_PROVIDER_GOES,
     ACTIVE_FIRE_PROVIDER_LSA_SAF,
     ACTIVE_FIRE_PROVIDER_MSG_IODC,
+    ACTIVE_FIRE_PROVIDER_SENTINEL3A,
+    ACTIVE_FIRE_PROVIDER_SENTINEL3B,
 )
 from .monitoring import MonitoredLocation
 from .providers.goes import select_goes_satellite
@@ -19,12 +21,19 @@ MTG_SUB_SATELLITE_LONGITUDE = 0.0
 MAX_SAFE_MTG_CENTRAL_ANGLE_DEGREES = 78.0
 NASA_FIRMS_PROVIDER = "nasa_firms"
 NASA_FIRMS_SATELLITES = "NOAA-20/NOAA-21 VIIRS + Terra/Aqua MODIS"
+SENTINEL3_SOURCES = (
+    (ACTIVE_FIRE_PROVIDER_SENTINEL3A, "S3A"),
+    (ACTIVE_FIRE_PROVIDER_SENTINEL3B, "S3B"),
+)
+MAX_SENTINEL3_LATITUDE = 82.0
 HIMAWARI_PROVIDER = "himawari_ahi_frp"
 
 SOURCE_DISPLAY_NAMES = {
     ACTIVE_FIRE_PROVIDER_LSA_SAF: "EUMETSAT LSA SAF",
     ACTIVE_FIRE_PROVIDER_MSG_IODC: "EUMETSAT LSA SAF IODC",
     ACTIVE_FIRE_PROVIDER_GOES: "NOAA GOES",
+    ACTIVE_FIRE_PROVIDER_SENTINEL3A: "EUMETSAT Sentinel-3A SLSTR",
+    ACTIVE_FIRE_PROVIDER_SENTINEL3B: "EUMETSAT Sentinel-3B SLSTR",
     NASA_FIRMS_PROVIDER: "NASA FIRMS",
     HIMAWARI_PROVIDER: "Himawari AHI FRP",
 }
@@ -33,6 +42,8 @@ SOURCE_OBSERVATION_MODES = {
     ACTIVE_FIRE_PROVIDER_LSA_SAF: "geostationary",
     ACTIVE_FIRE_PROVIDER_MSG_IODC: "geostationary",
     ACTIVE_FIRE_PROVIDER_GOES: "geostationary",
+    ACTIVE_FIRE_PROVIDER_SENTINEL3A: "polar_orbiting",
+    ACTIVE_FIRE_PROVIDER_SENTINEL3B: "polar_orbiting",
     NASA_FIRMS_PROVIDER: "polar_orbiting",
     HIMAWARI_PROVIDER: "geostationary",
 }
@@ -52,9 +63,7 @@ class SourceCoverageOpportunity:
             "provider": self.provider,
             "name": SOURCE_DISPLAY_NAMES.get(self.provider, self.provider),
             "satellite": self.satellite,
-            "observation_mode": SOURCE_OBSERVATION_MODES.get(
-                self.provider, "unknown"
-            ),
+            "observation_mode": SOURCE_OBSERVATION_MODES.get(self.provider, "unknown"),
             "status": "not_active",
             "reason": self.reason,
         }
@@ -101,9 +110,7 @@ class LocationSourcePlan:
                 "provider": provider,
                 "name": SOURCE_DISPLAY_NAMES.get(provider, provider),
                 "satellite": satellite,
-                "observation_mode": SOURCE_OBSERVATION_MODES.get(
-                    provider, "unknown"
-                ),
+                "observation_mode": SOURCE_OBSERVATION_MODES.get(provider, "unknown"),
             }
             for provider, satellite in zip(self.providers, self.satellites, strict=True)
         ]
@@ -117,16 +124,13 @@ class LocationSourcePlan:
             "assignments": assignments,
             "source_count": len(assignments),
             "geostationary_source_count": sum(
-                item["observation_mode"] == "geostationary"
-                for item in assignments
+                item["observation_mode"] == "geostationary" for item in assignments
             ),
             "polar_orbiting_source_count": sum(
-                item["observation_mode"] == "polar_orbiting"
-                for item in assignments
+                item["observation_mode"] == "polar_orbiting" for item in assignments
             ),
             "inactive_coverage_opportunities": [
-                opportunity.attrs()
-                for opportunity in self.coverage_opportunities
+                opportunity.attrs() for opportunity in self.coverage_opportunities
             ],
             "relationship": "equal_peers",
         }
@@ -163,6 +167,10 @@ def plan_location_sources(
     if firms_available:
         providers.append(NASA_FIRMS_PROVIDER)
         satellites.append(NASA_FIRMS_SATELLITES)
+    if abs(location.latitude) <= MAX_SENTINEL3_LATITUDE:
+        for provider, satellite in SENTINEL3_SOURCES:
+            providers.append(provider)
+            satellites.append(satellite)
     opportunities: list[SourceCoverageOpportunity] = []
     himawari = select_himawari_satellite(location.latitude, location.longitude)
     if himawari is not None:

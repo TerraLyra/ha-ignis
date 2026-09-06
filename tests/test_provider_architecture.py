@@ -415,7 +415,11 @@ def test_provider_coverage_sensor_separates_health_and_geography() -> None:
     assert attrs["provider_status"] == "available"
     assert attrs["covered_locations"] == 2
     assert attrs["uncovered_locations"] == 0
-    assert attrs["locations"][1]["providers"] == ["noaa_goes"]
+    assert attrs["locations"][1]["providers"] == [
+        "noaa_goes",
+        "eumetsat_sentinel3a",
+        "eumetsat_sentinel3b",
+    ]
 
 
 def test_monitored_location_sources_sensor_is_readable_and_equal_peer() -> None:
@@ -438,15 +442,19 @@ def test_monitored_location_sources_sensor_is_readable_and_equal_peer() -> None:
     )
     entity = MonitoredLocationSourcesSensor(entry, plan)
 
-    assert entity.native_value == 2
+    assert entity.native_value == 4
     assert entity.translation_placeholders == {"location_name": "California test"}
     assert entity.extra_state_attributes["source_names"] == [
         "NOAA GOES",
         "NASA FIRMS",
+        "EUMETSAT Sentinel-3A SLSTR",
+        "EUMETSAT Sentinel-3B SLSTR",
     ]
     assert entity.extra_state_attributes["satellites"] == [
         "G18",
         "NOAA-20/NOAA-21 VIIRS + Terra/Aqua MODIS",
+        "S3A",
+        "S3B",
     ]
     assert entity.extra_state_attributes["relationship"] == "equal_peers"
 

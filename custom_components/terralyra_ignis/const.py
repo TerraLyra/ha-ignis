@@ -1,4 +1,5 @@
 """Constants for the TerraLyra IGNIS integration."""
+
 from __future__ import annotations
 
 from datetime import timedelta
@@ -49,6 +50,8 @@ LEGACY_CUSTOM_LOCATION_ID = "legacy-custom"
 ACTIVE_FIRE_PROVIDER_LSA_SAF = "eumetsat_lsa_saf"
 ACTIVE_FIRE_PROVIDER_MSG_IODC = "eumetsat_lsa_saf_iodc"
 ACTIVE_FIRE_PROVIDER_GOES = "noaa_goes"
+ACTIVE_FIRE_PROVIDER_SENTINEL3A = "eumetsat_sentinel3a"
+ACTIVE_FIRE_PROVIDER_SENTINEL3B = "eumetsat_sentinel3b"
 DEFAULT_ACTIVE_FIRE_PROVIDER = ACTIVE_FIRE_PROVIDER_LSA_SAF
 
 PRODUCT_ACTIVE_FIRE = "active_fire"
@@ -82,7 +85,15 @@ MAX_RADIUS_KM = 500.0
 MAX_MONITORED_LOCATIONS = 10
 DEFAULT_UPDATE_INTERVAL = timedelta(minutes=DEFAULT_SCAN_INTERVAL_MINUTES)
 
-PLATFORMS = ["sensor", "event", "number", "select", "camera", "calendar", "geo_location"]
+PLATFORMS = [
+    "sensor",
+    "event",
+    "number",
+    "select",
+    "camera",
+    "calendar",
+    "geo_location",
+]
 
 EVENT_NEW_FIRE = "new_fire"
 BUS_EVENT_NEW_FIRE = f"{DOMAIN}_new_fire"

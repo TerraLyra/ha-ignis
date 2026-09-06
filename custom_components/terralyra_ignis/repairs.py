@@ -13,6 +13,7 @@ from .coverage import LocationCoverage, LocationSourcePlan
 from .providers.pool import ProviderHealth
 
 OUTAGE_REPAIR_THRESHOLD = 3
+_STATUS_ONLY_PROVIDER_PREFIXES = ("eumetsat_sentinel3",)
 
 
 def _issue_id(entry: ConfigEntry, kind: str) -> str:
@@ -35,6 +36,15 @@ def async_sync_provider_health_issues(
     for item in health:
         issue_id = _provider_issue_id(entry, item.provider_id)
         authentication_failure = item.failure_type == "authentication"
+        if (
+            item.provider_id.startswith(_STATUS_ONLY_PROVIDER_PREFIXES)
+            and not authentication_failure
+        ):
+            # Public polar feeds are supplementary and have no user-fixable
+            # credentials. Keep their outage visible in source health without
+            # producing two duplicate Repairs for the shared WFS service.
+            ir.async_delete_issue(hass, DOMAIN, issue_id)
+            continue
         if not authentication_failure and (
             item.failure_type is None
             or item.consecutive_failures < OUTAGE_REPAIR_THRESHOLD

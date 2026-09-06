@@ -109,6 +109,35 @@ def test_unavailable_source_is_not_selected_as_next_update() -> None:
     assert next_usable_update(estimates) == estimates[1]
 
 
+def test_sentinel3_update_uses_public_api_refresh_and_polar_window() -> None:
+    plan = LocationSourcePlan(
+        "home",
+        "Home",
+        ("eumetsat_sentinel3a", "eumetsat_sentinel3b"),
+        ("S3A", "S3B"),
+    )
+    estimates = location_update_estimates(
+        plan,
+        SimpleNamespace(longitude=20.0),
+        (
+            _health("eumetsat_sentinel3a", "S3A"),
+            _health("eumetsat_sentinel3b", "S3B"),
+        ),
+        now=NOW + timedelta(minutes=2),
+    )
+
+    assert len(estimates) == 2
+    assert {item.provider for item in estimates} == {
+        "eumetsat_sentinel3a",
+        "eumetsat_sentinel3b",
+    }
+    assert all(item.cadence_minutes == 15 for item in estimates)
+    assert all(
+        item.estimate_type == "api_refresh_with_nominal_polar_overpass_window"
+        for item in estimates
+    )
+
+
 def test_viirs_window_is_broad_and_longitude_adjusted() -> None:
     start, end = next_viirs_overpass_window(
         30.0, now=datetime(2026, 9, 4, 0, tzinfo=UTC)

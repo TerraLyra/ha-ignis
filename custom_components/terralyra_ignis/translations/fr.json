@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Choisir une source de données sur les feux actifs",
-        "description": "LSA SAF est recommandé pour l’Europe et les régions voisines et nécessite un compte gratuit. NOAA GOES est destiné aux emplacements couverts de façon sûre dans l’hémisphère occidental, ne nécessite aucun compte et télécharge des données satellitaires supplémentaires.",
+        "description": "TerraLyra IGNIS attribue automatiquement à chaque lieu toutes les sources pertinentes. Les sources publiques NOAA GOES et Sentinel-3 SLSTR ne nécessitent aucun compte ; LSA SAF et NASA FIRMS en option utilisent vos propres identifiants.",
         "data": {
           "active_fire_provider": "Source de données sur les feux actifs"
         }
@@ -27,7 +27,7 @@
       },
       "sources": {
         "title": "Connecter des sources facultatives de feux actifs",
-        "description": "TerraLyra IGNIS attribue automatiquement à chaque lieu toutes les sources pertinentes. NOAA GOES ne nécessite aucun identifiant. Ajoutez des identifiants LSA SAF et/ou une MAP_KEY NASA FIRMS pour étendre la couverture ; laissez les champs vides pour ignorer la source.",
+        "description": "TerraLyra IGNIS attribue automatiquement à chaque lieu toutes les sources pertinentes. Les sources publiques NOAA GOES et Sentinel-3A/3B SLSTR ne nécessitent aucun identifiant. Ajoutez vos identifiants pour les sources facultatives LSA SAF et NASA FIRMS ; laissez leurs champs vides pour les ignorer.",
         "data": {
           "username": "Identifiant LSA SAF (facultatif)",
           "password": "Mot de passe LSA SAF (facultatif)",
@@ -66,7 +66,7 @@
       "invalid_auth": "Nom d’utilisateur ou mot de passe incorrect",
       "invalid_firms_key": "La MAP_KEY NASA FIRMS a été refusée",
       "lsa_credentials_incomplete": "Saisissez l’identifiant et le mot de passe LSA SAF, ou laissez les deux champs vides",
-      "no_source_available": "Aucune source automatique ne couvre ce lieu. Ajoutez des identifiants LSA SAF ou une MAP_KEY NASA FIRMS"
+      "no_source_available": "Aucune source satellitaire automatique ne couvre ce lieu. Choisissez un lieu dans une zone d’observation prise en charge"
     },
     "abort": {
       "already_configured": "Ce compte LSA SAF est déjà configuré",
@@ -201,7 +201,7 @@
     },
     "provider_coverage": {
       "title": "Aucune source configurée ne couvre certains lieux",
-      "description": "TerraLyra IGNIS ne peut actuellement attribuer de source utilisable à : {locations}. Ajoutez les identifiants LSA SAF ou une MAP_KEY NASA FIRMS, ou modifiez les lieux. Les autres lieux continuent à être actualisés."
+      "description": "TerraLyra IGNIS ne peut actuellement attribuer de source satellitaire utilisable à : {locations}. Déplacez ou désactivez les lieux hors des zones d’observation prises en charge. Les autres lieux continuent à être actualisés."
     }
   },
   "entity": {

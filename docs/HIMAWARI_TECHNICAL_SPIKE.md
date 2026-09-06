@@ -89,7 +89,11 @@ navigation, pixel-footprint and validation data.
 
 Request NRT List Product access and integration terms from IPMA/KCL. MSG-IODC
 has since been implemented as an equal-peer provider using its documented LSA
-SAF data-service path; Himawari remains the next geographic source gap.
+SAF data-service path. Public Sentinel-3A/3B SLSTR observations now add a
+credential-free polar-orbiting source for Asia-Pacific locations, but they do
+not replace Himawari's potential ten-minute geostationary cadence. Himawari
+therefore remains a temporal coverage opportunity, not a geographic
+prerequisite for usable Asia-Pacific monitoring.
 
 ## References
 
