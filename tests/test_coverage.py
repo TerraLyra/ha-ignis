@@ -131,6 +131,43 @@ def test_unconfigured_global_source_leaves_unsupported_location_uncovered() -> N
     assert summarize_source_plans((arctic,)) == "not_covered"
 
 
+def test_tokyo_reports_himawari_as_inactive_coverage_opportunity() -> None:
+    """Potential Himawari coverage must not masquerade as an active source."""
+    tokyo = plan_location_sources(
+        _location("tokyo", "Tokyo", 35.6762, 139.6503),
+        lsa_saf_available=False,
+        firms_available=True,
+    )
+
+    assert tokyo.providers == ("nasa_firms",)
+    assert tokyo.covered is True
+    attrs = tokyo.attrs()
+    assert attrs["source_count"] == 1
+    assert attrs["geostationary_source_count"] == 0
+    assert attrs["polar_orbiting_source_count"] == 1
+    assert attrs["inactive_coverage_opportunities"] == [
+        {
+            "provider": "himawari_ahi_frp",
+            "name": "Himawari AHI FRP",
+            "satellite": "Himawari-9",
+            "observation_mode": "geostationary",
+            "status": "not_active",
+            "reason": "documented_machine_access_required",
+        }
+    ]
+
+
+def test_himawari_opportunity_is_absent_outside_safe_coverage() -> None:
+    california = plan_location_sources(
+        _location("california", "California", 38.0, -121.0),
+        lsa_saf_available=False,
+        firms_available=True,
+    )
+
+    assert california.attrs()["inactive_coverage_opportunities"] == []
+    assert california.attrs()["geostationary_source_count"] == 1
+
+
 def test_unknown_provider_recommends_global_fallback_when_needed() -> None:
     result = assess_location_coverage(
         "unknown",

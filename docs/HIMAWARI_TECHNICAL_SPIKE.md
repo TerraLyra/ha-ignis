@@ -1,7 +1,10 @@
 # Himawari-9 AHI active-fire technical spike
 
-Status: **conservative coverage foundation implemented; live provider blocked
-pending a documented, stable machine-access endpoint**
+Status: **conservative coverage foundation implemented and exposed as an
+inactive per-location opportunity; live provider blocked pending a documented,
+stable machine-access endpoint**
+
+Official access rechecked: **2026-09-06**
 
 ## Decision
 
@@ -17,8 +20,10 @@ but not the filtered geostationary Himawari layer. The FIRMS map displaying a
 layer does not by itself constitute a supported feature-data API contract.
 
 The repository therefore contains only a dependency-free, conservative
-coverage selector. It is intentionally not imported by runtime source planning,
-does not create entities, and performs no network requests.
+coverage selector. Runtime source planning uses it solely to annotate an
+existing location-source entity with an inactive coverage opportunity. It does
+not add Himawari to the active source count, claim operational coverage, create
+another entity or perform network requests.
 
 ## Official product and access findings
 
@@ -52,6 +57,13 @@ does not create entities, and performs no network requests.
 - explicitly documents that product navigation and quality masks remain a
   mandatory second gate.
 
+For locations inside that gate, the existing per-location active-fire source
+entity reports Himawari-9 under `inactive_coverage_opportunities`, with
+`status: not_active` and `reason: documented_machine_access_required`. Active
+assignments also identify whether their observation mode is geostationary or
+polar-orbiting. This makes a temporal coverage gap visible without presenting
+an unavailable feed as working evidence.
+
 The 70-degree limit is an engineering safety boundary, not a claim about the
 satellite's geometric horizon. It can be revised only using real product
 navigation, pixel-footprint and validation data.
@@ -75,10 +87,9 @@ navigation, pixel-footprint and validation data.
 
 ## Recommended next action
 
-Request NRT List Product access and integration terms from IPMA/KCL. While that
-external gate is pending, evaluate MSG-IODC FRP-PIXEL as the next provider: it
-has a documented LSA SAF data-service path and can reuse more of TerraLyra's
-existing authentication and FRP decoding architecture.
+Request NRT List Product access and integration terms from IPMA/KCL. MSG-IODC
+has since been implemented as an equal-peer provider using its documented LSA
+SAF data-service path; Himawari remains the next geographic source gap.
 
 ## References
 

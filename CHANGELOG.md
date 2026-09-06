@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.15.0
+
+- Identify whether each assigned active-fire feed is geostationary or
+  polar-orbiting in the per-location source details.
+- Expose safe Himawari-9 geographic coverage as an inactive opportunity for
+  relevant Asia-Pacific locations, without adding it to the active source
+  count or treating it as fire evidence.
+- Explain that Himawari activation remains blocked on a documented, licensed
+  machine-access endpoint; no unsupported map endpoint or full-disk imagery is
+  queried.
+- Add regression tests proving that Tokyo reports one active NASA FIRMS source
+  plus a separate inactive Himawari opportunity, while locations outside the
+  conservative Himawari gate do not report it.
+
 ## 0.14.0
 
 - Rename the wildfire product to **TerraLyra IGNIS** and move its repository to

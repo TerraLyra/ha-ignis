@@ -578,8 +578,9 @@ empty temporarily or enter `terralyra_ignis` in the card's YAML as shown above.
 ### Next
 
 - obtain a documented near-real-time Himawari-9 FRP-PIXEL List Product endpoint
-  and access terms; a conservative, runtime-disabled coverage foundation and
-  the remaining go/no-go gates are recorded in
+  and access terms; a conservative foundation now exposes geographically
+  relevant Himawari coverage as an inactive opportunity without counting it as
+  an active source, and the remaining go/no-go gates are recorded in
   [`docs/HIMAWARI_TECHNICAL_SPIKE.md`](docs/HIMAWARI_TECHNICAL_SPIKE.md)
 - collect operational GOES-18/19 experience from covered installations while
   retaining the conservative pre-download coverage gate and product navigation

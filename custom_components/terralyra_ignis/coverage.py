@@ -12,19 +12,52 @@ from .const import (
 )
 from .monitoring import MonitoredLocation
 from .providers.goes import select_goes_satellite
+from .providers.himawari import select_himawari_satellite
 from .providers.msg_iodc import select_msg_iodc_satellite
 
 MTG_SUB_SATELLITE_LONGITUDE = 0.0
 MAX_SAFE_MTG_CENTRAL_ANGLE_DEGREES = 78.0
 NASA_FIRMS_PROVIDER = "nasa_firms"
 NASA_FIRMS_SATELLITES = "NOAA-20/NOAA-21 VIIRS + Terra/Aqua MODIS"
+HIMAWARI_PROVIDER = "himawari_ahi_frp"
 
 SOURCE_DISPLAY_NAMES = {
     ACTIVE_FIRE_PROVIDER_LSA_SAF: "EUMETSAT LSA SAF",
     ACTIVE_FIRE_PROVIDER_MSG_IODC: "EUMETSAT LSA SAF IODC",
     ACTIVE_FIRE_PROVIDER_GOES: "NOAA GOES",
     NASA_FIRMS_PROVIDER: "NASA FIRMS",
+    HIMAWARI_PROVIDER: "Himawari AHI FRP",
 }
+
+SOURCE_OBSERVATION_MODES = {
+    ACTIVE_FIRE_PROVIDER_LSA_SAF: "geostationary",
+    ACTIVE_FIRE_PROVIDER_MSG_IODC: "geostationary",
+    ACTIVE_FIRE_PROVIDER_GOES: "geostationary",
+    NASA_FIRMS_PROVIDER: "polar_orbiting",
+    HIMAWARI_PROVIDER: "geostationary",
+}
+
+
+@dataclass(frozen=True, slots=True)
+class SourceCoverageOpportunity:
+    """A geographically relevant source that is not active in the runtime."""
+
+    provider: str
+    satellite: str
+    reason: str
+
+    def attrs(self) -> dict[str, str]:
+        """Return bounded, non-secret Home Assistant attributes."""
+        return {
+            "provider": self.provider,
+            "name": SOURCE_DISPLAY_NAMES.get(self.provider, self.provider),
+            "satellite": self.satellite,
+            "observation_mode": SOURCE_OBSERVATION_MODES.get(
+                self.provider, "unknown"
+            ),
+            "status": "not_active",
+            "reason": self.reason,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +89,7 @@ class LocationSourcePlan:
     location_name: str
     providers: tuple[str, ...]
     satellites: tuple[str, ...]
+    coverage_opportunities: tuple[SourceCoverageOpportunity, ...] = ()
 
     @property
     def covered(self) -> bool:
@@ -67,6 +101,9 @@ class LocationSourcePlan:
                 "provider": provider,
                 "name": SOURCE_DISPLAY_NAMES.get(provider, provider),
                 "satellite": satellite,
+                "observation_mode": SOURCE_OBSERVATION_MODES.get(
+                    provider, "unknown"
+                ),
             }
             for provider, satellite in zip(self.providers, self.satellites, strict=True)
         ]
@@ -79,6 +116,18 @@ class LocationSourcePlan:
             "satellites": list(self.satellites),
             "assignments": assignments,
             "source_count": len(assignments),
+            "geostationary_source_count": sum(
+                item["observation_mode"] == "geostationary"
+                for item in assignments
+            ),
+            "polar_orbiting_source_count": sum(
+                item["observation_mode"] == "polar_orbiting"
+                for item in assignments
+            ),
+            "inactive_coverage_opportunities": [
+                opportunity.attrs()
+                for opportunity in self.coverage_opportunities
+            ],
             "relationship": "equal_peers",
         }
 
@@ -114,11 +163,22 @@ def plan_location_sources(
     if firms_available:
         providers.append(NASA_FIRMS_PROVIDER)
         satellites.append(NASA_FIRMS_SATELLITES)
+    opportunities: list[SourceCoverageOpportunity] = []
+    himawari = select_himawari_satellite(location.latitude, location.longitude)
+    if himawari is not None:
+        opportunities.append(
+            SourceCoverageOpportunity(
+                HIMAWARI_PROVIDER,
+                himawari.satellite,
+                "documented_machine_access_required",
+            )
+        )
     return LocationSourcePlan(
         location.id,
         location.name,
         tuple(providers),
         tuple(satellites),
+        tuple(opportunities),
     )
 
 

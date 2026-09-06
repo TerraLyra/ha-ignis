@@ -9,6 +9,12 @@ There is no primary, secondary or fallback rank.
 | GOES-18 or GOES-19 viewing area | NOAA GOES ABI FDCF |
 | Any location | NASA FIRMS, when a MAP_KEY is configured |
 
+The per-location source entity also separates geostationary sources from
+polar-orbiting sources. When a location is safely visible to Himawari-9, it is
+listed only as an `inactive_coverage_opportunity` until TerraLyra has a
+documented and licensed machine-access endpoint. This metadata does not raise
+the active source count and is not used as fire evidence.
+
 All successful sources enter the same normalized incident pipeline. A failed
 source does not stop healthy peers. Nearby observations from different
 satellites are merged into one incident and reported as multi-source evidence;
