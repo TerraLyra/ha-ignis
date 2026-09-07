@@ -522,6 +522,8 @@ def test_technical_and_legacy_counts_are_diagnostics() -> None:
     )
 
     for entity in diagnostic_entities:
-        assert entity._attr_entity_category is EntityCategory.DIAGNOSTIC
+        instance = object.__new__(entity)
+        assert instance.entity_category is EntityCategory.DIAGNOSTIC
     for entity in disabled_by_default:
-        assert entity._attr_entity_registry_enabled_default is False
+        instance = object.__new__(entity)
+        assert instance.entity_registry_enabled_default is False
