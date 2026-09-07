@@ -246,10 +246,10 @@
         }
       },
       "monitored_location_sources": {
-        "name": "Aktivbrandquellen für {location_name}"
+        "name": "Ort: {location_name} — Aktivbrandquellen"
       },
       "monitored_location_status": {
-        "name": "Überwachungsstatus für {location_name}",
+        "name": "Ort: {location_name} — Überwachungsstatus",
         "state": {
           "available": "Alle Quellen verfügbar",
           "degraded": "Verfügbar, aber verzögert",
@@ -259,7 +259,7 @@
         }
       },
       "monitored_location_next_update": {
-        "name": "Nächste erwartete Aktualisierung aktiver Brände für {location_name}"
+        "name": "Ort: {location_name} — Nächste erwartete Aktualisierung aktiver Brände"
       },
       "provider_coverage": {
         "name": "Quellenabdeckung der überwachten Orte",

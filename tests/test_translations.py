@@ -37,6 +37,19 @@ EXPECTED_ENGLISH_IDENTICAL_PATHS = {
         "options.step.init.data.firms_map_key",
     },
 }
+LOCATION_ENTITY_PREFIXES = {
+    "de": "Ort: {location_name} — ",
+    "en": "Location: {location_name} — ",
+    "es": "Ubicación: {location_name} — ",
+    "fr": "Lieu : {location_name} — ",
+    "hu": "Hely: {location_name} — ",
+    "it": "Località: {location_name} — ",
+}
+LOCATION_ENTITY_KEYS = {
+    "monitored_location_sources",
+    "monitored_location_status",
+    "monitored_location_next_update",
+}
 
 
 def _leaf_paths(value: Any, prefix: tuple[str, ...] = ()) -> set[tuple[str, ...]]:
@@ -84,6 +97,22 @@ def test_translation_values_are_non_empty_strings() -> None:
             for key in leaf_path:
                 value = value[key]
             assert isinstance(value, str) and value.strip(), (path.name, leaf_path)
+
+
+def test_location_entities_share_a_localized_sorting_prefix() -> None:
+    """Keep all per-location entities grouped on alphabetical entity lists."""
+    for language, prefix in LOCATION_ENTITY_PREFIXES.items():
+        translation = json.loads(
+            (TRANSLATIONS / f"{language}.json").read_text(encoding="utf-8")
+        )
+        sensors = translation["entity"]["sensor"]
+        for key in LOCATION_ENTITY_KEYS:
+            assert sensors[key]["name"].startswith(prefix), (language, key)
+
+    source = json.loads(SOURCE_STRINGS.read_text(encoding="utf-8"))
+    sensors = source["entity"]["sensor"]
+    for key in LOCATION_ENTITY_KEYS:
+        assert sensors[key]["name"].startswith(LOCATION_ENTITY_PREFIXES["en"])
 
 
 def test_localizations_do_not_accidentally_fall_back_to_english() -> None:

@@ -246,10 +246,10 @@
         }
       },
       "monitored_location_sources": {
-        "name": "{location_name} active-fire sources"
+        "name": "Location: {location_name} — Active-fire sources"
       },
       "monitored_location_status": {
-        "name": "{location_name} monitoring status",
+        "name": "Location: {location_name} — Monitoring status",
         "state": {
           "available": "All sources available",
           "degraded": "Available with delays",
@@ -259,7 +259,7 @@
         }
       },
       "monitored_location_next_update": {
-        "name": "Next expected active-fire update for {location_name}"
+        "name": "Location: {location_name} — Next expected active-fire update"
       },
       "provider_coverage": {
         "name": "Monitored-location source coverage",

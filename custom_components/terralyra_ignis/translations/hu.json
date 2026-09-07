@@ -246,10 +246,10 @@
         }
       },
       "monitored_location_sources": {
-        "name": "{location_name} aktívtűz-forrásai"
+        "name": "Hely: {location_name} — Aktívtűz-források"
       },
       "monitored_location_status": {
-        "name": "{location_name} megfigyelési állapota",
+        "name": "Hely: {location_name} — Megfigyelési állapot",
         "state": {
           "available": "Minden forrás elérhető",
           "degraded": "Elérhető, de késéssel",
@@ -259,7 +259,7 @@
         }
       },
       "monitored_location_next_update": {
-        "name": "{location_name} következő várható aktívtűz-frissítése"
+        "name": "Hely: {location_name} — Következő várható aktívtűz-frissítés"
       },
       "provider_coverage": {
         "name": "Figyelt helyek forráslefedettsége",

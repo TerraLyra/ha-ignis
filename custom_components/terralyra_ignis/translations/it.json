@@ -246,10 +246,10 @@
         }
       },
       "monitored_location_sources": {
-        "name": "Fonti di incendi attivi per {location_name}"
+        "name": "Località: {location_name} — Fonti di incendi attivi"
       },
       "monitored_location_status": {
-        "name": "Stato di monitoraggio di {location_name}",
+        "name": "Località: {location_name} — Stato di monitoraggio",
         "state": {
           "available": "Tutte le fonti disponibili",
           "degraded": "Disponibile con ritardi",
@@ -259,7 +259,7 @@
         }
       },
       "monitored_location_next_update": {
-        "name": "Prossimo aggiornamento previsto degli incendi attivi per {location_name}"
+        "name": "Località: {location_name} — Prossimo aggiornamento previsto degli incendi attivi"
       },
       "provider_coverage": {
         "name": "Copertura fonti delle località",

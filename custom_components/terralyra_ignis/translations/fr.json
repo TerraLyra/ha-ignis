@@ -246,10 +246,10 @@
         }
       },
       "monitored_location_sources": {
-        "name": "Sources de feux actifs pour {location_name}"
+        "name": "Lieu : {location_name} — Sources de feux actifs"
       },
       "monitored_location_status": {
-        "name": "État de surveillance de {location_name}",
+        "name": "Lieu : {location_name} — État de surveillance",
         "state": {
           "available": "Toutes les sources sont disponibles",
           "degraded": "Disponible avec des retards",
@@ -259,7 +259,7 @@
         }
       },
       "monitored_location_next_update": {
-        "name": "Prochaine mise à jour attendue des feux actifs pour {location_name}"
+        "name": "Lieu : {location_name} — Prochaine mise à jour attendue des feux actifs"
       },
       "provider_coverage": {
         "name": "Couverture des sources par lieu",

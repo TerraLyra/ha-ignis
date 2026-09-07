@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.15.2
+
+- Group all per-location entities alphabetically with a localized
+  `Location: <name> — <sensor>` display-name convention.
+- Preserve existing entity identities, history, dashboards and automations;
+  only the integration-provided display names change.
+
 ## 0.15.1
 
 - Distinguish fully fresh per-location monitoring from usable but delayed
