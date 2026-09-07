@@ -130,6 +130,17 @@ async def test_diagnostics_are_bounded_and_redacted(hass) -> None:
     }
     assert result["fire_risk"]["near_home_risk"] == "extreme"
     assert result["fire_risk"]["area_risk"] == "very_high"
+    assert result["fire_risk"]["source_selection"] == (
+        "automatic_equal_peers_by_location_coverage"
+    )
+    assert result["fire_risk"]["coverage"] == {
+        "status": "covered",
+        "enabled_location_count": 1,
+        "covered_location_count": 1,
+        "uncovered_location_count": 0,
+        "provider_assignment_counts": {"eumetsat_lsa_saf_frmv3": 1},
+        "inactive_opportunity_counts": {"jrc_gwis_fwi": 1},
+    }
     assert account_value not in serialized
     assert credential_value not in serialized
     assert firms_key_value not in serialized
@@ -175,4 +186,5 @@ async def test_diagnostics_handle_coordinators_without_data(hass) -> None:
 
     assert result["active_fire"]["product_time"] is None
     assert result["fire_risk"]["near_home_risk"] is None
+    assert result["fire_risk"]["coverage"]["status"] == "unknown"
     assert result["place_names_enabled"] is False

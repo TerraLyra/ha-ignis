@@ -628,6 +628,12 @@ empty temporarily or enter `terralyra_ignis` in the card's YAML as shown above.
 
 ### Next
 
+- make fire-risk forecasting location-aware through a provider-neutral
+  per-location contract: FRMv3 will be assigned to every safely covered
+  location instead of being tied to Home, uncovered locations will not receive
+  misleading unavailable entities, and JRC GWIS is the preferred worldwide
+  candidate pending the bounded go/no-go checks in
+  [`docs/FIRE_RISK_PROVIDER_RESEARCH.md`](docs/FIRE_RISK_PROVIDER_RESEARCH.md)
 - obtain a documented near-real-time Himawari-9 FRP-PIXEL List Product endpoint
   and access terms; a conservative foundation now exposes geographically
   relevant Himawari coverage as an inactive opportunity without counting it as

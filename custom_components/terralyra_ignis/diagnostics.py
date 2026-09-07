@@ -17,6 +17,10 @@ from .const import (
     CONF_USERNAME,
 )
 from .coverage import plan_location_sources, summarize_source_plans
+from .fire_risk_coverage import (
+    plan_fire_risk_sources,
+    summarize_fire_risk_plans,
+)
 
 TO_REDACT = {
     CONF_USERNAME,
@@ -43,6 +47,11 @@ async def async_get_config_entry_diagnostics(
             lsa_saf_available=bool(entry.data.get(CONF_USERNAME)),
             firms_available=bool(entry.data.get(CONF_FIRMS_MAP_KEY)),
         )
+        for location in getattr(active, "monitored_locations", ())
+        if location.enabled
+    )
+    fire_risk_plans = tuple(
+        plan_fire_risk_sources(location)
         for location in getattr(active, "monitored_locations", ())
         if location.enabled
     )
@@ -177,6 +186,45 @@ async def async_get_config_entry_diagnostics(
             ),
         },
         "fire_risk": {
+            "source_selection": "automatic_equal_peers_by_location_coverage",
+            "coverage": {
+                "status": summarize_fire_risk_plans(fire_risk_plans),
+                "enabled_location_count": len(fire_risk_plans),
+                "covered_location_count": sum(
+                    plan.covered for plan in fire_risk_plans
+                ),
+                "uncovered_location_count": sum(
+                    not plan.covered for plan in fire_risk_plans
+                ),
+                "provider_assignment_counts": {
+                    provider: sum(
+                        any(
+                            assignment.provider == provider
+                            for assignment in plan.assignments
+                        )
+                        for plan in fire_risk_plans
+                    )
+                    for provider in {
+                        assignment.provider
+                        for plan in fire_risk_plans
+                        for assignment in plan.assignments
+                    }
+                },
+                "inactive_opportunity_counts": {
+                    provider: sum(
+                        any(
+                            opportunity.provider == provider
+                            for opportunity in plan.coverage_opportunities
+                        )
+                        for plan in fire_risk_plans
+                    )
+                    for provider in {
+                        opportunity.provider
+                        for plan in fire_risk_plans
+                        for opportunity in plan.coverage_opportunities
+                    }
+                },
+            },
             "last_update_success": risk.last_update_success,
             "generated_at": (
                 risk_data.generated_at.isoformat() if risk_data else None

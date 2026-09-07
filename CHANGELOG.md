@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Record the worldwide fire-risk provider decision: JRC GWIS is the preferred
+  global FWI candidate, subject to bounded live-WMS validation, while
+  Open-Meteo remains a possible input for a separately validated calculated
+  FWI provider.
+- Add a provider-neutral per-location fire-risk coverage planner that assigns
+  FRMv3 by geography instead of location identity and represents unvalidated
+  GWIS coverage only as an inactive opportunity.
+- Add privacy-safe diagnostics and regression coverage for covered, partially
+  covered and uncovered monitored-location sets.
+
 ## 0.15.3
 
 - Organize entity display names into localized `Location`, `Overview` and
