@@ -207,28 +207,28 @@
   "entity": {
     "sensor": {
       "nearest_fire": {
-        "name": "Incendio activo más cercano"
+        "name": "Resumen — Incendio activo más cercano"
       },
       "active_fire_count": {
-        "name": "Grupos de incendios activos"
+        "name": "Resumen — Grupos de incendios activos"
       },
       "supplemental_fire_count": {
-        "name": "Grupos observados por NASA FIRMS"
+        "name": "Fuentes — Grupos observados por NASA FIRMS"
       },
       "combined_fire_count": {
-        "name": "Todos los grupos de incendios activos"
+        "name": "Fuentes — Recuento heredado de todos los grupos"
       },
       "raw_pixel_count": {
-        "name": "Píxeles de incendio dentro del radio"
+        "name": "Fuentes — Píxeles de incendio sin procesar en ubicaciones vigiladas"
       },
       "product_time": {
-        "name": "Hora del último producto de incendios"
+        "name": "Fuentes — Hora del último producto de incendios activos"
       },
       "product_age": {
-        "name": "Antigüedad del producto de incendios"
+        "name": "Fuentes — Antigüedad del producto de incendios activos"
       },
       "provider_status": {
-        "name": "Estado de los datos de incendios activos",
+        "name": "Fuentes — Estado general de los datos de incendios activos",
         "state": {
           "initializing": "Inicializando",
           "available": "Disponible",
@@ -239,7 +239,7 @@
         }
       },
       "active_fire_provider": {
-        "name": "Fuentes de incendios asignadas",
+        "name": "Fuentes — Modo de asignación",
         "state": {
           "automatic": "Automática",
           "unavailable": "No disponible"
@@ -262,7 +262,7 @@
         "name": "Ubicación: {location_name} — Próxima actualización prevista de incendios activos"
       },
       "provider_coverage": {
-        "name": "Cobertura de fuentes por ubicación",
+        "name": "Fuentes — Cobertura de ubicaciones",
         "state": {
           "covered": "Cubierta",
           "partial": "Parcialmente cubierta",
@@ -271,7 +271,7 @@
         }
       },
       "fire_risk_today": {
-        "name": "Riesgo de incendio cerca de Casa",
+        "name": "Ubicación: Casa — Riesgo de incendio de hoy",
         "state": {
           "low": "Bajo",
           "moderate": "Moderado",
@@ -282,7 +282,7 @@
         }
       },
       "fire_risk_area_maximum": {
-        "name": "Mayor riesgo de incendio en la zona vigilada",
+        "name": "Ubicación: Casa — Mayor riesgo de incendio dentro del radio",
         "state": {
           "low": "Bajo",
           "moderate": "Moderado",
@@ -293,19 +293,19 @@
         }
       },
       "fire_risk_update": {
-        "name": "Última actualización de la previsión del riesgo de incendio"
+        "name": "Ubicación: Casa — Actualización de la previsión del riesgo de incendio"
       },
       "recent_detections": {
-        "name": "Detecciones de incendios en la última hora"
+        "name": "Resumen — Detecciones de incendios en la última hora"
       },
       "fire_activity_frp_change": {
-        "name": "Cambio de FRP de la actividad del incendio en una hora"
+        "name": "Resumen — Cambio de FRP de la actividad del incendio en una hora"
       },
       "new_incidents_24h": {
-        "name": "Nuevos incidentes de incendio en las últimas 24 horas"
+        "name": "Resumen — Nuevos incidentes de incendio en las últimas 24 horas"
       },
       "active_fire_situation": {
-        "name": "Situación de incendios activos",
+        "name": "Resumen — Situación de incendios activos",
         "state": {
           "normal": "Normal",
           "elevated": "Elevada",
@@ -315,7 +315,7 @@
         }
       },
       "fire_source_confirmation": {
-        "name": "Confirmación independiente de la fuente de incendio",
+        "name": "Fuentes — Confirmación independiente",
         "state": {
           "disabled": "Desactivada",
           "not_available": "No disponible",
@@ -325,7 +325,7 @@
         }
       },
       "nearest_fire_evidence": {
-        "name": "Solidez de la evidencia del incendio más cercano",
+        "name": "Resumen — Solidez de la evidencia del incendio más cercano",
         "state": {
           "no_active_fire": "Sin incendio activo",
           "limited": "Limitada",
@@ -334,23 +334,23 @@
         }
       },
       "land_surface_temperature": {
-        "name": "Temperatura de la superficie en Casa"
+        "name": "Ubicación: Casa — Temperatura de la superficie"
       }
     },
     "event": {
       "new_fire": {
-        "name": "Nuevo incendio activo"
+        "name": "Resumen — Nuevo incendio activo"
       },
       "fire_risk_increase": {
-        "name": "Aumento del riesgo de incendio"
+        "name": "Ubicación: Casa — Aumento del riesgo de incendio"
       },
       "fire_trend": {
-        "name": "Cambio de tendencia del incidente de incendio"
+        "name": "Resumen — Cambio de tendencia del incidente de incendio"
       }
     },
     "select": {
       "fire_risk_day": {
-        "name": "Día de previsión del riesgo de incendio",
+        "name": "Ubicación: Casa — Día de previsión del riesgo de incendio",
         "state": {
           "today": "Hoy",
           "tomorrow": "Mañana",
@@ -367,23 +367,23 @@
     },
     "camera": {
       "fire_risk_map": {
-        "name": "Mapa de previsión del riesgo de incendio"
+        "name": "Ubicación: Casa — Mapa de previsión del riesgo de incendio"
       }
     },
     "calendar": {
       "fire_risk_forecast": {
-        "name": "Previsión del riesgo de incendio a 10 días"
+        "name": "Ubicación: Casa — Previsión del riesgo de incendio a 10 días"
       }
     },
     "number": {
       "monitoring_radius": {
-        "name": "Radio de vigilancia de incendios activos"
+        "name": "Ubicación: {location_name} — Radio de vigilancia de incendios activos"
       },
       "fire_risk_radius": {
-        "name": "Radio de previsión del riesgo de incendio"
+        "name": "Ubicación: Casa — Radio de previsión del riesgo de incendio"
       },
       "fire_history_hours": {
-        "name": "Ventana del historial de incendios"
+        "name": "Resumen — Ventana del historial de incendios"
       }
     }
   },

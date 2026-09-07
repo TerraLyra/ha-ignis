@@ -47,6 +47,9 @@ class MonitoringRadiusNumber(IgnisEntity, NumberEntity):
     def __init__(self, entry: IgnisConfigEntry) -> None:
         super().__init__(entry)
         self._attr_unique_id = f"{entry.entry_id}_monitoring_radius"
+        self._attr_translation_placeholders = {
+            "location_name": self.coordinator.monitoring_center.name
+        }
 
     @property
     def native_value(self) -> float:

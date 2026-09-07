@@ -207,28 +207,28 @@
   "entity": {
     "sensor": {
       "nearest_fire": {
-        "name": "Legközelebbi aktív tűz"
+        "name": "Áttekintés — Legközelebbi aktív tűz"
       },
       "active_fire_count": {
-        "name": "Aktív tűzcsoportok"
+        "name": "Áttekintés — Aktív tűzcsoportok"
       },
       "supplemental_fire_count": {
-        "name": "NASA FIRMS által észlelt tűzcsoportok"
+        "name": "Források — NASA FIRMS által észlelt tűzcsoportok"
       },
       "combined_fire_count": {
-        "name": "Összes aktív tűzcsoport"
+        "name": "Források — Korábbi összesített tűzcsoportszám"
       },
       "raw_pixel_count": {
-        "name": "Tűzpixelek a körön belül"
+        "name": "Források — Nyers tűzpixelek a figyelt helyeken"
       },
       "product_time": {
-        "name": "Legfrissebb tűztermék ideje"
+        "name": "Források — Legfrissebb aktívtűz-termék ideje"
       },
       "product_age": {
-        "name": "Tűztermék kora"
+        "name": "Források — Aktívtűz-termék kora"
       },
       "provider_status": {
-        "name": "Aktívtűz-adatok állapota",
+        "name": "Források — Aktívtűz-adatok összesített állapota",
         "state": {
           "initializing": "Indítás",
           "available": "Elérhető",
@@ -239,7 +239,7 @@
         }
       },
       "active_fire_provider": {
-        "name": "Hozzárendelt aktívtűz-források",
+        "name": "Források — Hozzárendelési mód",
         "state": {
           "automatic": "Automatikus",
           "unavailable": "Nem érhető el"
@@ -262,7 +262,7 @@
         "name": "Hely: {location_name} — Következő várható aktívtűz-frissítés"
       },
       "provider_coverage": {
-        "name": "Figyelt helyek forráslefedettsége",
+        "name": "Források — Helyszínek lefedettsége",
         "state": {
           "covered": "Lefedett",
           "partial": "Részben lefedett",
@@ -271,7 +271,7 @@
         }
       },
       "fire_risk_today": {
-        "name": "Tűzkockázat az otthon közelében",
+        "name": "Hely: Otthon — Mai tűzkockázat",
         "state": {
           "low": "Alacsony",
           "moderate": "Mérsékelt",
@@ -282,7 +282,7 @@
         }
       },
       "fire_risk_area_maximum": {
-        "name": "Legmagasabb tűzkockázat a figyelési körzetben",
+        "name": "Hely: Otthon — Legmagasabb tűzkockázat a sugaron belül",
         "state": {
           "low": "Alacsony",
           "moderate": "Mérsékelt",
@@ -293,19 +293,19 @@
         }
       },
       "fire_risk_update": {
-        "name": "Tűzkockázati előrejelzés legutóbbi frissítése"
+        "name": "Hely: Otthon — Tűzkockázati előrejelzés frissítése"
       },
       "recent_detections": {
-        "name": "Tűzészlelések az elmúlt órában"
+        "name": "Áttekintés — Tűzészlelések az elmúlt órában"
       },
       "fire_activity_frp_change": {
-        "name": "Tűzaktivitás FRP-változása egy óra alatt"
+        "name": "Áttekintés — Tűzaktivitás FRP-változása egy óra alatt"
       },
       "new_incidents_24h": {
-        "name": "Új tűzesetek az elmúlt 24 órában"
+        "name": "Áttekintés — Új tűzesetek az elmúlt 24 órában"
       },
       "active_fire_situation": {
-        "name": "Aktív tűzhelyzet",
+        "name": "Áttekintés — Aktív tűzhelyzet",
         "state": {
           "normal": "Normál",
           "elevated": "Emelkedett",
@@ -315,7 +315,7 @@
         }
       },
       "fire_source_confirmation": {
-        "name": "Független tűzforrás-megerősítés",
+        "name": "Források — Független megerősítés",
         "state": {
           "disabled": "Kikapcsolva",
           "not_available": "Nem érhető el",
@@ -325,7 +325,7 @@
         }
       },
       "nearest_fire_evidence": {
-        "name": "A legközelebbi tűzészlelés bizonyítékerőssége",
+        "name": "Áttekintés — A legközelebbi tűzészlelés bizonyítékerőssége",
         "state": {
           "no_active_fire": "Nincs aktív tűz",
           "limited": "Korlátozott",
@@ -334,23 +334,23 @@
         }
       },
       "land_surface_temperature": {
-        "name": "Felszínhőmérséklet az otthonnál"
+        "name": "Hely: Otthon — Felszínhőmérséklet"
       }
     },
     "event": {
       "new_fire": {
-        "name": "Új aktív tűz"
+        "name": "Áttekintés — Új aktív tűz"
       },
       "fire_risk_increase": {
-        "name": "Tűzkockázat emelkedése"
+        "name": "Hely: Otthon — Tűzkockázat emelkedése"
       },
       "fire_trend": {
-        "name": "Tűzeset trendváltozása"
+        "name": "Áttekintés — Tűzeset trendváltozása"
       }
     },
     "select": {
       "fire_risk_day": {
-        "name": "Tűzkockázati előrejelzés napja",
+        "name": "Hely: Otthon — Tűzkockázati előrejelzés napja",
         "state": {
           "today": "Ma",
           "tomorrow": "Holnap",
@@ -367,23 +367,23 @@
     },
     "camera": {
       "fire_risk_map": {
-        "name": "Tűzkockázati előrejelzési térkép"
+        "name": "Hely: Otthon — Tűzkockázati előrejelzési térkép"
       }
     },
     "calendar": {
       "fire_risk_forecast": {
-        "name": "10 napos tűzkockázati előrejelzés"
+        "name": "Hely: Otthon — 10 napos tűzkockázati előrejelzés"
       }
     },
     "number": {
       "monitoring_radius": {
-        "name": "Aktív tűz figyelési sugár"
+        "name": "Hely: {location_name} — Aktív tűz figyelési sugár"
       },
       "fire_risk_radius": {
-        "name": "Tűzkockázati előrejelzés sugara"
+        "name": "Hely: Otthon — Tűzkockázati előrejelzés sugara"
       },
       "fire_history_hours": {
-        "name": "Tűzelőzmény időablaka"
+        "name": "Áttekintés — Tűzelőzmény időablaka"
       }
     }
   },

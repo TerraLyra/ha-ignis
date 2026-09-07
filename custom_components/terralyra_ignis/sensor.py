@@ -12,6 +12,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import UnitOfLength, UnitOfPower, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import IgnisConfigEntry
@@ -225,6 +226,8 @@ class SupplementalFireCountSensor(IgnisEntity, SensorEntity):
     """Count current deduplicated clusters observed by NASA FIRMS."""
 
     _attr_translation_key = "supplemental_fire_count"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:satellite-uplink"
 
@@ -254,6 +257,8 @@ class CombinedFireCountSensor(IgnisEntity, SensorEntity):
     """Count distinct current clusters across primary and supplemental sources."""
 
     _attr_translation_key = "combined_fire_count"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:fire-circle"
 
@@ -280,6 +285,8 @@ class CombinedFireCountSensor(IgnisEntity, SensorEntity):
 
 class RawPixelCountSensor(IgnisEntity, SensorEntity):
     _attr_translation_key = "raw_pixel_count"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_icon = "mdi:dots-hexagon"
 
@@ -294,6 +301,7 @@ class RawPixelCountSensor(IgnisEntity, SensorEntity):
 
 class ProductTimeSensor(IgnisEntity, SensorEntity):
     _attr_translation_key = "product_time"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_icon = "mdi:satellite-variant"
 
@@ -314,6 +322,7 @@ class ProductTimeSensor(IgnisEntity, SensorEntity):
 
 class ProductAgeSensor(IgnisEntity, SensorEntity):
     _attr_translation_key = "product_age"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_native_unit_of_measurement = "min"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_suggested_display_precision = 0

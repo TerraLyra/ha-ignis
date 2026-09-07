@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+from homeassistant.helpers.entity import EntityCategory
 import pytest
 
 from custom_components.terralyra_ignis.api import (
@@ -47,6 +48,9 @@ from custom_components.terralyra_ignis.sensor import (
     MonitoredLocationSourcesSensor,
     ProviderCoverageSensor,
     ProviderStatusSensor,
+    ProductAgeSensor,
+    ProductTimeSensor,
+    RawPixelCountSensor,
     SupplementalFireCountSensor,
 )
 
@@ -500,3 +504,24 @@ def test_source_specific_and_combined_counts_do_not_double_count() -> None:
         "distinct_clusters": 2,
         "count_scope": "deduplicated_current_clusters_all_sources",
     }
+
+
+def test_technical_and_legacy_counts_are_diagnostics() -> None:
+    """Keep raw implementation details away from new users' main entity lists."""
+    diagnostic_entities = (
+        SupplementalFireCountSensor,
+        CombinedFireCountSensor,
+        RawPixelCountSensor,
+        ProductTimeSensor,
+        ProductAgeSensor,
+    )
+    disabled_by_default = (
+        SupplementalFireCountSensor,
+        CombinedFireCountSensor,
+        RawPixelCountSensor,
+    )
+
+    for entity in diagnostic_entities:
+        assert entity._attr_entity_category is EntityCategory.DIAGNOSTIC
+    for entity in disabled_by_default:
+        assert entity._attr_entity_registry_enabled_default is False

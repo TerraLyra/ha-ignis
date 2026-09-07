@@ -207,28 +207,28 @@
   "entity": {
     "sensor": {
       "nearest_fire": {
-        "name": "Incendio attivo più vicino"
+        "name": "Panoramica — Incendio attivo più vicino"
       },
       "active_fire_count": {
-        "name": "Gruppi di incendi attivi"
+        "name": "Panoramica — Gruppi di incendi attivi"
       },
       "supplemental_fire_count": {
-        "name": "Gruppi osservati da NASA FIRMS"
+        "name": "Fonti — Gruppi osservati da NASA FIRMS"
       },
       "combined_fire_count": {
-        "name": "Tutti i gruppi di incendi attivi"
+        "name": "Fonti — Conteggio precedente di tutti i gruppi"
       },
       "raw_pixel_count": {
-        "name": "Pixel di incendio nel raggio"
+        "name": "Fonti — Pixel di incendio grezzi nelle località monitorate"
       },
       "product_time": {
-        "name": "Ora dell’ultimo prodotto incendi"
+        "name": "Fonti — Ora dell’ultimo prodotto incendi attivi"
       },
       "product_age": {
-        "name": "Età del prodotto incendi"
+        "name": "Fonti — Età del prodotto incendi attivi"
       },
       "provider_status": {
-        "name": "Stato dei dati sugli incendi attivi",
+        "name": "Fonti — Stato generale dei dati sugli incendi attivi",
         "state": {
           "initializing": "Inizializzazione",
           "available": "Disponibile",
@@ -239,7 +239,7 @@
         }
       },
       "active_fire_provider": {
-        "name": "Fonti di incendi attivi assegnate",
+        "name": "Fonti — Modalità di assegnazione",
         "state": {
           "automatic": "Automatica",
           "unavailable": "Non disponibile"
@@ -262,7 +262,7 @@
         "name": "Località: {location_name} — Prossimo aggiornamento previsto degli incendi attivi"
       },
       "provider_coverage": {
-        "name": "Copertura fonti delle località",
+        "name": "Fonti — Copertura delle località",
         "state": {
           "covered": "Coperta",
           "partial": "Parzialmente coperta",
@@ -271,7 +271,7 @@
         }
       },
       "fire_risk_today": {
-        "name": "Rischio di incendio vicino a Casa",
+        "name": "Località: Casa — Rischio di incendio odierno",
         "state": {
           "low": "Basso",
           "moderate": "Moderato",
@@ -282,7 +282,7 @@
         }
       },
       "fire_risk_area_maximum": {
-        "name": "Rischio di incendio massimo nell’area monitorata",
+        "name": "Località: Casa — Rischio di incendio massimo nel raggio",
         "state": {
           "low": "Basso",
           "moderate": "Moderato",
@@ -293,19 +293,19 @@
         }
       },
       "fire_risk_update": {
-        "name": "Ultimo aggiornamento della previsione del rischio di incendio"
+        "name": "Località: Casa — Aggiornamento della previsione del rischio di incendio"
       },
       "recent_detections": {
-        "name": "Rilevamenti di incendio nell’ultima ora"
+        "name": "Panoramica — Rilevamenti di incendio nell’ultima ora"
       },
       "fire_activity_frp_change": {
-        "name": "Variazione FRP dell’attività dell’incendio in un’ora"
+        "name": "Panoramica — Variazione FRP dell’attività dell’incendio in un’ora"
       },
       "new_incidents_24h": {
-        "name": "Nuovi incendi nelle ultime 24 ore"
+        "name": "Panoramica — Nuovi incendi nelle ultime 24 ore"
       },
       "active_fire_situation": {
-        "name": "Situazione degli incendi attivi",
+        "name": "Panoramica — Situazione degli incendi attivi",
         "state": {
           "normal": "Normale",
           "elevated": "Elevata",
@@ -315,7 +315,7 @@
         }
       },
       "fire_source_confirmation": {
-        "name": "Conferma indipendente della fonte d’incendio",
+        "name": "Fonti — Conferma indipendente",
         "state": {
           "disabled": "Disattivata",
           "not_available": "Non disponibile",
@@ -325,7 +325,7 @@
         }
       },
       "nearest_fire_evidence": {
-        "name": "Solidità delle evidenze dell’incendio più vicino",
+        "name": "Panoramica — Solidità delle evidenze dell’incendio più vicino",
         "state": {
           "no_active_fire": "Nessun incendio attivo",
           "limited": "Limitata",
@@ -334,23 +334,23 @@
         }
       },
       "land_surface_temperature": {
-        "name": "Temperatura della superficie presso Casa"
+        "name": "Località: Casa — Temperatura della superficie"
       }
     },
     "event": {
       "new_fire": {
-        "name": "Nuovo incendio attivo"
+        "name": "Panoramica — Nuovo incendio attivo"
       },
       "fire_risk_increase": {
-        "name": "Aumento del rischio di incendio"
+        "name": "Località: Casa — Aumento del rischio di incendio"
       },
       "fire_trend": {
-        "name": "Cambiamento di tendenza dell’incendio"
+        "name": "Panoramica — Cambiamento di tendenza dell’incendio"
       }
     },
     "select": {
       "fire_risk_day": {
-        "name": "Giorno della previsione del rischio di incendio",
+        "name": "Località: Casa — Giorno della previsione del rischio di incendio",
         "state": {
           "today": "Oggi",
           "tomorrow": "Domani",
@@ -367,23 +367,23 @@
     },
     "camera": {
       "fire_risk_map": {
-        "name": "Mappa di previsione del rischio di incendio"
+        "name": "Località: Casa — Mappa di previsione del rischio di incendio"
       }
     },
     "calendar": {
       "fire_risk_forecast": {
-        "name": "Previsione del rischio di incendio a 10 giorni"
+        "name": "Località: Casa — Previsione del rischio di incendio a 10 giorni"
       }
     },
     "number": {
       "monitoring_radius": {
-        "name": "Raggio di monitoraggio degli incendi attivi"
+        "name": "Località: {location_name} — Raggio di monitoraggio degli incendi attivi"
       },
       "fire_risk_radius": {
-        "name": "Raggio della previsione del rischio di incendio"
+        "name": "Località: Casa — Raggio della previsione del rischio di incendio"
       },
       "fire_history_hours": {
-        "name": "Finestra dello storico incendi"
+        "name": "Panoramica — Finestra dello storico incendi"
       }
     }
   },

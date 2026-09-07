@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.15.3
+
+- Organize entity display names into localized `Location`, `Overview` and
+  `Sources` groups so their scope is visible before the metric in alphabetical
+  Home Assistant lists.
+- Identify all FRMv3 fire-risk, forecast-map, calendar, selector, radius,
+  risk-event and optional land-surface-temperature entities as Home-bound.
+- Identify active-fire situation, incident, trend and history entities as a
+  combined overview of all enabled monitored locations.
+- Keep provider-specific NASA FIRMS counts, raw fire pixels and the redundant
+  legacy all-source cluster alias as diagnostics disabled by default for new
+  installations. Existing entities remain available and retain their IDs.
+- Give the primary active-fire radius a dynamic location-name prefix and add
+  translation regression coverage for the complete naming taxonomy.
+
 ## 0.15.2
 
 - Group all per-location entities alphabetically with a localized

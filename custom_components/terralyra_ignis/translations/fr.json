@@ -207,28 +207,28 @@
   "entity": {
     "sensor": {
       "nearest_fire": {
-        "name": "Feu actif le plus proche"
+        "name": "Vue d’ensemble — Feu actif le plus proche"
       },
       "active_fire_count": {
-        "name": "Groupes de feux actifs"
+        "name": "Vue d’ensemble — Groupes de feux actifs"
       },
       "supplemental_fire_count": {
-        "name": "Groupes observés par NASA FIRMS"
+        "name": "Sources — Groupes observés par NASA FIRMS"
       },
       "combined_fire_count": {
-        "name": "Tous les groupes de feux actifs"
+        "name": "Sources — Ancien compteur de tous les groupes"
       },
       "raw_pixel_count": {
-        "name": "Pixels de feu dans le rayon"
+        "name": "Sources — Pixels de feu bruts dans les lieux surveillés"
       },
       "product_time": {
-        "name": "Heure du dernier produit incendie"
+        "name": "Sources — Heure du dernier produit d’incendie actif"
       },
       "product_age": {
-        "name": "Âge du produit incendie"
+        "name": "Sources — Âge du produit d’incendie actif"
       },
       "provider_status": {
-        "name": "État des données d’incendie actif",
+        "name": "Sources — État général des données d’incendie actif",
         "state": {
           "initializing": "Initialisation",
           "available": "Disponible",
@@ -239,7 +239,7 @@
         }
       },
       "active_fire_provider": {
-        "name": "Sources de feux actifs attribuées",
+        "name": "Sources — Mode d’attribution",
         "state": {
           "automatic": "Automatique",
           "unavailable": "Indisponible"
@@ -262,7 +262,7 @@
         "name": "Lieu : {location_name} — Prochaine mise à jour attendue des feux actifs"
       },
       "provider_coverage": {
-        "name": "Couverture des sources par lieu",
+        "name": "Sources — Couverture des lieux",
         "state": {
           "covered": "Couverte",
           "partial": "Partiellement couverte",
@@ -271,7 +271,7 @@
         }
       },
       "fire_risk_today": {
-        "name": "Risque d’incendie près du domicile",
+        "name": "Lieu : Domicile — Risque d’incendie aujourd’hui",
         "state": {
           "low": "Faible",
           "moderate": "Modéré",
@@ -282,7 +282,7 @@
         }
       },
       "fire_risk_area_maximum": {
-        "name": "Risque d’incendie maximal dans la zone surveillée",
+        "name": "Lieu : Domicile — Risque d’incendie maximal dans le rayon",
         "state": {
           "low": "Faible",
           "moderate": "Modéré",
@@ -293,19 +293,19 @@
         }
       },
       "fire_risk_update": {
-        "name": "Dernière mise à jour de la prévision du risque d’incendie"
+        "name": "Lieu : Domicile — Mise à jour de la prévision du risque d’incendie"
       },
       "recent_detections": {
-        "name": "Détections d’incendie au cours de la dernière heure"
+        "name": "Vue d’ensemble — Détections d’incendie au cours de la dernière heure"
       },
       "fire_activity_frp_change": {
-        "name": "Variation de la FRP de l’activité incendie sur une heure"
+        "name": "Vue d’ensemble — Variation de la FRP de l’activité incendie sur une heure"
       },
       "new_incidents_24h": {
-        "name": "Nouveaux incendies au cours des dernières 24 heures"
+        "name": "Vue d’ensemble — Nouveaux incendies au cours des dernières 24 heures"
       },
       "active_fire_situation": {
-        "name": "Situation des incendies actifs",
+        "name": "Vue d’ensemble — Situation des incendies actifs",
         "state": {
           "normal": "Normale",
           "elevated": "Élevée",
@@ -315,7 +315,7 @@
         }
       },
       "fire_source_confirmation": {
-        "name": "Confirmation indépendante de la source d’incendie",
+        "name": "Sources — Confirmation indépendante",
         "state": {
           "disabled": "Désactivée",
           "not_available": "Indisponible",
@@ -325,7 +325,7 @@
         }
       },
       "nearest_fire_evidence": {
-        "name": "Force des indices du feu le plus proche",
+        "name": "Vue d’ensemble — Force des indices du feu le plus proche",
         "state": {
           "no_active_fire": "Aucun feu actif",
           "limited": "Limitée",
@@ -334,23 +334,23 @@
         }
       },
       "land_surface_temperature": {
-        "name": "Température de surface au domicile"
+        "name": "Lieu : Domicile — Température de surface"
       }
     },
     "event": {
       "new_fire": {
-        "name": "Nouveau feu actif"
+        "name": "Vue d’ensemble — Nouveau feu actif"
       },
       "fire_risk_increase": {
-        "name": "Augmentation du risque d’incendie"
+        "name": "Lieu : Domicile — Augmentation du risque d’incendie"
       },
       "fire_trend": {
-        "name": "Changement de tendance d’un incendie"
+        "name": "Vue d’ensemble — Changement de tendance d’un incendie"
       }
     },
     "select": {
       "fire_risk_day": {
-        "name": "Jour de prévision du risque d’incendie",
+        "name": "Lieu : Domicile — Jour de prévision du risque d’incendie",
         "state": {
           "today": "Aujourd’hui",
           "tomorrow": "Demain",
@@ -367,23 +367,23 @@
     },
     "camera": {
       "fire_risk_map": {
-        "name": "Carte de prévision du risque d’incendie"
+        "name": "Lieu : Domicile — Carte de prévision du risque d’incendie"
       }
     },
     "calendar": {
       "fire_risk_forecast": {
-        "name": "Prévision du risque d’incendie sur 10 jours"
+        "name": "Lieu : Domicile — Prévision du risque d’incendie sur 10 jours"
       }
     },
     "number": {
       "monitoring_radius": {
-        "name": "Rayon de surveillance des feux actifs"
+        "name": "Lieu : {location_name} — Rayon de surveillance des feux actifs"
       },
       "fire_risk_radius": {
-        "name": "Rayon de prévision du risque d’incendie"
+        "name": "Lieu : Domicile — Rayon de prévision du risque d’incendie"
       },
       "fire_history_hours": {
-        "name": "Fenêtre d’historique des feux"
+        "name": "Vue d’ensemble — Fenêtre d’historique des feux"
       }
     }
   },

@@ -310,12 +310,13 @@ service-outage, no-product and invalid-response states, including the next
 retry time.
 
 Provider health and geographic coverage are intentionally separate. The
-**Monitored-location source coverage** evaluates every enabled location using
+**Sources — Location coverage** entity evaluates every enabled location using
 conservative pre-download satellite geometry and reports `covered`, `partially
-covered`, or `not covered`. TerraLyra IGNIS also creates one **active-fire sources**
-sensor per location. Its state is the assigned source count and its attributes
-show the readable provider names, satellites and the equal-peer relationship
-without exposing the location coordinates.
+covered`, or `not covered`. TerraLyra IGNIS also creates one
+**Location: &lt;name&gt; — Active-fire sources** sensor per location. Its state is
+the assigned source count and its attributes show the readable provider names,
+satellites and the equal-peer relationship without exposing the location
+coordinates.
 
 The companion per-location monitoring-status sensor distinguishes full
 freshness from reduced service: `available` means every assigned source is
@@ -326,6 +327,14 @@ Its attributes provide fresh, delayed, unavailable and initializing source
 counts and stable provider-ID lists for Home Assistant automations. Each
 source-health entry also includes the last product and receipt timestamps,
 failure category, consecutive-failure count and next retry time when known.
+
+Entity display names expose their scope before the metric so alphabetical Home
+Assistant lists remain readable. `Location: <name> —` identifies location-bound
+values, `Overview —` combines all enabled monitored locations, and `Sources —`
+contains provider assignment, health and evidence details. Provider-specific
+counts, raw pixels and the legacy all-source count are diagnostic entities and
+are disabled by default for new installations. Existing entity IDs and user
+automations are not renamed or removed during upgrade.
 
 Every TerraLyra IGNIS map marker separately names the provider or providers that
 supplied the incident evidence: LSA SAF, NOAA GOES, NASA FIRMS, or multiple
@@ -356,7 +365,8 @@ conservative coverage gate.
 
 ## Active fire options
 
-- **Monitoring radius**: 1–500 km. Also exposed as a Number entity so it can be changed from a dashboard.
+- **Monitoring radius**: 1–500 km. Also exposed as a location-prefixed Number
+  entity so it can be changed from a dashboard.
 - **Managed monitored locations**: locally stored names, coordinates and
   radii used for automatic source assignment, distance sensors, alerts and
   fire markers. FRMv3 fire risk and MTLST remain tied to Home.
@@ -365,9 +375,9 @@ conservative coverage gate.
 - **Check interval**: how often Home Assistant looks for a newer product. The source product itself is nominally 10-minute data.
 - **Same-fire matching radius**: nearby detections are considered the same physical fire.
 - **Same-fire memory**: how long an already-seen fire suppresses a repeat `new_fire` event.
-- **Fire history window**: independently controls how long inactive markers
+- **Overview — Fire history window**: independently controls how long inactive markers
   remain visible on the map.
-- **Fire-risk forecast radius**: controls FRMv3 regional maximum sampling and
+- **Location: Home — Fire-risk forecast radius**: controls FRMv3 regional maximum sampling and
   the static map extent; it does not change active-fire alerts.
 - **Resolve nearby place names**: uses the bundled offline GeoNames database.
 - **Land-surface temperature**: creates the optional MTLST point sensor and
@@ -469,16 +479,16 @@ from the named active-fire monitoring center.
 The integration also reads the public demonstration **FRMv3 Fire Risk Map v3**
 service for Europe. It creates:
 
-- a **Fire risk near Home** sensor for today, with all ten daily forecasts in
-  its `forecast` attribute;
-- a separate **Highest fire risk in monitoring area** sensor;
-- a localized **Fire risk forecast day** selector (Today, Tomorrow, …);
-- an independent **Fire-risk forecast radius** control;
-- a **Fire risk forecast map** camera showing the selected day;
-- a **Latest fire-risk forecast update** status sensor;
-- a localized **10-day fire-risk forecast** calendar entity;
-- a **Fire risk increase** event when the monitoring-area maximum rises to high
-  or worse.
+- a **Location: Home — Fire risk today** sensor, with all ten daily forecasts
+  in its `forecast` attribute;
+- a separate **Location: Home — Highest fire risk within radius** sensor;
+- a localized **Location: Home — Fire-risk forecast day** selector;
+- an independent **Location: Home — Fire-risk forecast radius** control;
+- a **Location: Home — Fire-risk forecast map** camera showing the selected day;
+- a **Location: Home — Fire-risk forecast update** status sensor;
+- a localized **Location: Home — 10-day fire-risk forecast** calendar entity;
+- a **Location: Home — Fire risk increase** event when the area maximum rises
+  to high or worse.
 
 FRMv3 has five levels: low, moderate, high, very high and extreme. Because an
 exact Home coordinate can be an urban or otherwise non-burnable `nodata` pixel,
@@ -495,7 +505,8 @@ Natural Earth at 1:110m scale and require no additional network request.
 
 For the full outlook without YAML templates, add Home Assistant's standard
 **Calendar** card to a dashboard and select the TerraLyra IGNIS **10-day fire-risk
-forecast** calendar. Each all-day entry shows that day's localized risk level.
+forecast** calendar (displayed with the `Location: Home —` prefix). Each all-day
+entry shows that day's localized risk level.
 For free pan, zoom, time navigation and layer opacity controls, open the
 [official LSA SAF ADAGUC viewer](https://adaguc.lsasvcs.ipma.pt/) and choose
 **MSG – FRMv3 – Fire Risk** under Add layers. This uses the product owner's

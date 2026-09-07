@@ -184,28 +184,28 @@
   "entity": {
     "sensor": {
       "nearest_fire": {
-        "name": "Nearest active fire"
+        "name": "Overview — Nearest active fire"
       },
       "active_fire_count": {
-        "name": "Active-fire clusters"
+        "name": "Overview — Active-fire clusters"
       },
       "supplemental_fire_count": {
-        "name": "Active-fire clusters observed by NASA FIRMS"
+        "name": "Sources — NASA FIRMS observed clusters"
       },
       "combined_fire_count": {
-        "name": "All active-fire clusters"
+        "name": "Sources — Legacy all-source cluster count"
       },
       "raw_pixel_count": {
-        "name": "Fire pixels in radius"
+        "name": "Sources — Raw fire pixels within monitored locations"
       },
       "product_time": {
-        "name": "Latest fire product time"
+        "name": "Sources — Latest active-fire product time"
       },
       "product_age": {
-        "name": "Fire product age"
+        "name": "Sources — Active-fire product age"
       },
       "provider_status": {
-        "name": "Active-fire data status",
+        "name": "Sources — Overall active-fire data status",
         "state": {
           "initializing": "Initializing",
           "available": "Available",
@@ -216,7 +216,7 @@
         }
       },
       "active_fire_provider": {
-        "name": "Assigned active-fire sources",
+        "name": "Sources — Assignment mode",
         "state": {
           "automatic": "Automatic",
           "unavailable": "Unavailable"
@@ -233,7 +233,7 @@
         "name": "Location: {location_name} — Next expected active-fire update"
       },
       "provider_coverage": {
-        "name": "Monitored-location source coverage",
+        "name": "Sources — Location coverage",
         "state": {
           "covered": "Covered",
           "partial": "Partially covered",
@@ -242,7 +242,7 @@
         }
       },
       "fire_risk_today": {
-        "name": "Fire risk near Home",
+        "name": "Location: Home — Fire risk today",
         "state": {
           "low": "Low",
           "moderate": "Moderate",
@@ -253,7 +253,7 @@
         }
       },
       "fire_risk_area_maximum": {
-        "name": "Highest fire risk in monitoring area",
+        "name": "Location: Home — Highest fire risk within radius",
         "state": {
           "low": "Low",
           "moderate": "Moderate",
@@ -264,19 +264,19 @@
         }
       },
       "fire_risk_update": {
-        "name": "Latest fire-risk forecast update"
+        "name": "Location: Home — Fire-risk forecast update"
       },
       "recent_detections": {
-        "name": "Fire detections in the last hour"
+        "name": "Overview — Fire detections in the last hour"
       },
       "fire_activity_frp_change": {
-        "name": "Fire activity FRP change over one hour"
+        "name": "Overview — Fire activity FRP change over one hour"
       },
       "new_incidents_24h": {
-        "name": "New fire incidents in the last 24 hours"
+        "name": "Overview — New fire incidents in the last 24 hours"
       },
       "active_fire_situation": {
-        "name": "Active Fire Situation",
+        "name": "Overview — Active-fire situation",
         "state": {
           "normal": "Normal",
           "elevated": "Elevated",
@@ -286,7 +286,7 @@
         }
       },
       "fire_source_confirmation": {
-        "name": "Independent fire-source confirmation",
+        "name": "Sources — Independent confirmation",
         "state": {
           "disabled": "Disabled",
           "not_available": "Not available",
@@ -296,27 +296,27 @@
         }
       },
       "nearest_fire_evidence": {
-        "name": "Nearest fire evidence strength",
+        "name": "Overview — Nearest fire evidence strength",
         "state": {"no_active_fire": "No active fire", "limited": "Limited", "moderate": "Moderate", "strong": "Strong"}
       },
       "land_surface_temperature": {
-        "name": "Land-surface temperature at Home"
+        "name": "Location: Home — Land-surface temperature"
       }
     },
     "event": {
       "new_fire": {
-        "name": "New active fire"
+        "name": "Overview — New active fire"
       },
       "fire_risk_increase": {
-        "name": "Fire risk increase"
+        "name": "Location: Home — Fire risk increase"
       },
       "fire_trend": {
-        "name": "Fire incident trend change"
+        "name": "Overview — Fire incident trend change"
       }
     },
     "select": {
       "fire_risk_day": {
-        "name": "Fire risk forecast day",
+        "name": "Location: Home — Fire-risk forecast day",
         "state": {
           "today": "Today",
           "tomorrow": "Tomorrow",
@@ -333,23 +333,23 @@
     },
     "camera": {
       "fire_risk_map": {
-        "name": "Fire risk forecast map"
+        "name": "Location: Home — Fire-risk forecast map"
       }
     },
     "calendar": {
       "fire_risk_forecast": {
-        "name": "10-day fire-risk forecast"
+        "name": "Location: Home — 10-day fire-risk forecast"
       }
     },
     "number": {
       "monitoring_radius": {
-        "name": "Active fire monitoring radius"
+        "name": "Location: {location_name} — Active-fire monitoring radius"
       },
       "fire_risk_radius": {
-        "name": "Fire-risk forecast radius"
+        "name": "Location: Home — Fire-risk forecast radius"
       },
       "fire_history_hours": {
-        "name": "Fire history window"
+        "name": "Overview — Fire history window"
       }
     }
   },

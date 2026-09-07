@@ -207,28 +207,28 @@
   "entity": {
     "sensor": {
       "nearest_fire": {
-        "name": "Nächstes aktives Feuer"
+        "name": "Übersicht — Nächstes aktives Feuer"
       },
       "active_fire_count": {
-        "name": "Aktive Brandgruppen"
+        "name": "Übersicht — Aktive Brandgruppen"
       },
       "supplemental_fire_count": {
-        "name": "Von NASA FIRMS beobachtete Brandgruppen"
+        "name": "Quellen — Von NASA FIRMS beobachtete Brandgruppen"
       },
       "combined_fire_count": {
-        "name": "Alle aktiven Brandgruppen"
+        "name": "Quellen — Veralteter Zähler aller Brandgruppen"
       },
       "raw_pixel_count": {
-        "name": "Brandpixel im Radius"
+        "name": "Quellen — Rohbrandpixel in überwachten Orten"
       },
       "product_time": {
-        "name": "Zeitpunkt des neuesten Brandprodukts"
+        "name": "Quellen — Zeitpunkt des neuesten Aktivbrandprodukts"
       },
       "product_age": {
-        "name": "Alter des Brandprodukts"
+        "name": "Quellen — Alter des Aktivbrandprodukts"
       },
       "provider_status": {
-        "name": "Status der Aktivbranddaten",
+        "name": "Quellen — Gesamtstatus der Aktivbranddaten",
         "state": {
           "initializing": "Wird initialisiert",
           "available": "Verfügbar",
@@ -239,7 +239,7 @@
         }
       },
       "active_fire_provider": {
-        "name": "Zugewiesene Aktivbrandquellen",
+        "name": "Quellen — Zuweisungsmodus",
         "state": {
           "automatic": "Automatisch",
           "unavailable": "Nicht verfügbar"
@@ -262,7 +262,7 @@
         "name": "Ort: {location_name} — Nächste erwartete Aktualisierung aktiver Brände"
       },
       "provider_coverage": {
-        "name": "Quellenabdeckung der überwachten Orte",
+        "name": "Quellen — Ortsabdeckung",
         "state": {
           "covered": "Abgedeckt",
           "partial": "Teilweise abgedeckt",
@@ -271,7 +271,7 @@
         }
       },
       "fire_risk_today": {
-        "name": "Waldbrandgefahr in der Nähe von Zuhause",
+        "name": "Ort: Zuhause — Heutige Waldbrandgefahr",
         "state": {
           "low": "Niedrig",
           "moderate": "Mäßig",
@@ -282,7 +282,7 @@
         }
       },
       "fire_risk_area_maximum": {
-        "name": "Höchste Waldbrandgefahr im Überwachungsgebiet",
+        "name": "Ort: Zuhause — Höchste Waldbrandgefahr im Radius",
         "state": {
           "low": "Niedrig",
           "moderate": "Mäßig",
@@ -293,19 +293,19 @@
         }
       },
       "fire_risk_update": {
-        "name": "Letzte Aktualisierung der Waldbrandgefahrenvorhersage"
+        "name": "Ort: Zuhause — Aktualisierung der Waldbrandgefahrenvorhersage"
       },
       "recent_detections": {
-        "name": "Branderkennungen in der letzten Stunde"
+        "name": "Übersicht — Branderkennungen in der letzten Stunde"
       },
       "fire_activity_frp_change": {
-        "name": "FRP-Änderung der Brandaktivität in einer Stunde"
+        "name": "Übersicht — FRP-Änderung der Brandaktivität in einer Stunde"
       },
       "new_incidents_24h": {
-        "name": "Neue Brandereignisse in den letzten 24 Stunden"
+        "name": "Übersicht — Neue Brandereignisse in den letzten 24 Stunden"
       },
       "active_fire_situation": {
-        "name": "Aktive Brandsituation",
+        "name": "Übersicht — Aktive Brandsituation",
         "state": {
           "normal": "Normal",
           "elevated": "Erhöht",
@@ -315,7 +315,7 @@
         }
       },
       "fire_source_confirmation": {
-        "name": "Unabhängige Brandquellenbestätigung",
+        "name": "Quellen — Unabhängige Bestätigung",
         "state": {
           "disabled": "Deaktiviert",
           "not_available": "Nicht verfügbar",
@@ -325,7 +325,7 @@
         }
       },
       "nearest_fire_evidence": {
-        "name": "Belegstärke des nächstgelegenen Feuers",
+        "name": "Übersicht — Belegstärke des nächstgelegenen Feuers",
         "state": {
           "no_active_fire": "Kein aktives Feuer",
           "limited": "Begrenzt",
@@ -334,23 +334,23 @@
         }
       },
       "land_surface_temperature": {
-        "name": "Landoberflächentemperatur am Zuhause"
+        "name": "Ort: Zuhause — Landoberflächentemperatur"
       }
     },
     "event": {
       "new_fire": {
-        "name": "Neues aktives Feuer"
+        "name": "Übersicht — Neues aktives Feuer"
       },
       "fire_risk_increase": {
-        "name": "Anstieg der Waldbrandgefahr"
+        "name": "Ort: Zuhause — Anstieg der Waldbrandgefahr"
       },
       "fire_trend": {
-        "name": "Trendänderung eines Brandereignisses"
+        "name": "Übersicht — Trendänderung eines Brandereignisses"
       }
     },
     "select": {
       "fire_risk_day": {
-        "name": "Tag der Waldbrandgefahrenvorhersage",
+        "name": "Ort: Zuhause — Tag der Waldbrandgefahrenvorhersage",
         "state": {
           "today": "Heute",
           "tomorrow": "Morgen",
@@ -367,23 +367,23 @@
     },
     "camera": {
       "fire_risk_map": {
-        "name": "Karte der Waldbrandgefahrenvorhersage"
+        "name": "Ort: Zuhause — Karte der Waldbrandgefahrenvorhersage"
       }
     },
     "calendar": {
       "fire_risk_forecast": {
-        "name": "10-Tage-Waldbrandgefahrenvorhersage"
+        "name": "Ort: Zuhause — 10-Tage-Waldbrandgefahrenvorhersage"
       }
     },
     "number": {
       "monitoring_radius": {
-        "name": "Radius der Aktivbrandüberwachung"
+        "name": "Ort: {location_name} — Radius der Aktivbrandüberwachung"
       },
       "fire_risk_radius": {
-        "name": "Radius der Waldbrandgefahrenvorhersage"
+        "name": "Ort: Zuhause — Radius der Waldbrandgefahrenvorhersage"
       },
       "fire_history_hours": {
-        "name": "Brandverlaufsfenster"
+        "name": "Übersicht — Brandverlaufsfenster"
       }
     }
   },
