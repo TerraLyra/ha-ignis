@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.15.4
+
 - Reduce Home Assistant load by reusing unchanged active-fire products, avoiding
   unnecessary incident-store writes, and exposing bounded refresh performance
   counters in integration diagnostics.
