@@ -373,6 +373,9 @@
     "calendar": {
       "fire_risk_forecast": {
         "name": "Ubicación: Casa — Previsión del riesgo de incendio a 10 días"
+      },
+      "fire_incident_history": {
+        "name": "Resumen — Historial de incendios"
       }
     },
     "number": {

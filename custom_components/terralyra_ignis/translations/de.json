@@ -373,6 +373,9 @@
     "calendar": {
       "fire_risk_forecast": {
         "name": "Ort: Zuhause — 10-Tage-Waldbrandgefahrenvorhersage"
+      },
+      "fire_incident_history": {
+        "name": "Übersicht — Brandereignisverlauf"
       }
     },
     "number": {

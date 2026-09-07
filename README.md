@@ -138,6 +138,8 @@ common 0–1 model but is not presented as a calibrated probability of fire.
   `unknown`)
 - `event.*_new_active_fire` – Home Assistant Event entity for a newly deduplicated fire
 - `event.*_fire_incident_trend_change` – meaningful, cooldown-protected trend changes
+- `calendar.*_fire_incident_history` – searchable 30-day local archive of
+  detected incidents with source, satellite, location and peak-intensity details
 - `geo_location.*` – one map marker per recently tracked, deduplicated incident
 - `number.*_active_fire_monitoring_radius` – dashboard-adjustable monitoring radius
 - `number.*_fire_history_window` – dashboard-adjustable 1–48 hour period for
@@ -158,6 +160,17 @@ Markers keep the same identity while the cluster remains within the configured
 same-fire matching radius. Inactive markers remain visible for the independent
 **Fire history window** (1–48 hours) and are removed automatically afterward.
 Changing this display window does not extend repeat-alert suppression.
+
+### Fire incident history
+
+The **Overview — Fire incident history** calendar preserves detected incidents
+for retrospective checks after their map markers expire. Each calendar entry
+contains the first and last observation time, coordinates, affected monitored
+locations, contributing providers and satellites, peak FRP, maximum pixel count
+and total detection samples. The archive is stored locally in Home Assistant,
+is limited to 30 days or 500 incidents, and reuses existing provider results
+without making extra API requests. Removing a monitored location also removes
+archive entries that are no longer relevant to any enabled location.
 
 Add a **Map** card to a dashboard and select the `terralyra_ignis` geolocation source, or
 use this YAML configuration:

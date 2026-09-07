@@ -373,6 +373,9 @@
     "calendar": {
       "fire_risk_forecast": {
         "name": "Hely: Otthon — 10 napos tűzkockázati előrejelzés"
+      },
+      "fire_incident_history": {
+        "name": "Áttekintés — Tűzesemény-előzmények"
       }
     },
     "number": {

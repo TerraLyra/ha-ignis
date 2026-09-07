@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.16.0
+
+- Add a local, searchable Home Assistant fire-incident history calendar. It
+  retains up to 30 days or 500 incidents independently of the shorter map
+  marker window and records first/last detection, monitored locations,
+  coordinates, sources, satellites, peak FRP and detection counts.
+- Build the archive entirely from the existing bounded provider refreshes, so
+  the feature adds no upstream API calls and no additional live map markers.
+- Keep credential-free NOAA GOES outages visible in source-health sensors and
+  diagnostics without repeatedly recreating a non-actionable Repair issue.
+
 ## 0.15.4
 
 - Reduce Home Assistant load by reusing unchanged active-fire products, avoiding

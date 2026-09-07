@@ -166,9 +166,10 @@ def test_provider_authentication_issue_is_immediate(create_issue: Mock) -> None:
     assert create_issue.call_args.kwargs["severity"] is ir.IssueSeverity.ERROR
 
 
+@patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
 @patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")
-def test_goes_provider_issue_uses_credential_free_guidance(
-    create_issue: Mock,
+def test_public_goes_outage_remains_status_only(
+    create_issue: Mock, delete_issue: Mock
 ) -> None:
     health = ProviderHealth(
         "noaa_goes:G18",
@@ -180,9 +181,16 @@ def test_goes_provider_issue_uses_credential_free_guidance(
         OUTAGE_REPAIR_THRESHOLD,
     )
 
-    async_sync_provider_health_issues(Mock(), _entry(), (health,))
+    hass = Mock()
+    entry = _entry()
+    async_sync_provider_health_issues(hass, entry, (health,))
 
-    assert create_issue.call_args.kwargs["translation_key"] == "upstream_goes_issue"
+    create_issue.assert_not_called()
+    delete_issue.assert_called_once_with(
+        hass,
+        "terralyra_ignis",
+        "entry-1_provider_noaa_goes_g18",
+    )
 
 
 @patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")

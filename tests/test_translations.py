@@ -1,4 +1,5 @@
 """Validate bundled translations."""
+
 from __future__ import annotations
 
 import json
@@ -98,6 +99,7 @@ OVERVIEW_ENTITIES = {
         "nearest_fire_evidence",
     },
     "event": {"new_fire", "fire_trend"},
+    "calendar": {"fire_incident_history"},
     "number": {"fire_history_hours"},
 }
 SOURCE_ENTITIES = {
@@ -211,9 +213,9 @@ def test_primary_location_radius_uses_the_location_sorting_prefix() -> None:
         translation = json.loads(
             (TRANSLATIONS / f"{language}.json").read_text(encoding="utf-8")
         )
-        assert translation["entity"]["number"]["monitoring_radius"][
-            "name"
-        ].startswith(prefix)
+        assert translation["entity"]["number"]["monitoring_radius"]["name"].startswith(
+            prefix
+        )
 
 
 def test_localizations_do_not_accidentally_fall_back_to_english() -> None:
@@ -222,9 +224,7 @@ def test_localizations_do_not_accidentally_fall_back_to_english() -> None:
     )
     for language, allowed in EXPECTED_ENGLISH_IDENTICAL_PATHS.items():
         localized = _leaf_values(
-            json.loads(
-                (TRANSLATIONS / f"{language}.json").read_text(encoding="utf-8")
-            )
+            json.loads((TRANSLATIONS / f"{language}.json").read_text(encoding="utf-8"))
         )
         identical = {
             ".".join(path)

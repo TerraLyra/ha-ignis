@@ -46,6 +46,7 @@ from .geocoding import (
     PlaceLookupError,
     PlaceNameResolver,
 )
+from .incident_history import update_incident_history
 from .location_matching import match_incident_to_locations
 from .models import (
     ConfirmationLevel,
@@ -98,6 +99,7 @@ class CoordinatorData:
     supplemental_clusters: list[FireCluster] = field(default_factory=list)
     confirmation_level: ConfirmationLevel = ConfirmationLevel.DISABLED
     corroborating_detections: int = 0
+    incident_history: list[dict[str, Any]] = field(default_factory=list)
 
 
 class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
@@ -148,6 +150,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self._tracks: list[dict[str, Any]] = []
         self._firms_tracks: list[dict[str, Any]] = []
         self._activity_history: list[dict[str, Any]] = []
+        self._incident_history: list[dict[str, Any]] = []
         self._store_loaded = False
         self._initialized = False
         self._place_resolver = place_resolver
@@ -190,6 +193,8 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 self._firms_tracks = stored["firms_tracks"]
             if isinstance(stored.get("activity_history"), list):
                 self._activity_history = stored["activity_history"]
+            if isinstance(stored.get("incident_history"), list):
+                self._incident_history = stored["incident_history"]
             # A removed monitored location must not leave its recent incidents
             # on the map or inflate the global 24-hour activity aggregates.
             track_count = len(self._tracks) + len(self._firms_tracks)
@@ -447,6 +452,16 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             trend_events.append(attrs)
             self.hass.bus.async_fire(BUS_EVENT_FIRE_TREND, attrs)
 
+        updated_incident_history = update_incident_history(
+            self._incident_history,
+            [*self._tracks, *self._firms_tracks],
+            self.monitored_locations,
+            now=snapshot.product_timestamp,
+        )
+        if updated_incident_history != self._incident_history:
+            changed = True
+        self._incident_history = updated_incident_history
+
         if first_snapshot:
             self._initialized = True
             changed = True
@@ -510,6 +525,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             supplemental_clusters=firms_clusters,
             confirmation_level=confirmation_level,
             corroborating_detections=corroborating_count,
+            incident_history=self._incident_history,
         )
         self._last_snapshot_signature = snapshot_signature
         self.last_processing_duration_ms = _elapsed_ms(processing_started)
@@ -606,6 +622,16 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             if track is None:
                 return
             _apply_place(track, None, place)
+            archived = next(
+                (
+                    item
+                    for item in self._incident_history
+                    if item.get("track_id") == track_id
+                ),
+                None,
+            )
+            if archived is not None:
+                _apply_place(archived, None, place)
             await self._async_save_state()
             if self.data:
                 for cluster in self.data.tracked_fires:
@@ -629,6 +655,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 "tracks": self._tracks,
                 "firms_tracks": self._firms_tracks,
                 "activity_history": self._activity_history,
+                "incident_history": self._incident_history,
                 "monitoring_center": self.monitoring_center.storage_key,
             }
         )

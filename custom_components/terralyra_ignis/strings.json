@@ -339,6 +339,9 @@
     "calendar": {
       "fire_risk_forecast": {
         "name": "Location: Home — 10-day fire-risk forecast"
+      },
+      "fire_incident_history": {
+        "name": "Overview — Fire incident history"
       }
     },
     "number": {
