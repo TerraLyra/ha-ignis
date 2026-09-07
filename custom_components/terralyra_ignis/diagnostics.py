@@ -123,6 +123,24 @@ async def async_get_config_entry_diagnostics(
                 if active.received_timestamp
                 else None
             ),
+            "performance": {
+                "last_update_duration_ms": getattr(
+                    active, "last_update_duration_ms", None
+                ),
+                "last_fetch_duration_ms": getattr(
+                    active, "last_fetch_duration_ms", None
+                ),
+                "last_processing_duration_ms": getattr(
+                    active, "last_processing_duration_ms", None
+                ),
+                "last_input_detection_count": getattr(
+                    active, "last_input_detection_count", None
+                ),
+                "unchanged_update_skips": getattr(
+                    active, "unchanged_update_skips", None
+                ),
+                "state_write_count": getattr(active, "state_write_count", None),
+            },
             "active_cluster_count": (
                 len(active_data.active_clusters) if active_data else None
             ),

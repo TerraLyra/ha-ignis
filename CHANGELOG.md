@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reduce Home Assistant load by reusing unchanged active-fire products, avoiding
+  unnecessary incident-store writes, and exposing bounded refresh performance
+  counters in integration diagnostics.
+
 - Record the worldwide fire-risk provider decision: JRC GWIS is the preferred
   global FWI candidate, subject to bounded live-WMS validation, while
   Open-Meteo remains a possible input for a separately validated calculated

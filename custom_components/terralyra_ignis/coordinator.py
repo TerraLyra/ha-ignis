@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
+from time import perf_counter
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -152,6 +153,13 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self._place_resolver = place_resolver
         self._pending_place_ids: set[str] = set()
         self._consecutive_provider_failures = 0
+        self._last_snapshot_signature: tuple[Any, ...] | None = None
+        self.last_update_duration_ms: float | None = None
+        self.last_fetch_duration_ms: float | None = None
+        self.last_processing_duration_ms: float | None = None
+        self.last_input_detection_count = 0
+        self.unchanged_update_skips = 0
+        self.state_write_count = 0
         self._normal_interval = timedelta(
             minutes=int(
                 entry.options.get(
@@ -206,6 +214,8 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self._store_loaded = True
 
     async def _async_update_data(self) -> CoordinatorData:
+        update_started = perf_counter()
+        fetch_started = perf_counter()
         try:
             snapshot = await self.provider.async_fetch_latest()
         except ProviderAuthenticationError as err:
@@ -223,6 +233,8 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self._set_provider_failure_status(ProviderStatus.OUTAGE)
             self._record_provider_outage(err)
             raise UpdateFailed(str(err)) from err
+        finally:
+            self.last_fetch_duration_ms = _elapsed_ms(fetch_started)
 
         self._consecutive_provider_failures = 0
         self.update_interval = self._normal_interval
@@ -265,6 +277,27 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 self.corroboration_product_timestamp = (
                     corroboration_snapshot.product_timestamp
                 )
+
+        self.last_fetch_duration_ms = _elapsed_ms(fetch_started)
+        self.last_input_detection_count = len(snapshot.detections) + (
+            len(corroboration_snapshot.detections)
+            if corroboration_snapshot is not None
+            else 0
+        )
+        snapshot_signature = (
+            _snapshot_signature(snapshot, getattr(self.provider, "health", ())),
+            _snapshot_signature(corroboration_snapshot),
+        )
+        if (
+            self.data is not None
+            and snapshot_signature == self._last_snapshot_signature
+        ):
+            self.unchanged_update_skips += 1
+            self.last_processing_duration_ms = 0.0
+            self.last_update_duration_ms = _elapsed_ms(update_started)
+            return self.data
+
+        processing_started = perf_counter()
 
         min_conf = float(self.entry.options.get(CONF_MIN_CONFIDENCE, DEFAULT_MIN_CONFIDENCE))
         min_frp = float(self.entry.options.get(CONF_MIN_FRP_MW, DEFAULT_MIN_FRP_MW))
@@ -377,7 +410,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         _attach_location_matches(
             self._firms_tracks, firms_clusters, self.monitored_locations
         )
-        changed = tracking.changed
+        changed = tracking.changed or firms_tracking.changed
         for track, cluster in tracking.new_incidents:
             if not first_snapshot:
                 await self._async_resolve_new_fire_place(track, cluster)
@@ -418,13 +451,16 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self._initialized = True
             changed = True
 
-        self._activity_history = update_activity_history(
+        updated_activity_history = update_activity_history(
             self._activity_history,
             timestamp=snapshot.product_timestamp,
             detections=len(filtered),
             total_frp_mw=sum(cluster.frp_mw for cluster in clusters),
             new_incidents=0 if first_snapshot else len(tracking.new_incidents),
         )
+        if updated_activity_history != self._activity_history:
+            changed = True
+        self._activity_history = updated_activity_history
         activity = summarize_activity(
             self._activity_history, now=snapshot.product_timestamp
         )
@@ -434,8 +470,6 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             product_time=snapshot.product_timestamp,
             now=snapshot.received_timestamp,
         )
-        changed = True
-
         if changed and self._store_loaded:
             await self._async_save_state()
 
@@ -462,7 +496,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         )
         tracked_fires.sort(key=lambda cluster: cluster.distance_km)
 
-        return CoordinatorData(
+        result = CoordinatorData(
             product_time=snapshot.product_timestamp,
             source_url=snapshot.source_url,
             filename=snapshot.filename,
@@ -477,6 +511,10 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             confirmation_level=confirmation_level,
             corroborating_detections=corroborating_count,
         )
+        self._last_snapshot_signature = snapshot_signature
+        self.last_processing_duration_ms = _elapsed_ms(processing_started)
+        self.last_update_duration_ms = _elapsed_ms(update_started)
+        return result
 
     def _set_provider_failure_status(self, status: ProviderStatus) -> None:
         """Notify the health sensor when consecutive failures change type."""
@@ -594,6 +632,38 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 "monitoring_center": self.monitoring_center.storage_key,
             }
         )
+        self.state_write_count += 1
+
+
+def _snapshot_signature(
+    snapshot: Any | None, provider_health: Any = ()
+) -> tuple[Any, ...] | None:
+    """Return a cheap identity for immutable timestamped provider products."""
+    if snapshot is None:
+        return None
+    return (
+        snapshot.provider,
+        snapshot.satellite,
+        snapshot.product,
+        snapshot.product_timestamp,
+        snapshot.status,
+        snapshot.filename,
+        len(snapshot.detections),
+        tuple(
+            (
+                item.provider_id,
+                item.status,
+                item.failure_type,
+                item.product_timestamp,
+            )
+            for item in provider_health
+        ),
+    )
+
+
+def _elapsed_ms(started: float) -> float:
+    """Return a bounded millisecond duration for privacy-safe diagnostics."""
+    return round(max(0.0, (perf_counter() - started) * 1000), 2)
 
 
 def _apply_place(
