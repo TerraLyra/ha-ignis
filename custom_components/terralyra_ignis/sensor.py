@@ -472,6 +472,7 @@ class MonitoredLocationSourcesSensor(IgnisEntity, SensorEntity):
             "assignment_note": "all_sources_are_equal_peers",
             "operational_status": status,
             "source_health": assignments,
+            **_location_health_summary(assignments),
         }
 
 
@@ -480,7 +481,13 @@ class MonitoredLocationStatusSensor(IgnisEntity, SensorEntity):
 
     _attr_translation_key = "monitored_location_status"
     _attr_device_class = SensorDeviceClass.ENUM
-    _attr_options = ["available", "partial", "initializing", "unavailable"]
+    _attr_options = [
+        "available",
+        "degraded",
+        "partial",
+        "initializing",
+        "unavailable",
+    ]
     _attr_icon = "mdi:map-marker-radius-outline"
 
     def __init__(self, entry: IgnisConfigEntry, plan: LocationSourcePlan) -> None:
@@ -509,6 +516,7 @@ class MonitoredLocationStatusSensor(IgnisEntity, SensorEntity):
         return self._plan.attrs() | {
             "operational_status": status,
             "source_health": assignments,
+            **_location_health_summary(assignments),
             "last_received_at": (
                 self.coordinator.received_timestamp.isoformat()
                 if self.coordinator.received_timestamp
@@ -606,18 +614,83 @@ def _location_operational_status(
                 "name": getattr(item, "label", None),
                 "satellite": satellite,
                 "status": state,
+                "failure_type": getattr(item, "failure_type", None),
+                "consecutive_failures": getattr(item, "consecutive_failures", 0),
+                "retry_at": _isoformat_or_none(getattr(item, "retry_at", None)),
+                "product_timestamp": _isoformat_or_none(
+                    getattr(item, "product_timestamp", None)
+                ),
+                "received_timestamp": _isoformat_or_none(
+                    getattr(item, "received_timestamp", None)
+                ),
+                "last_success_at": _isoformat_or_none(
+                    getattr(item, "received_timestamp", None)
+                ),
             }
         )
     if not states:
         return "unavailable", assignments
+    if all(state == "available" for state in states):
+        return "available", assignments
     usable = sum(state in {"available", "delayed"} for state in states)
     if usable == len(states):
-        return "available", assignments
+        return "degraded", assignments
     if usable:
         return "partial", assignments
     if all(state == "initializing" for state in states):
         return "initializing", assignments
     return "unavailable", assignments
+
+
+def _location_health_summary(
+    assignments: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Return stable, automation-friendly per-location health attributes."""
+    statuses = tuple(status.value for status in ProviderStatus)
+    sources_by_status = {
+        status: [
+            item["provider"] for item in assignments if item["status"] == status
+        ]
+        for status in statuses
+    }
+    unavailable_states = {
+        ProviderStatus.NO_PRODUCT.value,
+        ProviderStatus.OUTAGE.value,
+        ProviderStatus.AUTH_ERROR.value,
+    }
+    retries = [
+        item["retry_at"] for item in assignments if item.get("retry_at") is not None
+    ]
+    return {
+        "fresh_source_count": len(sources_by_status[ProviderStatus.AVAILABLE.value]),
+        "delayed_source_count": len(sources_by_status[ProviderStatus.DELAYED.value]),
+        "unavailable_source_count": sum(
+            len(sources_by_status[state]) for state in unavailable_states
+        ),
+        "initializing_source_count": len(
+            sources_by_status[ProviderStatus.INITIALIZING.value]
+        ),
+        "available_sources": sources_by_status[ProviderStatus.AVAILABLE.value],
+        "delayed_sources": sources_by_status[ProviderStatus.DELAYED.value],
+        "no_product_sources": sources_by_status[ProviderStatus.NO_PRODUCT.value],
+        "outage_sources": sources_by_status[ProviderStatus.OUTAGE.value],
+        "auth_error_sources": sources_by_status[ProviderStatus.AUTH_ERROR.value],
+        "unavailable_sources": [
+            item["provider"]
+            for item in assignments
+            if item["status"] in unavailable_states
+        ],
+        "initializing_sources": sources_by_status[
+            ProviderStatus.INITIALIZING.value
+        ],
+        "sources_by_status": sources_by_status,
+        "next_retry_at": min(retries) if retries else None,
+    }
+
+
+def _isoformat_or_none(value: Any) -> str | None:
+    """Serialize an optional timestamp without assuming its concrete type."""
+    return value.isoformat() if value is not None else None
 
 
 def _location_incident_summary(location_id: str, data: Any) -> dict[str, int]:

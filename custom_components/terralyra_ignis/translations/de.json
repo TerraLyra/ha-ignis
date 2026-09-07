@@ -252,6 +252,7 @@
         "name": "Überwachungsstatus für {location_name}",
         "state": {
           "available": "Alle Quellen verfügbar",
+          "degraded": "Verfügbar, aber verzögert",
           "partial": "Teilweise verfügbar",
           "initializing": "Initialisierung",
           "unavailable": "Nicht verfügbar"

@@ -252,6 +252,7 @@
         "name": "Estado de monitorización de {location_name}",
         "state": {
           "available": "Todas las fuentes disponibles",
+          "degraded": "Disponible con retrasos",
           "partial": "Parcialmente disponible",
           "initializing": "Inicializando",
           "unavailable": "No disponible"

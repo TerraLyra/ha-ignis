@@ -252,6 +252,7 @@
         "name": "État de surveillance de {location_name}",
         "state": {
           "available": "Toutes les sources sont disponibles",
+          "degraded": "Disponible avec des retards",
           "partial": "Partiellement disponible",
           "initializing": "Initialisation",
           "unavailable": "Indisponible"

@@ -317,6 +317,16 @@ sensor per location. Its state is the assigned source count and its attributes
 show the readable provider names, satellites and the equal-peer relationship
 without exposing the location coordinates.
 
+The companion per-location monitoring-status sensor distinguishes full
+freshness from reduced service: `available` means every assigned source is
+current, `degraded` means every source remains usable but at least one is
+delayed, `partial` means at least one equal peer is unavailable while another
+still works, and `unavailable` means that no assigned source is usable.
+Its attributes provide fresh, delayed, unavailable and initializing source
+counts and stable provider-ID lists for Home Assistant automations. Each
+source-health entry also includes the last product and receipt timestamps,
+failure category, consecutive-failure count and next retry time when known.
+
 Every TerraLyra IGNIS map marker separately names the provider or providers that
 supplied the incident evidence: LSA SAF, NOAA GOES, NASA FIRMS, or multiple
 sources. Home Assistant map cards may also combine geolocation entities from

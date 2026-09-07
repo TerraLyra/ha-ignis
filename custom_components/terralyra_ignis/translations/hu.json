@@ -252,6 +252,7 @@
         "name": "{location_name} megfigyelési állapota",
         "state": {
           "available": "Minden forrás elérhető",
+          "degraded": "Elérhető, de késéssel",
           "partial": "Részben elérhető",
           "initializing": "Inicializálás",
           "unavailable": "Nem érhető el"

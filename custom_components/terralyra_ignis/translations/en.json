@@ -252,6 +252,7 @@
         "name": "{location_name} monitoring status",
         "state": {
           "available": "All sources available",
+          "degraded": "Available with delays",
           "partial": "Partially available",
           "initializing": "Initializing",
           "unavailable": "Unavailable"

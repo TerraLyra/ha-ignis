@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.15.1
+
+- Distinguish fully fresh per-location monitoring from usable but delayed
+  equal-peer sources with a translated `degraded` state, instead of reporting
+  misleadingly that every source is available.
+- Expose per-source product, receipt and retry timestamps plus failure details
+  in each monitored location's source-health attributes.
+- Add automation-friendly fresh, delayed, unavailable and initializing source
+  counts, provider lists and exact status groups.
+- Cover the complete equal-peer availability matrix and the new summary
+  contract with regression tests.
+
 ## 0.15.0
 
 - Add public EUMETSAT Sentinel-3A and Sentinel-3B SLSTR Level 2 near-real-time
