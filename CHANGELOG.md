@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Consolidate nearby, temporally related provider tracks into stable physical
+  incident families before publishing map entities, counts, history or events.
+- Keep provider-level source tracks for attribution while exposing one incident
+  identity with bounded source-track and spatial-extent diagnostics.
+- Prevent duplicate new-fire and trend events for one incident, avoid summing
+  overlapping-source intensity, and preserve the original entity identity when
+  an incident gains a source or later splits.
+- Document a separate, opt-in official-report and news-context roadmap that
+  never treats automatically matched reporting as satellite or official proof.
+- Record the worldwide fire-risk provider decision: JRC GWIS is the preferred
+  global FWI candidate, subject to bounded live-WMS validation, while
+  Open-Meteo remains a possible input for a separately validated calculated
+  FWI provider.
+- Add a provider-neutral per-location fire-risk coverage planner that assigns
+  FRMv3 by geography instead of location identity and represents unvalidated
+  GWIS coverage only as an inactive opportunity.
+- Add privacy-safe diagnostics and regression coverage for covered, partially
+  covered and uncovered monitored-location sets.
+
 ## 0.16.0
 
 - Add a local, searchable Home Assistant fire-incident history calendar. It
@@ -18,16 +37,6 @@
 - Reduce Home Assistant load by reusing unchanged active-fire products, avoiding
   unnecessary incident-store writes, and exposing bounded refresh performance
   counters in integration diagnostics.
-
-- Record the worldwide fire-risk provider decision: JRC GWIS is the preferred
-  global FWI candidate, subject to bounded live-WMS validation, while
-  Open-Meteo remains a possible input for a separately validated calculated
-  FWI provider.
-- Add a provider-neutral per-location fire-risk coverage planner that assigns
-  FRMv3 by geography instead of location identity and represents unvalidated
-  GWIS coverage only as an inactive opportunity.
-- Add privacy-safe diagnostics and regression coverage for covered, partially
-  covered and uncovered monitored-location sets.
 
 ## 0.15.3
 

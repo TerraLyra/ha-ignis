@@ -25,6 +25,7 @@ _NUMBER_FIELDS = (
     "maximum_confidence",
     "maximum_pixel_count",
     "detections_total",
+    "incident_extent_km",
 )
 
 
@@ -38,12 +39,20 @@ def update_incident_history(
     """Merge current tracks into a size- and age-bounded incident archive."""
     current = _as_utc(now)
     cutoff = current - HISTORY_RETENTION
+    superseded_track_ids = {
+        source_id
+        for track in tracks
+        for source_id in _source_track_ids(track)
+        if source_id != str(track.get("track_id", ""))
+    }
     merged: dict[str, dict[str, Any]] = {}
     for candidate in [*history, *tracks]:
         normalized = _normalize(candidate, locations)
         if normalized is None or _parse_dt(normalized["last_seen"]) < cutoff:
             continue
         track_id = normalized["track_id"]
+        if track_id in superseded_track_ids:
+            continue
         previous = merged.get(track_id)
         if previous is None or _parse_dt(normalized["last_seen"]) >= _parse_dt(
             previous["last_seen"]
@@ -54,6 +63,13 @@ def update_incident_history(
         key=lambda item: (_parse_dt(item["last_seen"]), item["track_id"]),
         reverse=True,
     )[:MAX_HISTORY_INCIDENTS]
+
+
+def _source_track_ids(incident: dict[str, Any]) -> tuple[str, ...]:
+    values = incident.get("source_track_ids", [])
+    if not isinstance(values, (list, tuple)):
+        return ()
+    return tuple(str(value).strip()[:128] for value in values if str(value).strip())
 
 
 def _normalize(
@@ -106,6 +122,10 @@ def _normalize(
             result[field] = [
                 str(value)[:128] for value in values[:12] if str(value).strip()
             ]
+    source_track_ids = _source_track_ids(incident)[:12]
+    if source_track_ids:
+        result["source_track_ids"] = list(source_track_ids)
+        result["source_track_count"] = len(result["source_track_ids"])
 
     matches = []
     for location in locations:

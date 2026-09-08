@@ -46,6 +46,7 @@ from .geocoding import (
     PlaceLookupError,
     PlaceNameResolver,
 )
+from .incident_families import consolidate_incident_families
 from .incident_history import update_incident_history
 from .location_matching import match_incident_to_locations
 from .models import (
@@ -352,8 +353,6 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             provider_available=corroboration_snapshot is not None,
             cluster_radius_km=max(0.5, dedup_radius * 0.66),
         )
-        new_fires: list[dict[str, Any]] = []
-        trend_events: list[dict[str, Any]] = []
         first_snapshot = not self._initialized
         tracking = update_incidents(
             self._tracks,
@@ -416,25 +415,87 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self._firms_tracks, firms_clusters, self.monitored_locations
         )
         changed = tracking.changed or firms_tracking.changed
-        for track, cluster in tracking.new_incidents:
-            if not first_snapshot:
+        new_source_incidents = [
+            *tracking.new_incidents,
+            *firms_tracking.new_incidents,
+        ]
+        if not first_snapshot:
+            for track, cluster in new_source_incidents:
                 await self._async_resolve_new_fire_place(track, cluster)
-            attrs = cluster.attrs() | {
-                ATTR_SOURCE_URL: snapshot.source_url,
-                ATTR_PRODUCT_TIME: snapshot.product_timestamp.isoformat(),
-            }
-            if not first_snapshot:
+
+        visible_since = snapshot.product_timestamp - timedelta(hours=history_hours)
+        source_fires = _tracked_fire_clusters(
+            self._tracks,
+            home_lat,
+            home_lon,
+            visible_since=visible_since,
+            monitored_locations=self.monitored_locations,
+        )
+        source_fires.extend(
+            _tracked_fire_clusters(
+                self._firms_tracks,
+                home_lat,
+                home_lon,
+                visible_since=visible_since,
+                monitored_locations=self.monitored_locations,
+            )
+        )
+        tracked_fires = consolidate_incident_families(
+            source_fires,
+            home_latitude=home_lat,
+            home_longitude=home_lon,
+            matching_radius_km=dedup_radius,
+            matching_window=timedelta(hours=dedup_hours),
+        )
+        family_by_source = {
+            source_id: incident.track_id
+            for incident in tracked_fires
+            for source_id in incident.source_track_ids
+        }
+        _persist_family_ids(
+            [*self._tracks, *self._firms_tracks], family_by_source
+        )
+        for cluster in [*clusters, *firms_clusters]:
+            if cluster.track_id in family_by_source:
+                cluster.family_id = family_by_source[cluster.track_id]
+        active_clusters = consolidate_incident_families(
+            [*clusters, *firms_clusters],
+            home_latitude=home_lat,
+            home_longitude=home_lon,
+            matching_radius_km=dedup_radius,
+            matching_window=timedelta(hours=dedup_hours),
+        )
+
+        new_fires: list[dict[str, Any]] = []
+        new_source_ids = {
+            str(track.get("track_id", ""))
+            for track, _cluster in new_source_incidents
+            if any(
+                str(existing.get("track_id", ""))
+                == str(track.get("track_id", ""))
+                for existing in [*self._tracks, *self._firms_tracks]
+            )
+        }
+        if not first_snapshot:
+            for incident in tracked_fires:
+                member_ids = set(incident.source_track_ids)
+                if not member_ids or not member_ids.issubset(new_source_ids):
+                    continue
+                attrs = incident.attrs() | {
+                    ATTR_SOURCE_URL: incident.source_url or snapshot.source_url,
+                    ATTR_PRODUCT_TIME: snapshot.product_timestamp.isoformat(),
+                }
                 notification_center, notification_distance, affected_locations = (
                     _notification_location_context(
-                        cluster, self.monitoring_center.name
+                        incident, self.monitoring_center.name
                     )
                 )
                 attrs[ATTR_AFFECTED_LOCATIONS] = list(affected_locations)
                 title, message = _notification_text(
                     self.hass.config.language,
-                    cluster.nearest_settlement,
+                    incident.nearest_settlement,
                     notification_distance,
-                    cluster.confidence,
+                    incident.confidence,
                     notification_center,
                     affected_locations,
                 )
@@ -443,10 +504,27 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 new_fires.append(attrs)
                 self.hass.bus.async_fire(BUS_EVENT_NEW_FIRE, attrs)
 
-        for event_type, _track, cluster in tracking.trend_events:
-            attrs = cluster.attrs() | {
+        trend_events: list[dict[str, Any]] = []
+        family_lookup = {
+            source_id: incident
+            for incident in tracked_fires
+            for source_id in incident.source_track_ids
+        }
+        emitted_trends: set[tuple[str, str]] = set()
+        for event_type, track, _cluster in [
+            *tracking.trend_events,
+            *firms_tracking.trend_events,
+        ]:
+            incident = family_lookup.get(str(track.get("track_id", "")))
+            if incident is None or incident.track_id is None:
+                continue
+            event_key = (event_type, incident.track_id)
+            if event_key in emitted_trends:
+                continue
+            emitted_trends.add(event_key)
+            attrs = incident.attrs() | {
                 "event_type": event_type,
-                ATTR_SOURCE_URL: snapshot.source_url,
+                ATTR_SOURCE_URL: incident.source_url or snapshot.source_url,
                 ATTR_PRODUCT_TIME: snapshot.product_timestamp.isoformat(),
             }
             trend_events.append(attrs)
@@ -454,7 +532,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
 
         updated_incident_history = update_incident_history(
             self._incident_history,
-            [*self._tracks, *self._firms_tracks],
+            [incident.attrs() for incident in tracked_fires],
             self.monitored_locations,
             now=snapshot.product_timestamp,
         )
@@ -470,8 +548,8 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self._activity_history,
             timestamp=snapshot.product_timestamp,
             detections=len(filtered),
-            total_frp_mw=sum(cluster.frp_mw for cluster in clusters),
-            new_incidents=0 if first_snapshot else len(tracking.new_incidents),
+            total_frp_mw=sum(cluster.frp_mw for cluster in active_clusters),
+            new_incidents=0 if first_snapshot else len(new_fires),
         )
         if updated_activity_history != self._activity_history:
             changed = True
@@ -480,7 +558,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self._activity_history, now=snapshot.product_timestamp
         )
         situation = assess_situation(
-            clusters,
+            active_clusters,
             provider_status=snapshot.status,
             product_time=snapshot.product_timestamp,
             now=snapshot.received_timestamp,
@@ -492,30 +570,11 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             for track in [*self._tracks, *self._firms_tracks]:
                 self._schedule_place_lookup(track)
 
-        visible_since = snapshot.product_timestamp - timedelta(hours=history_hours)
-        tracked_fires = _tracked_fire_clusters(
-            self._tracks,
-            home_lat,
-            home_lon,
-            visible_since=visible_since,
-            monitored_locations=self.monitored_locations,
-        )
-        tracked_fires.extend(
-            _tracked_fire_clusters(
-                self._firms_tracks,
-                home_lat,
-                home_lon,
-                visible_since=visible_since,
-                monitored_locations=self.monitored_locations,
-            )
-        )
-        tracked_fires.sort(key=lambda cluster: cluster.distance_km)
-
         result = CoordinatorData(
             product_time=snapshot.product_timestamp,
             source_url=snapshot.source_url,
             filename=snapshot.filename,
-            active_clusters=clusters,
+            active_clusters=active_clusters,
             tracked_fires=tracked_fires,
             new_fires=new_fires,
             trend_events=trend_events,
@@ -622,11 +681,16 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             if track is None:
                 return
             _apply_place(track, None, place)
+            family_id = str(track.get("family_id") or track_id)
             archived = next(
                 (
                     item
                     for item in self._incident_history
-                    if item.get("track_id") == track_id
+                    if item.get("track_id") == family_id
+                    or (
+                        isinstance(item.get("source_track_ids"), list)
+                        and track_id in item["source_track_ids"]
+                    )
                 ),
                 None,
             )
@@ -635,7 +699,10 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             await self._async_save_state()
             if self.data:
                 for cluster in self.data.tracked_fires:
-                    if cluster.track_id == track_id:
+                    if (
+                        track_id in cluster.source_track_ids
+                        and not cluster.location_description
+                    ):
                         cluster.place_name = place.place_name
                         cluster.nearest_settlement = place.nearest_settlement
                         cluster.location_description = place.location_description
@@ -1027,6 +1094,7 @@ def _tracked_fire_clusters(
                 acquired=acquired,
                 pixel_count=pixel_count,
                 track_id=track_id,
+                family_id=_optional_text(track.get("family_id")),
                 peak_frp_mw=peak_frp_mw,
                 place_name=_optional_text(track.get("place_name")),
                 nearest_settlement=_optional_text(track.get("nearest_settlement")),
@@ -1082,6 +1150,17 @@ def _tracks_inside_locations(
         ):
             retained.append(track)
     return retained
+
+
+def _persist_family_ids(
+    tracks: list[dict[str, Any]], family_by_source: dict[str, str | None]
+) -> None:
+    """Persist stable presentation-incident membership on source tracks."""
+    for track in tracks:
+        track_id = str(track.get("track_id", ""))
+        family_id = family_by_source.get(track_id)
+        if family_id:
+            track["family_id"] = family_id
 
 
 def _inside_any_location(

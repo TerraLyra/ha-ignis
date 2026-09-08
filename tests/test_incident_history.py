@@ -56,6 +56,21 @@ def test_history_updates_existing_incident_without_duplicates() -> None:
     assert history[0]["maximum_frp_mw"] == 25.0
 
 
+def test_family_replaces_duplicate_source_tracks_in_history() -> None:
+    first = _incident(1)
+    second = _incident(2)
+    family = _incident(1)
+    family["source_track_ids"] = ["fire-1", "fire-2"]
+    family["incident_extent_km"] = 2.4
+
+    history = update_incident_history([first, second], [family], (HOME,), now=NOW)
+
+    assert [item["track_id"] for item in history] == ["fire-1"]
+    assert history[0]["source_track_ids"] == ["fire-1", "fire-2"]
+    assert history[0]["source_track_count"] == 2
+    assert history[0]["incident_extent_km"] == 2.4
+
+
 def test_history_removes_old_and_out_of_scope_incidents() -> None:
     expired = _incident(1, seen=NOW - HISTORY_RETENTION - timedelta(minutes=1))
     outside = _incident(2)

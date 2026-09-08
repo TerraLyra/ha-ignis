@@ -21,6 +21,7 @@ from .const import (
     ATTR_FIRST_SEEN,
     ATTR_FRP_MW,
     ATTR_FRP_TREND,
+    ATTR_INCIDENT_EXTENT_KM,
     ATTR_INCIDENT_ID,
     ATTR_INSIDE_RADIUS,
     ATTR_LAST_SEEN,
@@ -43,6 +44,8 @@ from .const import (
     ATTR_PLACE_NAME,
     ATTR_PROVIDERS,
     ATTR_SATELLITES,
+    ATTR_SOURCE_TRACK_COUNT,
+    ATTR_SOURCE_TRACK_IDS,
     ATTR_SOURCE_URL,
     ATTR_TRACK_ID,
     ATTR_TREND_SAMPLES,
@@ -178,6 +181,9 @@ class FireCluster:
     acquired: datetime
     pixel_count: int
     track_id: str | None = None
+    family_id: str | None = None
+    source_track_ids: tuple[str, ...] = ()
+    incident_extent_km: float | None = None
     peak_frp_mw: float | None = None
     place_name: str | None = None
     nearest_settlement: str | None = None
@@ -216,7 +222,12 @@ class FireCluster:
         }
         if self.track_id is not None:
             attrs[ATTR_TRACK_ID] = self.track_id
-            attrs[ATTR_INCIDENT_ID] = self.track_id
+            attrs[ATTR_INCIDENT_ID] = self.family_id or self.track_id
+        if self.source_track_ids:
+            attrs[ATTR_SOURCE_TRACK_IDS] = list(self.source_track_ids)
+            attrs[ATTR_SOURCE_TRACK_COUNT] = len(self.source_track_ids)
+        if self.incident_extent_km is not None:
+            attrs[ATTR_INCIDENT_EXTENT_KM] = round(self.incident_extent_km, 2)
         if self.peak_frp_mw is not None:
             attrs[ATTR_PEAK_FRP_MW] = round(self.peak_frp_mw, 2)
         if self.place_name is not None:

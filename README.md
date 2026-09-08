@@ -675,6 +675,11 @@ normal source updates use the separately bounded production decoder.
 
 ### Multi-source detection and incident verification
 
+- nearby, temporally related provider tracks are consolidated into one stable
+  presentation incident before IGNIS publishes map markers, counts, history or
+  events; the raw source attribution remains available in bounded attributes
+- the matching rules, identity guarantees and validation plan are documented
+  in [Incident families and report context](docs/INCIDENT_FAMILIES_AND_REPORT_CONTEXT.md)
 - NASA FIRMS can be enabled as an optional equal active-fire source with the
   user's personal MAP_KEY; it remains disabled by default
 - bounded NOAA-20/21 VIIRS and Terra/Aqua MODIS Area API requests are cached for at least
