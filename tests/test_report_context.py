@@ -72,7 +72,7 @@ def test_uncertain_position_or_day_wide_time_stays_possible() -> None:
 
 @pytest.mark.parametrize("changes", [
     {"url": "javascript:alert(1)"},
-    {"url": "https://user:password@example.org/fire"},
+    {"url": "https://user:password@example.org/fire"},  # pragma: allowlist secret - synthetic rejection test
     {"latitude": float("nan")},
     {"location_uncertainty_km": -1},
     {"published_at": NOW.replace(tzinfo=None)},
