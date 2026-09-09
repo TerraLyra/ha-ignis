@@ -15,7 +15,7 @@ from custom_components.terralyra_ignis.official_reports import ATTRIBUTION
 
 def notice(number=1, published="2026-09-09T09:13:00+00:00"):
     return {
-        "title": "Tesztközlemény: közlekedési baleset",
+        "title": "Kigyulladt a nádas",
         "publisher": ATTRIBUTION,
         "url": f"https://www.katasztrofavedelem.hu/modules/vesz/esemeny/{number}",
         "published_at": published,
@@ -99,4 +99,20 @@ async def test_archived_calendar_during_feed_outage(hass):
     assert "manual_import" in events[0].description
     assert "Live RSS: unavailable" in events[0].description
     assert "Saved text" in events[0].description
+    await entity.coordinator.async_shutdown()
+
+
+async def test_calendar_filters_nonfire_without_deleting_archive(hass):
+    from copy import deepcopy
+
+    reports = [notice(1), notice(2) | {"title": "Elsőfokú riasztást adott ki zivatarok kialakulása miatt a HungaroMet"},
+               notice(3) | {"title": "Karambol történt", "description": "A tűzoltók áramtalanítottak."},
+               notice(4) | {"title": "Beavatkozás Egyeken"}]
+    original = deepcopy(reports)
+    entity, _ = calendar(hass, {"status": "available", "notices": reports})
+    events = await entity.async_get_events(hass, datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC))
+    assert [event.uid for event in events] == [reports[0]["url"]]
+    assert "explicit_fire_language_in_title" in events[0].description
+    assert reports == original
+    assert entity.coordinator.data["notices"] == original
     await entity.coordinator.async_shutdown()

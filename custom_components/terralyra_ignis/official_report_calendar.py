@@ -18,16 +18,17 @@ from homeassistant.helpers.update_coordinator import (
 from . import IgnisConfigEntry
 from .const import DOMAIN
 from .official_reports import OfficialReportClient
+from .report_relevance import classify_report
 
 _LOGGER = logging.getLogger(__name__)
 
 PUBLICATION_NOTES = {
-    "en": "Publication time, not incident start or duration. Not matched to satellite detections. Local retention: 30 days / 1000 notices; not a complete archive. Includes non-fire emergencies.",
-    "hu": "Közzétételi idő, nem az esemény kezdete vagy időtartama. Nincs műholdas észleléshez párosítva. Helyi megőrzés: 30 nap / 1000 közlemény; nem teljes archívum. Nem csak tűzeseteket tartalmaz.",
-    "de": "Veröffentlichungszeit, nicht Beginn oder Dauer des Ereignisses. Keine Zuordnung zu Satellitenerkennungen. Lokale Speicherung: 30 Tage / 1000 Meldungen; kein vollständiges Archiv. Enthält auch andere Notfälle als Brände.",
-    "es": "Hora de publicación, no inicio ni duración del suceso. Sin vinculación a detecciones por satélite. Conservación local: 30 días / 1000 avisos; no es un archivo completo. Incluye emergencias distintas de incendios.",
-    "fr": "Heure de publication, pas le début ni la durée de l’événement. Aucune association aux détections satellitaires. Conservation locale : 30 jours / 1000 avis ; archives incomplètes. Inclut des urgences autres que des incendies.",
-    "it": "Ora di pubblicazione, non inizio o durata dell’evento. Nessuna associazione ai rilevamenti satellitari. Conservazione locale: 30 giorni / 1000 avvisi; archivio incompleto. Include emergenze diverse dagli incendi.",
+    "en": "Publication time, not incident start or duration. Not matched to satellite detections. Local retention: 30 days / 1000 notices; not a complete archive. Filtered by fire-related wording, not official classification; relevant notices may be missed.",
+    "hu": "Közzétételi idő, nem az esemény kezdete vagy időtartama. Nincs műholdas észleléshez párosítva. Helyi megőrzés: 30 nap / 1000 közlemény; nem teljes archívum. Tűzesetre utaló szöveg alapján szűrve, nem hivatalos besorolás; releváns hírek is kimaradhatnak.",
+    "de": "Veröffentlichungszeit, nicht Beginn oder Dauer des Ereignisses. Keine Zuordnung zu Satellitenerkennungen. Lokale Speicherung: 30 Tage / 1000 Meldungen; kein vollständiges Archiv. Textfilter für Brandmeldungen, keine amtliche Einstufung; relevante Meldungen können fehlen.",
+    "es": "Hora de publicación, no inicio ni duración del suceso. Sin vinculación a detecciones por satélite. Conservación local: 30 días / 1000 avisos; no es un archivo completo. Filtro textual de incendios, no clasificación oficial; puede omitir avisos relevantes.",
+    "fr": "Heure de publication, pas le début ni la durée de l’événement. Aucune association aux détections satellitaires. Conservation locale : 30 jours / 1000 avis ; archives incomplètes. Filtre textuel des incendies, non officiel ; des avis pertinents peuvent être omis.",
+    "it": "Ora di pubblicazione, non inizio o durata dell’evento. Nessuna associazione ai rilevamenti satellitari. Conservazione locale: 30 giorni / 1000 avvisi; archivio incompleto. Filtro testuale degli incendi, non classificazione ufficiale; può omettere avvisi pertinenti.",
 }
 
 
@@ -76,6 +77,9 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
         notes = PUBLICATION_NOTES.get(hass.config.language, PUBLICATION_NOTES["en"])
         events = []
         for notice in self.coordinator.data["notices"]:
+            relevance = classify_report(notice)
+            if relevance["category"] != "fire_related":
+                continue
             published = datetime.fromisoformat(notice["published_at"])
             end = published + timedelta(minutes=1)
             if published >= end_date or end <= start_date:
@@ -86,6 +90,7 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
                 end=end,
                 description=(f"{notice['publisher']}\n{notice['url']}\n\n{notice.get('description', '')}\n\n{notes}"
                              f"\nArchive origin: {notice.get('archive_origin', 'rss')}"
+                             f"\nRelevance: {relevance['reason']}"
                              f"\nLive RSS: {self.coordinator.data.get('feed_status', 'available')}"),
                 uid=notice["url"],
             ))

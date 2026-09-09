@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.20.1
+
+- Filter the BM OKF publication calendar using bounded, local Hungarian fire-
+  incident language rules. Hide weather alerts, non-fire accidents and uncertain
+  notices without deleting archived records. Preserve explicitly described fires,
+  including the saved Egyek report; no incident evidence or matching changes.
+
 ## 0.20.0
 
 - Retain fetched BM OKF publications locally across restarts for 30 days, capped

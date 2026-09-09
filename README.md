@@ -793,7 +793,14 @@ action's five-minute cache; no monitored-location data is sent to BM OKF.
 Each entry contains BM OKF attribution and the original notice URL. The time is
 the **publication time**, represented by a one-minute display slot, not the
 incident's start or duration. This is a separate publication calendar, not the
-satellite incident-history calendar. It includes non-fire emergencies. Publications
+satellite incident-history calendar. The archive includes non-fire emergencies, but
+the calendar now shows only notices with explicit Hungarian fire-incident language
+in the title or description. Firefighter mentions alone do not qualify. Weather
+alerts, ordinary accidents and ambiguous notices are hidden, not deleted. An
+accident notice explicitly describing a vehicle fire remains visible. This is a
+conservative, local text rule: it may miss unusual wording, is not an official
+classification, and does not confirm a satellite match. It includes building and
+vehicle fires as well as vegetation fires; it is not a geographic filter. Publications
 seen while fetching are now retained locally for 30 days from publication, up to
 1000 URLs, across restarts. This is not a complete historical feed. Archived entries
 remain readable during feed outages with live RSS health shown separately.
