@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "review_official_report": {
+      "name": "Revisar coincidencias de avisos oficiales",
+      "description": "Busca candidatos en el historial local con un aviso de incendio de BM OKF y ubicación y fechas revisadas manualmente. No modifica incidentes."
+    },
     "get_official_reports": {
       "name": "Obtener avisos oficiales de BM OKF",
       "description": "Devuelve enlaces a avisos actuales de emergencias de Hungría con atribución a BM OKF. Caché de cinco minutos. Incluye sucesos distintos de incendios; no vincula detecciones por satélite ni crea marcadores."

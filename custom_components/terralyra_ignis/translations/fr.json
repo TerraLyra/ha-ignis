@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "review_official_report": {
+      "name": "Examiner les correspondances des avis officiels",
+      "description": "Recherche des candidats dans l’historique local avec un avis d’incendie BM OKF et des coordonnées et dates vérifiées manuellement. Ne modifie aucun incident."
+    },
     "get_official_reports": {
       "name": "Obtenir les avis officiels du BM OKF",
       "description": "Renvoie les liens des avis d’urgence hongrois actuels avec attribution au BM OKF. Cache de cinq minutes. Inclut des événements autres que des incendies ; aucune association aux détections satellitaires ni création de marqueurs."

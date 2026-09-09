@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "review_official_report": {
+      "name": "Zuordnung offizieller Meldungen prüfen",
+      "description": "Sucht mit einer BM-OKF-Brandmeldung und manuell geprüften Orts- und Zeitangaben in lokalen Ereignissen. Gibt nur Kandidaten zurück und verändert keine Ereignisse."
+    },
     "get_official_reports": {
       "name": "Offizielle BM-OKF-Mitteilungen abrufen",
       "description": "Gibt aktuelle ungarische Ereignismeldungen mit Links und BM-OKF-Quellenangabe zurück. Fünf Minuten zwischengespeichert. Enthält auch andere Ereignisse als Brände; keine Zuordnung zu Satellitenerkennungen und keine Kartenmarkierungen."

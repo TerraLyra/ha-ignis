@@ -360,6 +360,10 @@
     }
   },
   "services": {
+    "review_official_report": {
+      "name": "Review official report matches",
+      "description": "Search local incident history using a selected BM OKF fire notice and manually reviewed coordinates and times. Returns candidates only; does not modify incidents."
+    },
     "get_official_reports": {
       "name": "Get official BM OKF notices",
       "description": "Returns current Hungarian emergency-notice links with BM OKF attribution. Cached for five minutes. Includes non-fire notices; does not match satellite incidents or create map markers."

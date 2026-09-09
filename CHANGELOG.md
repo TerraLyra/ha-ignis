@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add a response-only official-report review action that compares a selected
+  current RSS notice with local incident history using explicitly reviewed fire
+  coordinates, uncertainty and optional event times. It reports candidates and
+  reasons without modifying incidents or applying extracted date hints.
+
 - Preserve bounded RSS descriptions with attribution and expose review-only
   Hungarian previous-day ignition date hints. Dates use the publication's
   Europe/Budapest calendar day, retain source wording and do not become automatic

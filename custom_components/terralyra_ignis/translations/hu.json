@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "review_official_report": {
+      "name": "Hivatalos közlemény párosításának ellenőrzése",
+      "description": "Jelölteket keres a helyi tűzelőzményekben egy BM OKF-tűzközleményhez, kézzel ellenőrzött hely és idő alapján. Nem módosítja az eseményeket."
+    },
     "get_official_reports": {
       "name": "Hivatalos BM OKF-közlemények lekérése",
       "description": "Aktuális magyar veszélyhelyzeti közlemények hivatkozásai BM OKF-forrásmegjelöléssel, ötperces gyorsítótárral. Nem csak tűzeseteket tartalmaz; nem párosít műholdas észleléseket, és nem hoz létre térképjelölőket."

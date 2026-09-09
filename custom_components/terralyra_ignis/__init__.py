@@ -61,6 +61,7 @@ from .products.msg_iodc import (
 )
 from .providers.factory import build_provider_pool
 from .repairs import async_sync_coverage_issue
+from .report_review_service import register_report_review
 
 
 @dataclass
@@ -84,6 +85,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     official_reports = OfficialReportClient(async_get_clientsession(hass))
     hass.data.setdefault(DOMAIN, {})["official_report_client"] = official_reports
+    register_report_review(hass, official_reports)
 
     async def async_get_official_reports(call: ServiceCall) -> ServiceResponse:
         return await official_reports.async_get_notices()

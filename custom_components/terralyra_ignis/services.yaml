@@ -1,6 +1,63 @@
 get_official_reports:
   name: Get official BM OKF notices
   description: Fetch current Hungarian emergency-notice links with BM OKF attribution. Cached for five minutes. Includes non-fire notices; does not match satellite incidents or create map markers.
+review_official_report:
+  name: Review official report matches
+  description: Read-only candidate search in local incident history. Requires a reviewed fire notice and manually supplied coordinates. No markers or incidents are changed.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    report_url:
+      required: true
+      name: Original BM OKF event URL
+      selector:
+        text:
+    confirm_fire_report:
+      required: true
+      name: I checked that this notice describes a fire
+      selector:
+        boolean:
+    latitude:
+      required: true
+      name: Reviewed fire latitude
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: 0.000001
+          mode: box
+    longitude:
+      required: true
+      name: Reviewed fire longitude
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: 0.000001
+          mode: box
+    location_uncertainty_km:
+      required: true
+      name: Assumed location uncertainty (km)
+      description: Explicit review assumption, not provider accuracy. Do not use a settlement centre as an exact fire location.
+      selector:
+        number:
+          min: 0.1
+          max: 25
+          step: 0.1
+          mode: box
+    event_start:
+      name: Reviewed event interval start
+      description: Optional ISO timestamp including timezone, for example 2026-09-08T00:00:00+02:00. Omit to use publication time. Date hints are not applied automatically.
+      selector:
+        text:
+    event_end:
+      name: Reviewed event interval end
+      description: Optional ISO timestamp including timezone. Requires start; this is a review window, not necessarily extinction time.
+      selector:
+        text:
 probe_msg_iodc:
   fields:
     config_entry_id:

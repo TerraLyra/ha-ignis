@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "review_official_report": {
+      "name": "Verifica corrispondenze degli avvisi ufficiali",
+      "description": "Cerca candidati nella cronologia locale usando un avviso di incendio BM OKF e posizione e tempi verificati manualmente. Non modifica gli eventi."
+    },
     "get_official_reports": {
       "name": "Ottieni avvisi ufficiali BM OKF",
       "description": "Restituisce collegamenti agli avvisi attuali di emergenza ungheresi con attribuzione a BM OKF. Cache di cinque minuti. Include eventi diversi dagli incendi; non associa rilevamenti satellitari e non crea indicatori sulla mappa."
