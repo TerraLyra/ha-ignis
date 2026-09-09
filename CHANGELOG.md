@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.17.1
+
+- Remove inactive and ended incidents from the active-fire map while retaining
+  their incident history; show reactivated incidents again after new observations.
+
 ## 0.17.0
 
 - Consolidate nearby, temporally related provider tracks into stable physical

@@ -19,6 +19,7 @@ from .const import (
 )
 from .coordinator import FireCluster
 from .entity import IgnisEntity
+from .models import FireLifecycle
 
 
 @callback
@@ -53,6 +54,7 @@ async def async_setup_entry(
             cluster.track_id: cluster
             for cluster in (data.tracked_fires if data else [])
             if cluster.track_id is not None
+            and cluster.lifecycle in (FireLifecycle.NEW, FireLifecycle.CONTINUING)
         }
 
     registry = er.async_get(hass)

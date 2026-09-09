@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from custom_components.terralyra_ignis.activity import ActivitySummary
 from custom_components.terralyra_ignis.const import (
@@ -35,6 +35,7 @@ from custom_components.terralyra_ignis.geo_location import (
     _async_remove_expired_entity,
     _display_name,
     _suggested_object_id,
+    async_setup_entry,
 )
 from custom_components.terralyra_ignis.models import (
     DistanceTrend,
@@ -96,6 +97,47 @@ def _entity(cluster: FireCluster) -> IgnisFireLocation:
         )
     )
     return entity
+
+
+async def test_map_removes_inactive_tracks_but_retains_history_data() -> None:
+    """Retained historical tracks must not remain on the active map."""
+    active = _cluster()
+    inactive = _cluster(track_id="inactive", lifecycle=FireLifecycle.INACTIVE)
+    ended = _cluster(track_id="ended", lifecycle=FireLifecycle.ENDED)
+    coordinator = SimpleNamespace(
+        data=SimpleNamespace(tracked_fires=[active, inactive, ended]),
+        async_add_listener=Mock(),
+    )
+    entry = SimpleNamespace(
+        entry_id="test", runtime_data=SimpleNamespace(coordinator=coordinator),
+        async_on_unload=Mock(),
+    )
+    registry = Mock()
+    stale = SimpleNamespace(
+        domain="geo_location", platform=DOMAIN,
+        unique_id="test_fire_inactive", entity_id="geo_location.inactive",
+    )
+    add_entities = Mock()
+    with (
+        patch("custom_components.terralyra_ignis.geo_location.er.async_get", return_value=registry),
+        patch("custom_components.terralyra_ignis.geo_location.er.async_entries_for_config_entry", return_value=[stale]),
+        patch("custom_components.terralyra_ignis.geo_location.IgnisFireLocation") as entity_class,
+        patch("custom_components.terralyra_ignis.geo_location._async_remove_expired_entity") as remove,
+    ):
+        await async_setup_entry(Mock(), entry, add_entities)
+        registry.async_remove.assert_called_once_with("geo_location.inactive")
+        entity_class.assert_called_once_with(entry, active, disambiguate=False)
+        add_entities.assert_called_once_with([entity_class.return_value])
+
+        active.lifecycle = FireLifecycle.INACTIVE
+        coordinator.async_add_listener.call_args.args[0]()
+        remove.assert_called_once()
+        assert coordinator.data.tracked_fires == [active, inactive, ended]
+
+        # A new observation can reactivate the same incident on the map.
+        active.lifecycle = FireLifecycle.CONTINUING
+        coordinator.async_add_listener.call_args.args[0]()
+        assert add_entities.call_count == 2
 
 
 def test_cluster_attributes_include_tracking_metadata() -> None:
