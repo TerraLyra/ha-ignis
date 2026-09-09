@@ -69,6 +69,25 @@ feed also cannot reconstruct the September 8 Egyek incident retrospectively.
 
 ## Next implementation gate
 
+### Review-only event date hints (next release)
+
+The manual action retains up to 4,000 plain-text characters from the RSS
+description, always alongside attribution. This does not fetch the linked page.
+`description_status` distinguishes complete and truncated text. A narrow
+Hungarian rule recognizes expressions such as "tegnap kora este gyulladt meg"
+and returns `reported_start_date_hint`, precision `day`, the original evidence
+phrase and timezone `Europe/Budapest`. The date anchors to publication, never
+retrieval. Unrecognized, negated, repeated or truncated input remains `unknown`.
+
+Recognized hints have `event_time_status: requires_review`. The notice could
+describe another fire or quote an earlier statement, so these hints are **not**
+fed automatically into `match_reports`. They are neither exact ignition times
+nor extinction times. The Egyek case demonstrated why publication time alone
+misses older observations; it did not establish a safe universal extraction rule.
+The publication calendar continues to use publication time unchanged.
+
+### Geographic association
+
 Clarify with the provider:
 
 1. Whether attributed local use of event coordinates/category is permitted.

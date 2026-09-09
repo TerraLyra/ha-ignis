@@ -29,7 +29,8 @@ def test_metadata_attribution_and_no_false_fire_classification():
     assert notice["published_at"] == "2026-09-09T09:13:00+00:00"
     assert notice["association"] == "not_matched"
     assert "latitude" not in notice
-    assert "description" not in notice
+    assert notice["description"] == ""
+    assert notice["event_time_status"] == "unknown"
     assert parse_notices(feed(ITEM * 2)) == [notice]
     assert parse_notices(feed("")) == []
 
@@ -59,6 +60,24 @@ def test_title_is_plain_text():
         "Karambol a tesztúton", "&lt;b&gt;Teszt&lt;/b&gt; &amp; hír"
     )))
     assert notice["title"] == "Teszt & hír"
+
+
+def test_rss_description_and_date_hint_are_kept_with_attribution():
+    item = ITEM.replace("</item>", "<description>Még tegnap kora este gyulladt meg a nádas.</description></item>")
+    result, = parse_notices(feed(item))
+    assert result["description"] == "Még tegnap kora este gyulladt meg a nádas."
+    assert result["reported_start_date_hint"] == "2026-09-08"
+    assert result["event_time_status"] == "requires_review"
+    assert result["association"] == "not_matched"
+    assert result["publisher"] == ATTRIBUTION
+
+
+def test_truncated_description_never_produces_date_hint():
+    item = ITEM.replace("</item>", "<description>Tegnap gyulladt ki. " + "a" * 5000 + "</description></item>")
+    result, = parse_notices(feed(item))
+    assert len(result["description"]) == 4000
+    assert result["description_status"] == "truncated"
+    assert result["event_time_status"] == "unknown"
 
 
 class Response:

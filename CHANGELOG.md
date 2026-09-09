@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Preserve bounded RSS descriptions with attribution and expose review-only
+  Hungarian previous-day ignition date hints. Dates use the publication's
+  Europe/Budapest calendar day, retain source wording and do not become automatic
+  incident start/end times or satellite associations.
+
 - Add a disabled-by-default BM OKF publication calendar, separate from satellite
   incident history. When enabled, it refreshes every 15 minutes using the manual
   action's shared cache and includes attributed links and explicit publication-

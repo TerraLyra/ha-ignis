@@ -13,11 +13,14 @@ import aiohttp
 from defusedxml import ElementTree
 from defusedxml.common import DefusedXmlException
 
+from .report_time import hungarian_start_hint
+
 FEED_URL = "https://www.katasztrofavedelem.hu/10466/RSS_VESZ"
 ATTRIBUTION = "BM Országos Katasztrófavédelmi Főigazgatóság (BM OKF)"
 MAX_BYTES = 256_000
 MAX_ITEMS = 100
 CACHE_SECONDS = 300
+MAX_DESCRIPTION_CHARS = 4000
 NOTICE_URL = re.compile(
     r"https://www\.katasztrofavedelem\.hu/modules/vesz/esemeny/[0-9]+"
 )
@@ -36,14 +39,14 @@ class _PlainText(HTMLParser):
         self.parts.append(data)
 
 
-def _text(value: str) -> str:
+def _text(value: str, limit: int = 500) -> str:
     parser = _PlainText()
     parser.feed(value)
-    return " ".join(" ".join(parser.parts).split())[:500]
+    return " ".join(" ".join(parser.parts).split())[:limit]
 
 
 def parse_notices(payload: bytes) -> list[dict[str, str]]:
-    """Keep attributed links, not article bodies or guessed coordinates."""
+    """Keep attributed RSS text and review-only hints, never guessed coordinates."""
     if len(payload) > MAX_BYTES:
         raise ReportFeedError("Official report feed exceeds the size limit")
     try:
@@ -66,6 +69,8 @@ def parse_notices(payload: bytes) -> list[dict[str, str]]:
             published_at = published.astimezone(UTC).isoformat()
         except (TypeError, ValueError, OverflowError):
             continue
+        description = _text(item.findtext("description") or "", MAX_DESCRIPTION_CHARS + 1)
+        truncated = len(description) > MAX_DESCRIPTION_CHARS
         notices[url] = {
             "title": title,
             "url": url,
@@ -73,6 +78,9 @@ def parse_notices(payload: bytes) -> list[dict[str, str]]:
             "language": "hu",
             "published_at": published_at,
             "association": "not_matched",
+            "description": description[:MAX_DESCRIPTION_CHARS],
+            "description_status": "truncated" if truncated else "complete",
+            **({"event_time_status": "unknown"} if truncated else hungarian_start_hint(description, published)),
         }
     return list(notices.values())
 
