@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.19.0
+
 - Add a response-only official-report review action that compares a selected
   current RSS notice with local incident history using explicitly reviewed fire
   coordinates, uncertainty and optional event times. It reports candidates and

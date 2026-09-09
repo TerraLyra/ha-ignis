@@ -41,7 +41,7 @@ and category metadata, or request a supported structured endpoint.
 
 RSS discovery is technically feasible and has an explicit attribution-based
 reuse statement. Fully automatic geographic association is **not ready** on
-RSS alone. Version 0.18.0 provides on-demand RSS discovery. The next iteration
+RSS alone. Version 0.18.0 provides on-demand RSS discovery. Version 0.19.0
 adds a disabled-by-default publication calendar, with 15-minute refreshes only
 after the user enables it. It shares the manual action's client/cache. No
 automatic geocoding, persistent report storage, map markers or evidence upgrades
@@ -69,7 +69,7 @@ feed also cannot reconstruct the September 8 Egyek incident retrospectively.
 
 ## Next implementation gate
 
-### Review-only event date hints (next release)
+### Review-only event date hints (0.19.0)
 
 The manual action retains up to 4,000 plain-text characters from the RSS
 description, always alongside attribution. This does not fetch the linked page.

@@ -782,7 +782,7 @@ Results are cached for five minutes; failures also impose a five-minute cooldown
 There is no background polling, incident-page scraping or new Repair notification.
 See the [source review](docs/HU_OFFICIAL_REPORT_SOURCE_REVIEW.md) for limitations.
 
-### Optional publication calendar (next release)
+### Optional publication calendar (0.19.0)
 
 The **Reports — BM OKF notices** calendar is disabled by default. To opt in, open
 the IGNIS entity list, include disabled entities, select this calendar and enable
@@ -797,6 +797,20 @@ satellite incident-history calendar. It includes non-fire emergencies and only
 the current RSS snapshot: notices disappear when they leave the feed. There is
 no persistent news archive or automatic satellite association. A feed failure
 marks the calendar unavailable instead of presenting an empty success.
+
+### Manual report matching review (0.19.0)
+
+Use **Developer Tools → Actions → Review official report matches**
+(`terralyra_ignis.review_official_report`). Select the IGNIS configuration and
+an original BM OKF event URL from the current RSS response. Confirm the notice
+describes a fire, then provide reviewed fire coordinates and assumed location
+uncertainty. Optional event start/end values must include a timezone; otherwise
+the action uses publication time. It returns candidate incident IDs, distances
+and reasons without changing incidents, markers or notifications.
+
+Extracted previous-day date hints require review and are never applied
+automatically. This is not automatic news-to-fire matching. See the
+[review instructions](docs/HU_OFFICIAL_REPORT_SOURCE_REVIEW.md) for limitations.
 
 ## Validation and release readiness
 
