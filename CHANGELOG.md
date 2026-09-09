@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a local report-association foundation with explicit spatial and temporal
+  uncertainty and shared-origin grouping. Feed ingestion and Home Assistant
+  presentation are not enabled yet.
+
 ## 0.17.1
 
 - Remove inactive and ended incidents from the active-fire map while retaining

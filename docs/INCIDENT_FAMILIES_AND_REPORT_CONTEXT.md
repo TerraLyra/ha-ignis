@@ -110,6 +110,28 @@ opt-in and should not scrape sites whose terms or controls prohibit it.
 
 ## Release sequence
 
+### Matching foundation
+
+`report_context.py` provides a local, immutable association API for adapter-
+supplied fire reports and existing satellite incidents. It performs no network
+requests and is not yet connected to Home Assistant entities or feed polling.
+It retains publisher, URL, language, publication and event dates, spatial
+uncertainty, and explicit match reasons. Results are `possible` or `probable`,
+never confirmation of a fire. Publication-only dates, broad time intervals,
+imprecise locations and multiple candidate incidents remain `possible`.
+
+Matching is capped at 100 reports and 500 incidents, with an 8 km distance
+and 6 hour temporal tolerance. These are initial candidate-search bounds,
+not calibrated probabilities. A shared adapter-supplied original notice URL
+groups syndicated reports; unrelated URLs are not inferred to be independent
+evidence. HTTPS link validation is not a download/SSRF policy: a future feed
+adapter still needs its own permitted-host, redirect and response-size controls.
+
+The September 8 Egyek news example remains an unverified real-world candidate;
+the unit tests use synthetic coordinates and do not claim to validate that fire.
+Next: select and review one structured official feed, then add opt-in polling,
+persistence and entity/calendar presentation around this API.
+
 1. Ship incident-family consolidation with replay and persistence tests.
 2. Collect diagnostics on family sizes and extents without sending telemetry.
 3. Validate thresholds against user-supplied cases and adjust only with tests.
