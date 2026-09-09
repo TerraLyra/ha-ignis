@@ -10,8 +10,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import IgnisConfigEntry
+from .const import DOMAIN
 from .coverage import SOURCE_DISPLAY_NAMES
 from .entity import IgnisEntity, IgnisFireRiskEntity
+from .official_report_calendar import OfficialReportCalendar
 from .products.fire_risk import FireRiskDay
 
 RISK_LABELS = {
@@ -147,7 +149,13 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     async_add_entities(
-        [FireRiskForecastCalendar(entry), FireIncidentHistoryCalendar(entry)]
+        [
+            FireRiskForecastCalendar(entry),
+            FireIncidentHistoryCalendar(entry),
+            OfficialReportCalendar(
+                hass, entry, hass.data[DOMAIN]["official_report_client"]
+            ),
+        ]
     )
 
 

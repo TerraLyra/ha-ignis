@@ -371,6 +371,9 @@
       }
     },
     "calendar": {
+      "official_reports": {
+        "name": "Közlemények — BM OKF"
+      },
       "fire_risk_forecast": {
         "name": "Hely: Otthon — 10 napos tűzkockázati előrejelzés"
       },

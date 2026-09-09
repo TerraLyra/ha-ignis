@@ -371,6 +371,9 @@
       }
     },
     "calendar": {
+      "official_reports": {
+        "name": "Reports — BM OKF notices"
+      },
       "fire_risk_forecast": {
         "name": "Location: Home — 10-day fire-risk forecast"
       },

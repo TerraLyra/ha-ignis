@@ -782,6 +782,22 @@ Results are cached for five minutes; failures also impose a five-minute cooldown
 There is no background polling, incident-page scraping or new Repair notification.
 See the [source review](docs/HU_OFFICIAL_REPORT_SOURCE_REVIEW.md) for limitations.
 
+### Optional publication calendar (next release)
+
+The **Reports — BM OKF notices** calendar is disabled by default. To opt in, open
+the IGNIS entity list, include disabled entities, select this calendar and enable
+it. It will then appear in Home Assistant's Calendar view and refresh every 15
+minutes. Disabling it stops its scheduled refreshes. It shares the manual
+action's five-minute cache; no monitored-location data is sent to BM OKF.
+
+Each entry contains BM OKF attribution and the original notice URL. The time is
+the **publication time**, represented by a one-minute display slot, not the
+incident's start or duration. This is a separate publication calendar, not the
+satellite incident-history calendar. It includes non-fire emergencies and only
+the current RSS snapshot: notices disappear when they leave the feed. There is
+no persistent news archive or automatic satellite association. A feed failure
+marks the calendar unavailable instead of presenting an empty success.
+
 ## Validation and release readiness
 
 The repository includes automated GitHub Actions for:

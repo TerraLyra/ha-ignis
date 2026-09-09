@@ -1,0 +1,90 @@
+"""Opt-in RSS publication calendar, separate from satellite incident history."""
+
+from __future__ import annotations
+
+import logging
+from datetime import datetime, timedelta
+
+from homeassistant.components.calendar import CalendarEntity, CalendarEvent
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
+
+from . import IgnisConfigEntry
+from .const import DOMAIN
+from .official_reports import OfficialReportClient
+
+_LOGGER = logging.getLogger(__name__)
+
+PUBLICATION_NOTES = {
+    "en": "Publication time, not incident start or duration. Not matched to satellite detections. Current RSS notices only; not a complete archive. Includes non-fire emergencies.",
+    "hu": "Közzétételi idő, nem az esemény kezdete vagy időtartama. Nincs műholdas észleléshez párosítva. Csak aktuális RSS-közlemények, nem teljes archívum. Nem csak tűzeseteket tartalmaz.",
+    "de": "Veröffentlichungszeit, nicht Beginn oder Dauer des Ereignisses. Keine Zuordnung zu Satellitenerkennungen. Nur aktuelle RSS-Meldungen, kein vollständiges Archiv. Enthält auch andere Notfälle als Brände.",
+    "es": "Hora de publicación, no inicio ni duración del suceso. Sin vinculación a detecciones por satélite. Solo avisos RSS actuales, no un archivo completo. Incluye emergencias distintas de incendios.",
+    "fr": "Heure de publication, pas le début ni la durée de l’événement. Aucune association aux détections satellitaires. Avis RSS actuels uniquement, pas d’archives complètes. Inclut des urgences autres que des incendies.",
+    "it": "Ora di pubblicazione, non inizio o durata dell’evento. Nessuna associazione ai rilevamenti satellitari. Solo avvisi RSS attuali, non un archivio completo. Include emergenze diverse dagli incendi.",
+}
+
+
+class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
+    """Fetch only when enabled; share the manual action's bounded RSS client."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "official_reports"
+    _attr_icon = "mdi:newspaper-variant-outline"
+    _attr_entity_registry_enabled_default = False
+
+    def __init__(
+        self, hass: HomeAssistant, entry: IgnisConfigEntry, client: OfficialReportClient
+    ) -> None:
+        async def update() -> dict:
+            result = await client.async_get_notices()
+            if result["status"] != "available":
+                raise UpdateFailed("BM OKF RSS is temporarily unavailable")
+            return result
+
+        coordinator = DataUpdateCoordinator(
+            hass, _LOGGER, name="BM OKF publication notices",
+            config_entry=entry, update_method=update,
+            update_interval=timedelta(minutes=15),
+        )
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_official_reports"
+        self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, entry.entry_id)})
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        # Disabled entities are never added, and therefore never start polling.
+        await self.coordinator.async_request_refresh()
+
+    @property
+    def event(self) -> CalendarEvent | None:
+        # Publication entries are not active emergencies or notification triggers.
+        return None
+
+    async def async_get_events(
+        self, hass: HomeAssistant, start_date: datetime, end_date: datetime
+    ) -> list[CalendarEvent]:
+        await self.coordinator.async_request_refresh()
+        if not self.coordinator.last_update_success or self.coordinator.data is None:
+            raise HomeAssistantError("BM OKF RSS is temporarily unavailable")
+        notes = PUBLICATION_NOTES.get(hass.config.language, PUBLICATION_NOTES["en"])
+        events = []
+        for notice in self.coordinator.data["notices"]:
+            published = datetime.fromisoformat(notice["published_at"])
+            end = published + timedelta(minutes=1)
+            if published >= end_date or end <= start_date:
+                continue
+            events.append(CalendarEvent(
+                summary=f"BM OKF · {notice['title']}",
+                start=published,
+                end=end,
+                description=f"{notice['publisher']}\n{notice['url']}\n\n{notes}",
+                uid=notice["url"],
+            ))
+        return sorted(events, key=lambda event: event.start)

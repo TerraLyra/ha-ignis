@@ -83,6 +83,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register explicit, response-only diagnostic actions."""
 
     official_reports = OfficialReportClient(async_get_clientsession(hass))
+    hass.data.setdefault(DOMAIN, {})["official_report_client"] = official_reports
 
     async def async_get_official_reports(call: ServiceCall) -> ServiceResponse:
         return await official_reports.async_get_notices()

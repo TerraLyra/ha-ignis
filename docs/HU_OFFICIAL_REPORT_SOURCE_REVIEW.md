@@ -41,9 +41,11 @@ and category metadata, or request a supported structured endpoint.
 
 RSS discovery is technically feasible and has an explicit attribution-based
 reuse statement. Fully automatic geographic association is **not ready** on
-RSS alone. The first implementation provides on-demand RSS discovery only;
-no background polling, automatic geocoding, persistent report storage, map
-markers or evidence upgrades are enabled.
+RSS alone. Version 0.18.0 provides on-demand RSS discovery. The next iteration
+adds a disabled-by-default publication calendar, with 15-minute refreshes only
+after the user enables it. It shares the manual action's client/cache. No
+automatic geocoding, persistent report storage, map markers or evidence upgrades
+are enabled. Calendar entries show publication time, not incident start/duration.
 
 ### Manual Home Assistant action
 

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add a disabled-by-default BM OKF publication calendar, separate from satellite
+  incident history. When enabled, it refreshes every 15 minutes using the manual
+  action's shared cache and includes attributed links and explicit publication-
+  time and coverage limitations. No automatic incident matching is performed.
+
 ## 0.18.0
 
 - Add an on-demand `get_official_reports` action returning current BM OKF
