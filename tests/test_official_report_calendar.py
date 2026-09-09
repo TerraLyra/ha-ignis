@@ -56,6 +56,7 @@ async def test_publications_have_attribution_stable_id_and_explicit_limitations(
     assert (event.end - event.start).total_seconds() == 60
     assert entity.event is None
     client.async_get_notices.assert_awaited_once()
+    await entity.coordinator.async_shutdown()
 
 
 async def test_date_window_overlap_and_order(hass):
@@ -69,6 +70,7 @@ async def test_date_window_overlap_and_order(hass):
         hass, datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC)
     )
     assert [event.uid.rsplit("/", 1)[-1] for event in events] == ["1", "2"]
+    await entity.coordinator.async_shutdown()
 
 
 async def test_failed_feed_is_not_an_empty_success_or_old_news(hass):
@@ -78,6 +80,7 @@ async def test_failed_feed_is_not_an_empty_success_or_old_news(hass):
             hass, datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC)
         )
     assert not entity.available
+    await entity.coordinator.async_shutdown()
 
 
 async def test_empty_feed_and_unsupported_language(hass):
@@ -86,3 +89,4 @@ async def test_empty_feed_and_unsupported_language(hass):
     assert await entity.async_get_events(
         hass, datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC)
     ) == []
+    await entity.coordinator.async_shutdown()
