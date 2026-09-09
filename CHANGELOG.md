@@ -2,14 +2,16 @@
 
 ## Unreleased
 
+## 0.18.0
+
 - Add an on-demand `get_official_reports` action returning current BM OKF
   emergency-notice titles, attributed links and publication times. Five-minute
   caching and failure cooldown bound requests. No automatic incident matching,
   background polling or new map markers are enabled.
 
 - Add a local report-association foundation with explicit spatial and temporal
-  uncertainty and shared-origin grouping. Feed ingestion and Home Assistant
-  presentation are not enabled yet.
+  uncertainty and shared-origin grouping. Automatic incident association and
+  map/calendar presentation are not enabled yet.
 
 ## 0.17.1
 

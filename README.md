@@ -765,6 +765,23 @@ Country boundaries are derived from [Natural Earth](https://www.naturalearthdata
 
 Integration source code: MIT License.
 
+## Official Hungarian emergency notices (manual)
+
+Since 0.18.0, **Developer Tools → Actions → TerraLyra IGNIS: Get official BM OKF
+notices** returns current Hungarian emergency-notice titles, publication times,
+original links and BM OKF attribution. No credentials or action fields are needed.
+The action ID is `terralyra_ignis.get_official_reports` and it returns a response.
+
+This is a manual discovery tool, not an automatic news layer on the map. Notices
+can include traffic accidents and other non-fire events. They are not matched to
+satellite incidents because the RSS feed does not provide coordinates. An empty
+response does not mean no fires exist. Existing entities and automations are
+unchanged.
+
+Results are cached for five minutes; failures also impose a five-minute cooldown.
+There is no background polling, incident-page scraping or new Repair notification.
+See the [source review](docs/HU_OFFICIAL_REPORT_SOURCE_REVIEW.md) for limitations.
+
 ## Validation and release readiness
 
 The repository includes automated GitHub Actions for:
