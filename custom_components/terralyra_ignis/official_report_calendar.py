@@ -22,12 +22,12 @@ from .official_reports import OfficialReportClient
 _LOGGER = logging.getLogger(__name__)
 
 PUBLICATION_NOTES = {
-    "en": "Publication time, not incident start or duration. Not matched to satellite detections. Current RSS notices only; not a complete archive. Includes non-fire emergencies.",
-    "hu": "Közzétételi idő, nem az esemény kezdete vagy időtartama. Nincs műholdas észleléshez párosítva. Csak aktuális RSS-közlemények, nem teljes archívum. Nem csak tűzeseteket tartalmaz.",
-    "de": "Veröffentlichungszeit, nicht Beginn oder Dauer des Ereignisses. Keine Zuordnung zu Satellitenerkennungen. Nur aktuelle RSS-Meldungen, kein vollständiges Archiv. Enthält auch andere Notfälle als Brände.",
-    "es": "Hora de publicación, no inicio ni duración del suceso. Sin vinculación a detecciones por satélite. Solo avisos RSS actuales, no un archivo completo. Incluye emergencias distintas de incendios.",
-    "fr": "Heure de publication, pas le début ni la durée de l’événement. Aucune association aux détections satellitaires. Avis RSS actuels uniquement, pas d’archives complètes. Inclut des urgences autres que des incendies.",
-    "it": "Ora di pubblicazione, non inizio o durata dell’evento. Nessuna associazione ai rilevamenti satellitari. Solo avvisi RSS attuali, non un archivio completo. Include emergenze diverse dagli incendi.",
+    "en": "Publication time, not incident start or duration. Not matched to satellite detections. Local retention: 30 days / 1000 notices; not a complete archive. Includes non-fire emergencies.",
+    "hu": "Közzétételi idő, nem az esemény kezdete vagy időtartama. Nincs műholdas észleléshez párosítva. Helyi megőrzés: 30 nap / 1000 közlemény; nem teljes archívum. Nem csak tűzeseteket tartalmaz.",
+    "de": "Veröffentlichungszeit, nicht Beginn oder Dauer des Ereignisses. Keine Zuordnung zu Satellitenerkennungen. Lokale Speicherung: 30 Tage / 1000 Meldungen; kein vollständiges Archiv. Enthält auch andere Notfälle als Brände.",
+    "es": "Hora de publicación, no inicio ni duración del suceso. Sin vinculación a detecciones por satélite. Conservación local: 30 días / 1000 avisos; no es un archivo completo. Incluye emergencias distintas de incendios.",
+    "fr": "Heure de publication, pas le début ni la durée de l’événement. Aucune association aux détections satellitaires. Conservation locale : 30 jours / 1000 avis ; archives incomplètes. Inclut des urgences autres que des incendies.",
+    "it": "Ora di pubblicazione, non inizio o durata dell’evento. Nessuna associazione ai rilevamenti satellitari. Conservazione locale: 30 giorni / 1000 avvisi; archivio incompleto. Include emergenze diverse dagli incendi.",
 }
 
 
@@ -43,7 +43,7 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
         self, hass: HomeAssistant, entry: IgnisConfigEntry, client: OfficialReportClient
     ) -> None:
         async def update() -> dict:
-            result = await client.async_get_notices()
+            result = await client.async_get_archived_notices()
             if result["status"] != "available":
                 raise UpdateFailed("BM OKF RSS is temporarily unavailable")
             return result
@@ -84,7 +84,9 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
                 summary=f"BM OKF · {notice['title']}",
                 start=published,
                 end=end,
-                description=f"{notice['publisher']}\n{notice['url']}\n\n{notes}",
+                description=(f"{notice['publisher']}\n{notice['url']}\n\n{notice.get('description', '')}\n\n{notes}"
+                             f"\nArchive origin: {notice.get('archive_origin', 'rss')}"
+                             f"\nLive RSS: {self.coordinator.data.get('feed_status', 'available')}"),
                 uid=notice["url"],
             ))
         return sorted(events, key=lambda event: event.start)

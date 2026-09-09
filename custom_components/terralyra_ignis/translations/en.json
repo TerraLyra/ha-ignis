@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "import_official_report": {
+      "name": "Import saved BM OKF report",
+      "description": "Save a publication in the local 30-day archive as a manual import. Does not modify fire incidents."
+    },
     "review_official_report": {
       "name": "Review official report matches",
       "description": "Search local incident history using a selected BM OKF fire notice and manually reviewed coordinates and times. Returns candidates only; does not modify incidents."

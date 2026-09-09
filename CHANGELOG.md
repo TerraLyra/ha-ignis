@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.20.0
+
+- Retain fetched BM OKF publications locally across restarts for 30 days, capped
+  at 1000 URLs. Calendar and manual matching can use archived notices even after
+  they leave RSS; live feed health and manual-import provenance remain explicit.
+- Add a validated manual publication import action and an attributed, opt-in
+  Egyek example. Regression tests replay the saved report against two reviewed
+  satellite history samples without mutating incidents or auto-applying date hints.
+
 ## 0.19.0
 
 - Add a response-only official-report review action that compares a selected

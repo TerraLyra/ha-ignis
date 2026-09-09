@@ -1,6 +1,7 @@
 """RSS discovery never invents satellite associations or fire classifications."""
 
 import asyncio
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -121,6 +122,25 @@ async def test_concurrent_requests_share_cache_and_fixed_destination():
     assert session.calls[0][1]["allow_redirects"] is False
     first["notices"][0]["title"] = "mutated"
     assert (await client.async_get_notices())["notices"][0]["title"] != "mutated"
+
+
+@pytest.mark.asyncio
+async def test_archive_is_available_when_live_feed_fails():
+    from custom_components.terralyra_ignis.report_archive import ReportArchive
+
+    store = AsyncMock()
+    store.async_load.return_value = None
+    archive = ReportArchive(store)
+    await archive.async_import({"url": "https://www.katasztrofavedelem.hu/modules/vesz/esemeny/91803",
+                               "title": "Saved report", "published_at": datetime.now(UTC).isoformat()})
+    session = Session(Response(503))
+    client = OfficialReportClient(session, archive)
+    result = await client.async_get_archived_notices()
+    assert result["status"] == "available"
+    assert result["feed_status"] == "unavailable"
+    assert result["notices"][0]["archive_origin"] == "manual_import"
+    assert (await client.async_get_notices())["notices"] == []
+    assert len(session.calls) == 1
 
 
 @pytest.mark.asyncio

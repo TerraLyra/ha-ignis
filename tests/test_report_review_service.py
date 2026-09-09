@@ -21,7 +21,7 @@ def review_action(hass):
     entry.mock_state(hass, ConfigEntryState.LOADED)
     entry.runtime_data = SimpleNamespace(coordinator=SimpleNamespace(data=SimpleNamespace(incident_history=[])))
     client = AsyncMock()
-    client.async_get_notices.return_value = {"status": "available", "notices": [{
+    client.async_get_archived_notices.return_value = {"status": "available", "notices": [{
         "url": "https://www.katasztrofavedelem.hu/modules/vesz/esemeny/123",
         "title": "Test", "publisher": "BM OKF", "published_at": "2026-09-09T14:21:00+02:00",
     }]}
@@ -39,7 +39,28 @@ async def test_response_only_review(hass, review_action):
     result = await hass.services.async_call("terralyra_ignis", "review_official_report", data, blocking=True, return_response=True)
     assert result["candidates"] == []
     assert result["changes_applied"] is False
-    client.async_get_notices.assert_awaited_once_with()
+    client.async_get_archived_notices.assert_awaited_once_with()
+
+
+async def test_archived_report_review_during_feed_outage(hass, review_action):
+    client, data = review_action
+    client.async_get_archived_notices.return_value["feed_status"] = "unavailable"
+    client.async_get_archived_notices.return_value["notices"][0]["archive_origin"] = "manual_import"
+    result = await hass.services.async_call("terralyra_ignis", "review_official_report", data, blocking=True, return_response=True)
+    assert result["feed_status"] == "unavailable"
+    assert result["archive_origin"] == "manual_import"
+    assert result["changes_applied"] is False
+
+
+async def test_import_only_writes_archive(hass, review_action):
+    client, _ = review_action
+    client.archive.async_import.return_value = {"status": "archived"}
+    data = {"url": "https://www.katasztrofavedelem.hu/modules/vesz/esemeny/91803",
+            "title": "Saved report", "published_at": "2026-09-09T14:21:00+02:00"}
+    result = await hass.services.async_call("terralyra_ignis", "import_official_report", data, blocking=True, return_response=True)
+    assert result["status"] == "archived"
+    client.archive.async_import.assert_awaited_once_with(data | {"description": ""})
+    client.async_get_archived_notices.assert_not_called()
 
 
 @pytest.mark.parametrize("change", [
@@ -49,14 +70,14 @@ async def test_invalid_selection_makes_no_network_request(hass, review_action, c
     client, data = review_action
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call("terralyra_ignis", "review_official_report", data | change, blocking=True, return_response=True)
-    client.async_get_notices.assert_not_called()
+    client.async_get_archived_notices.assert_not_called()
 
 
 async def test_fire_confirmation_required(hass, review_action):
     client, data = review_action
     with pytest.raises(vol.Invalid):
         await hass.services.async_call("terralyra_ignis", "review_official_report", data | {"confirm_fire_report": False}, blocking=True, return_response=True)
-    client.async_get_notices.assert_not_called()
+    client.async_get_archived_notices.assert_not_called()
 
 
 @pytest.mark.parametrize("response", [
@@ -64,6 +85,6 @@ async def test_fire_confirmation_required(hass, review_action):
 ])
 async def test_failed_or_expired_feed_does_not_match(hass, review_action, response):
     client, data = review_action
-    client.async_get_notices.return_value = response
+    client.async_get_archived_notices.return_value = response
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call("terralyra_ignis", "review_official_report", data, blocking=True, return_response=True)

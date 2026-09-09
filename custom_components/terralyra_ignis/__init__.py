@@ -15,6 +15,7 @@ from homeassistant.core import (
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
 from .const import (
@@ -61,6 +62,7 @@ from .products.msg_iodc import (
 )
 from .providers.factory import build_provider_pool
 from .repairs import async_sync_coverage_issue
+from .report_archive import ReportArchive
 from .report_review_service import register_report_review
 
 
@@ -83,7 +85,10 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register explicit, response-only diagnostic actions."""
 
-    official_reports = OfficialReportClient(async_get_clientsession(hass))
+    official_reports = OfficialReportClient(
+        async_get_clientsession(hass),
+        ReportArchive(Store(hass, 1, f"{DOMAIN}.official_report_archive")),
+    )
     hass.data.setdefault(DOMAIN, {})["official_report_client"] = official_reports
     register_report_review(hass, official_reports)
 

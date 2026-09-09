@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "import_official_report": {
+      "name": "Gespeicherte BM-OKF-Meldung importieren",
+      "description": "Meldung als manuellen Import im lokalen 30-Tage-Archiv speichern. Ändert keine Brandereignisse."
+    },
     "review_official_report": {
       "name": "Zuordnung offizieller Meldungen prüfen",
       "description": "Sucht mit einer BM-OKF-Brandmeldung und manuell geprüften Orts- und Zeitangaben in lokalen Ereignissen. Gibt nur Kandidaten zurück und verändert keine Ereignisse."

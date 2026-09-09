@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "import_official_report": {
+      "name": "Mentett BM OKF-közlemény importálása",
+      "description": "Közlemény mentése a helyi, 30 napos archívumba kézi importként. Nem módosít tűzeseményeket."
+    },
     "review_official_report": {
       "name": "Hivatalos közlemény párosításának ellenőrzése",
       "description": "Jelölteket keres a helyi tűzelőzményekben egy BM OKF-tűzközleményhez, kézzel ellenőrzött hely és idő alapján. Nem módosítja az eseményeket."

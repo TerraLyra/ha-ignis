@@ -1,0 +1,10 @@
+# Source: BM Országos Katasztrófavédelmi Főigazgatóság (BM OKF).
+# Saved from RSS on 2026-09-09 at 19:51:25 UTC. Explicit manual import only.
+# Original publication date must remain unchanged; import expires after 30 days.
+action: terralyra_ignis.import_official_report
+data:
+  url: https://www.katasztrofavedelem.hu/modules/vesz/esemeny/91803
+  title: Eddig hét hektár égett le Egyeknél
+  published_at: "2026-09-09T14:21:00+02:00"
+  description: >-
+    A Hortobágyi Nemzeti Park területén, Egyek külterületén még tegnap kora este gyulladt meg a nádas, cserjés, bokros, bozótos terület, akkor nagyjából ötven hektáron égett a vegetáció. A tűzoltók szerda hajnalban a rossz látási és terepviszonyok miatt biztonsági okokból felfüggesztették az utómunkálatokat. Az egységek reggel kilenc óta ismét a helyszínen vannak, felkutatták a gócpontokat, a felerősödött szél azonban újra felszította a lángokat. Egyeki önkéntes, illetve mezőkövesdi, tiszaújvárosi, füzesabonyi, hajdúszoboszlói, debreceni és püspökladányi hivatásos tűzoltókat riasztottak a tűzhöz, amelynek kiterjedését drónnal derítik fel. A nagy füst miatt az úttal párhuzamosan haladó vasúti pályán lassítják a vonatokat.

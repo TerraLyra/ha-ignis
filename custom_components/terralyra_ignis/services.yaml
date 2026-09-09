@@ -1,6 +1,27 @@
 get_official_reports:
   name: Get official BM OKF notices
   description: Fetch current Hungarian emergency-notice links with BM OKF attribution. Cached for five minutes. Includes non-fire notices; does not match satellite incidents or create map markers.
+import_official_report:
+  name: Import saved BM OKF report
+  description: Save an attributed report locally as a manual import. Publication must be within the last 30 days. Does not create or change fire incidents.
+  fields:
+    url:
+      required: true
+      selector:
+        text:
+    title:
+      required: true
+      selector:
+        text:
+    published_at:
+      required: true
+      description: Original publication time including timezone, not import time.
+      selector:
+        text:
+    description:
+      selector:
+        text:
+          multiline: true
 review_official_report:
   name: Review official report matches
   description: Read-only candidate search in local incident history. Requires a reviewed fire notice and manually supplied coordinates. No markers or incidents are changed.

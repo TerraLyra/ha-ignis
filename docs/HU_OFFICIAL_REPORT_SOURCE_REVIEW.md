@@ -89,8 +89,8 @@ The publication calendar continues to use publication time unchanged.
 ### Geographic association
 
 `terralyra_ignis.review_official_report` provides a manual, response-only trial.
-Select a loaded configuration entry and a report URL still in the current RSS
-snapshot. Confirm that the notice describes a fire; supply reviewed fire
+Select a loaded configuration entry and a report URL in the current RSS
+snapshot or the local 30-day archive (0.20.0). Confirm that the notice describes a fire; supply reviewed fire
 latitude/longitude and an explicit assumed location uncertainty (0.1–25 km).
 Do not supply a settlement centre as a precise fire position. Optional
 `event_start` and `event_end` must be ISO timestamps with timezones; end requires

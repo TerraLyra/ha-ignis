@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "import_official_report": {
+      "name": "Importar aviso guardado del BM OKF",
+      "description": "Guarda un aviso como importación manual en el archivo local de 30 días. No modifica incendios."
+    },
     "review_official_report": {
       "name": "Revisar coincidencias de avisos oficiales",
       "description": "Busca candidatos en el historial local con un aviso de incendio de BM OKF y ubicación y fechas revisadas manualmente. No modifica incidentes."

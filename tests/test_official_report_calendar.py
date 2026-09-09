@@ -25,7 +25,7 @@ def notice(number=1, published="2026-09-09T09:13:00+00:00"):
 
 def calendar(hass, response):
     client = AsyncMock()
-    client.async_get_notices.return_value = response
+    client.async_get_archived_notices.return_value = response
     entry = MockConfigEntry(domain="terralyra_ignis")
     entry.add_to_hass(hass)
     return OfficialReportCalendar(hass, entry, client), client
@@ -36,7 +36,7 @@ async def test_disabled_by_default_and_no_initial_network(hass):
     assert entity.entity_registry_enabled_default is False
     assert entity.event is None
     assert entity.coordinator.update_interval.total_seconds() == 900
-    client.async_get_notices.assert_not_called()
+    client.async_get_archived_notices.assert_not_called()
 
 
 async def test_publications_have_attribution_stable_id_and_explicit_limitations(hass):
@@ -55,7 +55,7 @@ async def test_publications_have_attribution_stable_id_and_explicit_limitations(
     assert "nem teljes archívum" in event.description
     assert (event.end - event.start).total_seconds() == 60
     assert entity.event is None
-    client.async_get_notices.assert_awaited_once()
+    client.async_get_archived_notices.assert_awaited_once()
     await entity.coordinator.async_shutdown()
 
 
@@ -89,4 +89,14 @@ async def test_empty_feed_and_unsupported_language(hass):
     assert await entity.async_get_events(
         hass, datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC)
     ) == []
+    await entity.coordinator.async_shutdown()
+
+
+async def test_archived_calendar_during_feed_outage(hass):
+    item = notice() | {"archive_origin": "manual_import", "description": "Saved text"}
+    entity, _ = calendar(hass, {"status": "available", "feed_status": "unavailable", "notices": [item]})
+    events = await entity.async_get_events(hass, datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC))
+    assert "manual_import" in events[0].description
+    assert "Live RSS: unavailable" in events[0].description
+    assert "Saved text" in events[0].description
     await entity.coordinator.async_shutdown()

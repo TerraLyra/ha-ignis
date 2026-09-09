@@ -88,8 +88,9 @@ def parse_notices(payload: bytes) -> list[dict[str, str]]:
 class OfficialReportClient:
     """Share a five-minute cache and failure cooldown across manual calls."""
 
-    def __init__(self, session: aiohttp.ClientSession) -> None:
+    def __init__(self, session: aiohttp.ClientSession, archive=None) -> None:
         self._session = session
+        self.archive = archive
         self._lock = asyncio.Lock()
         self._next_attempt = 0.0
         self._notices: list[dict[str, str]] | None = None
@@ -114,6 +115,8 @@ class OfficialReportClient:
                                 if len(payload) > MAX_BYTES:
                                     raise ReportFeedError("Official report feed exceeds the size limit")
                     self._notices = parse_notices(bytes(payload))
+                    if self.archive is not None:
+                        await self.archive.async_merge(self._notices)
                     self._fetched_at = datetime.now(UTC).isoformat()
                     self._failed = False
                 except (aiohttp.ClientError, TimeoutError, ReportFeedError):
@@ -130,3 +133,16 @@ class OfficialReportClient:
                 # Never return an old successful response as current during failure.
                 "notices": [] if self._failed else [dict(n) for n in self._notices or ()],
             }
+
+    async def async_get_archived_notices(self) -> dict:
+        """Keep live-feed health separate from historical report availability."""
+        result = await self.async_get_notices()
+        if self.archive is None:
+            return result
+        notices = await self.archive.async_merge()
+        return {
+            **result, "feed_status": result["status"],
+            "status": "available" if notices or result["status"] == "available" else "unavailable",
+            "scope": "Locally retained publications: 30 days, at most 1000; not a complete archive",
+            "notices": notices,
+        }

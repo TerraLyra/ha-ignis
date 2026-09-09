@@ -793,16 +793,18 @@ action's five-minute cache; no monitored-location data is sent to BM OKF.
 Each entry contains BM OKF attribution and the original notice URL. The time is
 the **publication time**, represented by a one-minute display slot, not the
 incident's start or duration. This is a separate publication calendar, not the
-satellite incident-history calendar. It includes non-fire emergencies and only
-the current RSS snapshot: notices disappear when they leave the feed. There is
-no persistent news archive or automatic satellite association. A feed failure
-marks the calendar unavailable instead of presenting an empty success.
+satellite incident-history calendar. It includes non-fire emergencies. Publications
+seen while fetching are now retained locally for 30 days from publication, up to
+1000 URLs, across restarts. This is not a complete historical feed. Archived entries
+remain readable during feed outages with live RSS health shown separately.
+There is no automatic satellite association. No background collection starts
+unless the calendar is enabled; manual discovery also archives fetched notices.
 
 ### Manual report matching review (0.19.0)
 
 Use **Developer Tools → Actions → Review official report matches**
 (`terralyra_ignis.review_official_report`). Select the IGNIS configuration and
-an original BM OKF event URL from the current RSS response. Confirm the notice
+an original BM OKF event URL from the current RSS response or local archive. Confirm the notice
 describes a fire, then provide reviewed fire coordinates and assumed location
 uncertainty. Optional event start/end values must include a timezone; otherwise
 the action uses publication time. It returns candidate incident IDs, distances
@@ -811,6 +813,18 @@ and reasons without changing incidents, markers or notifications.
 Extracted previous-day date hints require review and are never applied
 automatically. This is not automatic news-to-fire matching. See the
 [review instructions](docs/HU_OFFICIAL_REPORT_SOURCE_REVIEW.md) for limitations.
+
+### Importing a saved publication
+
+`terralyra_ignis.import_official_report` accepts an original BM OKF `url`, `title`,
+timezone-aware `published_at` and optional plain-text `description` (4000 characters).
+It writes only the local publication archive, labels the record `manual_import`,
+and never changes satellite incidents. The original publication must be within
+the last 30 days; do not substitute the import date. Actual RSS observations take
+precedence over manual imports. Retention pruning occurs on archive access.
+The [saved Egyek example](examples/egyek-report-import.yaml) preserves the September
+9 publication, including its source attribution and original text. Import explicitly;
+it is never seeded into installations automatically.
 
 ## Validation and release readiness
 

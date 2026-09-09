@@ -394,6 +394,10 @@
     }
   },
   "services": {
+    "import_official_report": {
+      "name": "Importer un avis BM OKF sauvegardé",
+      "description": "Enregistre un avis comme importation manuelle dans les archives locales de 30 jours. Ne modifie pas les incendies."
+    },
     "review_official_report": {
       "name": "Examiner les correspondances des avis officiels",
       "description": "Recherche des candidats dans l’historique local avec un avis d’incendie BM OKF et des coordonnées et dates vérifiées manuellement. Ne modifie aucun incident."
