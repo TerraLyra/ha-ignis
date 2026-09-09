@@ -102,8 +102,10 @@ distances, relations, reasons and skipped-record counts, and applies no changes.
 `probable` is a heuristic relation, not a calibrated probability or official
 confirmation. No result does not prove there was no fire; history or RSS may be
 incomplete. The existing RSS cache bounds requests; coordinates/history remain
-local. An expired notice requires a future saved-report workflow, not automatic
-scraping or manual insertion into the live integration.
+local. Version 0.20.0 retains observed publications for 30 days (1000 URLs) and
+supports explicit, validated manual import of saved publications, marked with
+their origin. See the [Egyek archive test](EGYEK_ARCHIVE_TEST.md). This does not
+scrape event pages or insert fire detections.
 
 Clarify with the provider:
 
