@@ -391,6 +391,10 @@
     }
   },
   "services": {
+    "get_official_reports": {
+      "name": "Get official BM OKF notices",
+      "description": "Returns current Hungarian emergency-notice links with BM OKF attribution. Cached for five minutes. Includes non-fire notices; does not match satellite incidents or create map markers."
+    },
     "probe_msg_iodc": {
       "name": "Inspect MSG-IODC compatibility",
       "description": "Downloads one current, size-limited MSG-IODC List Product using the saved LSA SAF account and returns metadata only. It does not change automatic source assignment, retain the file, or read fire-observation values.",

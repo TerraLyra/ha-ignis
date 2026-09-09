@@ -391,6 +391,10 @@
     }
   },
   "services": {
+    "get_official_reports": {
+      "name": "Hivatalos BM OKF-közlemények lekérése",
+      "description": "Aktuális magyar veszélyhelyzeti közlemények hivatkozásai BM OKF-forrásmegjelöléssel, ötperces gyorsítótárral. Nem csak tűzeseteket tartalmaz; nem párosít műholdas észleléseket, és nem hoz létre térképjelölőket."
+    },
     "probe_msg_iodc": {
       "name": "MSG-IODC kompatibilitás ellenőrzése",
       "description": "A mentett LSA SAF-fiókkal letölt egy aktuális, méretkorlátos MSG-IODC List Product fájlt, és kizárólag metaadatokat ad vissza. Nem módosítja az automatikus forráshozzárendelést, nem őrzi meg a fájlt, és nem olvassa ki a tűzészlelési értékeket.",

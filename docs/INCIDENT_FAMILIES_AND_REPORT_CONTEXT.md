@@ -115,6 +115,9 @@ opt-in and should not scrape sites whose terms or controls prohibit it.
 `report_context.py` provides a local, immutable association API for adapter-
 supplied fire reports and existing satellite incidents. It performs no network
 requests and is not yet connected to Home Assistant entities or feed polling.
+The separate `get_official_reports` action now supports on-demand BM OKF RSS
+discovery with attribution; its notices remain unmatched because RSS provides
+no coordinates. It does not call this association API.
 It retains publisher, URL, language, publication and event dates, spatial
 uncertainty, and explicit match reasons. Results are `possible` or `probable`,
 never confirmation of a fire. Publication-only dates, broad time intervals,
@@ -131,6 +134,11 @@ The September 8 Egyek news example remains an unverified real-world candidate;
 the unit tests use synthetic coordinates and do not claim to validate that fire.
 Next: select and review one structured official feed, then add opt-in polling,
 persistence and entity/calendar presentation around this API.
+
+The first [Hungarian official-source review](HU_OFFICIAL_REPORT_SOURCE_REVIEW.md)
+verified a reusable national RSS feed, but found that coordinates require a
+separate event-page interface whose reuse and stability need clarification.
+Automatic geographic report association remains disabled pending that gate.
 
 1. Ship incident-family consolidation with replay and persistence tests.
 2. Collect diagnostics on family sizes and extents without sending telemetry.
