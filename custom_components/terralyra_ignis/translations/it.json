@@ -391,6 +391,10 @@
     }
   },
   "services": {
+    "get_official_reports": {
+      "name": "Ottieni avvisi ufficiali BM OKF",
+      "description": "Restituisce collegamenti agli avvisi attuali di emergenza ungheresi con attribuzione a BM OKF. Cache di cinque minuti. Include eventi diversi dagli incendi; non associa rilevamenti satellitari e non crea indicatori sulla mappa."
+    },
     "probe_msg_iodc": {
       "name": "Verifica compatibilità MSG-IODC",
       "description": "Scarica con l’account LSA SAF salvato un List Product MSG-IODC corrente e con dimensione limitata, restituendo solo i metadati. Non modifica l’assegnazione automatica delle sorgenti, non conserva il file e non legge i valori delle osservazioni degli incendi.",

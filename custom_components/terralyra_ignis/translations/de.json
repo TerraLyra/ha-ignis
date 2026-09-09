@@ -391,6 +391,10 @@
     }
   },
   "services": {
+    "get_official_reports": {
+      "name": "Offizielle BM-OKF-Mitteilungen abrufen",
+      "description": "Gibt aktuelle ungarische Ereignismeldungen mit Links und BM-OKF-Quellenangabe zurück. Fünf Minuten zwischengespeichert. Enthält auch andere Ereignisse als Brände; keine Zuordnung zu Satellitenerkennungen und keine Kartenmarkierungen."
+    },
     "probe_msg_iodc": {
       "name": "MSG-IODC-Kompatibilität prüfen",
       "description": "Lädt mit dem gespeicherten LSA-SAF-Konto ein aktuelles, größenbegrenztes MSG-IODC List Product und gibt nur Metadaten zurück. Die automatische Quellenzuordnung wird nicht geändert, die Datei nicht gespeichert und es werden keine Brandbeobachtungswerte gelesen.",
