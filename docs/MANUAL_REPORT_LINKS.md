@@ -1,6 +1,6 @@
 # Kézzel jóváhagyott hírkapcsolatok ellenőrzése
 
-Ez a funkció még kiadatlan fejlesztés. Telepített változatban csak a kiadás után használható.
+Ez a funkció a 0.21.0 verziótól használható. Frissítés után indítsd újra a Home Assistantot.
 
 1. Az `terralyra_ignis.review_official_report` művelettel kérj friss jelöltlistát.
    A koordináták a tűz feltételezett helyét jelöljék, ne a tűzoltóság székhelyét.

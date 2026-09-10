@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.21.0
+
 - Enrich official-report review candidates with coordinates, actual first/last
   detection times, providers, satellites and a per-candidate review token.
 - Add explicit, reversible manual report links in a separate bounded local

@@ -824,7 +824,7 @@ Extracted previous-day date hints require review and are never applied
 automatically. This is not automatic news-to-fire matching. See the
 [review instructions](docs/HU_OFFICIAL_REPORT_SOURCE_REVIEW.md) for limitations.
 
-### Saving one manually reviewed link (unreleased)
+### Saving one manually reviewed link (0.21.0)
 
 After inspecting a candidate, use `terralyra_ignis.save_official_report_link`.
 Repeat the exact review inputs, select its `incident_id`, copy its `review_token`,
