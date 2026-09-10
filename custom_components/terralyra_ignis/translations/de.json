@@ -205,6 +205,11 @@
     }
   },
   "entity": {
+    "geo_location": {
+      "monitoring_area": {
+        "name": "Ort: {location_name} — Aktivbrand-Überwachungsbereich"
+      }
+    },
     "sensor": {
       "nearest_fire": {
         "name": "Übersicht — Nächstes aktives Feuer"

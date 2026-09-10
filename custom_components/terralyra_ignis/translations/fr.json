@@ -205,6 +205,11 @@
     }
   },
   "entity": {
+    "geo_location": {
+      "monitoring_area": {
+        "name": "Lieu : {location_name} — Zone de surveillance des feux actifs"
+      }
+    },
     "sensor": {
       "nearest_fire": {
         "name": "Vue d’ensemble — Feu actif le plus proche"

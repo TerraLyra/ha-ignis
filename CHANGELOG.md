@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.23.0
+
+- Add one map entity for every enabled monitored location. Its native Home
+  Assistant map decoration shows the configured active-fire radius as a circle,
+  in metres internally and kilometres in the readable attributes.
+- Publish monitoring areas under the separate
+  `terralyra_ignis_monitoring_areas` geolocation source, so existing fire maps
+  remain unchanged and users can independently show or hide the circles.
+- Remove stale area entities when a location is deleted or disabled. These
+  circles describe configured monitoring boundaries only; they are not fire
+  extents, satellite footprints, positioning uncertainty, or safety zones.
+
 ## 0.22.0
 
 - Add an isolated, tested GDACS wildfire-context parser with bounded page sizes,

@@ -182,6 +182,11 @@
     }
   },
   "entity": {
+    "geo_location": {
+      "monitoring_area": {
+        "name": "Location: {location_name} — Active-fire monitoring area"
+      }
+    },
     "sensor": {
       "nearest_fire": {
         "name": "Overview — Nearest active fire"

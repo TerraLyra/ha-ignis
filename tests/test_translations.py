@@ -51,6 +51,10 @@ LOCATION_ENTITY_KEYS = {
     "monitored_location_status",
     "monitored_location_next_update",
 }
+LOCATION_PLATFORM_ENTITIES = {
+    "geo_location": {"monitoring_area"},
+    "sensor": LOCATION_ENTITY_KEYS,
+}
 HOME_ENTITY_PREFIXES = {
     "de": "Ort: Zuhause — ",
     "en": "Location: Home — ",
@@ -170,14 +174,18 @@ def test_location_entities_share_a_localized_sorting_prefix() -> None:
         translation = json.loads(
             (TRANSLATIONS / f"{language}.json").read_text(encoding="utf-8")
         )
-        sensors = translation["entity"]["sensor"]
-        for key in LOCATION_ENTITY_KEYS:
-            assert sensors[key]["name"].startswith(prefix), (language, key)
+        for platform, keys in LOCATION_PLATFORM_ENTITIES.items():
+            entities = translation["entity"][platform]
+            for key in keys:
+                assert entities[key]["name"].startswith(prefix), (language, key)
 
     source = json.loads(SOURCE_STRINGS.read_text(encoding="utf-8"))
-    sensors = source["entity"]["sensor"]
-    for key in LOCATION_ENTITY_KEYS:
-        assert sensors[key]["name"].startswith(LOCATION_ENTITY_PREFIXES["en"])
+    for platform, keys in LOCATION_PLATFORM_ENTITIES.items():
+        entities = source["entity"][platform]
+        for key in keys:
+            assert entities[key]["name"].startswith(
+                LOCATION_ENTITY_PREFIXES["en"]
+            )
 
 
 def test_entity_names_expose_their_scope_before_the_metric() -> None:

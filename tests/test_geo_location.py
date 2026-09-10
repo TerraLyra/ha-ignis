@@ -23,6 +23,7 @@ from custom_components.terralyra_ignis.const import (
     ATTR_SOURCE_URL,
     ATTR_TRACK_ID,
     DOMAIN,
+    MONITORING_AREA_SOURCE,
 )
 from custom_components.terralyra_ignis.coordinator import (
     CoordinatorData,
@@ -32,6 +33,7 @@ from custom_components.terralyra_ignis.coordinator import (
 )
 from custom_components.terralyra_ignis.geo_location import (
     IgnisFireLocation,
+    IgnisMonitoringArea,
     _async_remove_expired_entity,
     _display_name,
     _suggested_object_id,
@@ -106,6 +108,7 @@ async def test_map_removes_inactive_tracks_but_retains_history_data() -> None:
     ended = _cluster(track_id="ended", lifecycle=FireLifecycle.ENDED)
     coordinator = SimpleNamespace(
         data=SimpleNamespace(tracked_fires=[active, inactive, ended]),
+        monitored_locations=(),
         async_add_listener=Mock(),
     )
     entry = SimpleNamespace(
@@ -138,6 +141,102 @@ async def test_map_removes_inactive_tracks_but_retains_history_data() -> None:
         active.lifecycle = FireLifecycle.CONTINUING
         coordinator.async_add_listener.call_args.args[0]()
         assert add_entities.call_count == 2
+
+
+def test_monitoring_area_uses_location_radius_as_map_decoration() -> None:
+    """The native map interprets GPS accuracy as a circle radius in metres."""
+    coordinator = Mock()
+    entry = SimpleNamespace(
+        entry_id="test",
+        data={},
+        runtime_data=SimpleNamespace(coordinator=coordinator),
+    )
+    location = MonitoredLocation(
+        "home", "Home", 47.5, 19.04, 25.0, True, "home_assistant"
+    )
+
+    entity = IgnisMonitoringArea(
+        entry,
+        location,
+        home_latitude=47.5,
+        home_longitude=19.04,
+    )
+
+    assert entity.source == MONITORING_AREA_SOURCE
+    assert entity.latitude == 47.5
+    assert entity.longitude == 19.04
+    assert entity.distance == 0.0
+    assert entity.translation_key == "monitoring_area"
+    assert entity.translation_placeholders == {"location_name": "Home"}
+    assert entity.extra_state_attributes == {
+        "gps_accuracy": 25000.0,
+        "monitoring_location_id": "home",
+        "monitoring_radius_km": 25.0,
+        "map_circle_meaning": "active_fire_monitoring_area",
+    }
+
+
+async def test_map_adds_one_area_per_enabled_monitored_location() -> None:
+    enabled = MonitoredLocation(
+        "home", "Home", 47.5, 19.04, 25.0, True, "home_assistant"
+    )
+    disabled = MonitoredLocation(
+        "tokyo", "Tokyo", 35.68, 139.76, 50.0, False, "manual"
+    )
+    coordinator = SimpleNamespace(
+        data=SimpleNamespace(tracked_fires=[]),
+        monitored_locations=(enabled, disabled),
+        async_add_listener=Mock(),
+    )
+    entry = SimpleNamespace(
+        entry_id="test",
+        runtime_data=SimpleNamespace(coordinator=coordinator),
+        async_on_unload=Mock(),
+    )
+    hass = SimpleNamespace(config=SimpleNamespace(latitude=47.5, longitude=19.04))
+    registry = Mock()
+    add_entities = Mock()
+
+    with (
+        patch("custom_components.terralyra_ignis.geo_location.er.async_get", return_value=registry),
+        patch("custom_components.terralyra_ignis.geo_location.er.async_entries_for_config_entry", return_value=[]),
+    ):
+        await async_setup_entry(hass, entry, add_entities)
+
+    area = add_entities.call_args_list[0].args[0][0]
+    assert isinstance(area, IgnisMonitoringArea)
+    assert area.extra_state_attributes["monitoring_location_id"] == "home"
+    assert len(add_entities.call_args_list) == 1
+
+
+async def test_map_removes_area_for_deleted_or_disabled_location() -> None:
+    coordinator = SimpleNamespace(
+        data=SimpleNamespace(tracked_fires=[]),
+        monitored_locations=(),
+        async_add_listener=Mock(),
+    )
+    entry = SimpleNamespace(
+        entry_id="test",
+        runtime_data=SimpleNamespace(coordinator=coordinator),
+        async_on_unload=Mock(),
+    )
+    stale = SimpleNamespace(
+        domain="geo_location",
+        platform=DOMAIN,
+        unique_id="test_monitoring_area_removed",
+        entity_id="geo_location.removed_monitoring_area",
+    )
+    registry = Mock()
+
+    with (
+        patch("custom_components.terralyra_ignis.geo_location.er.async_get", return_value=registry),
+        patch("custom_components.terralyra_ignis.geo_location.er.async_entries_for_config_entry", return_value=[stale]),
+    ):
+        await async_setup_entry(Mock(), entry, Mock())
+
+    registry.async_remove.assert_called_once_with(
+        "geo_location.removed_monitoring_area"
+    )
 
 
 def test_cluster_attributes_include_tracking_metadata() -> None:

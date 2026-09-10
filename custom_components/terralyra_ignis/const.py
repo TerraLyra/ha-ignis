@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 DOMAIN = "terralyra_ignis"
+MONITORING_AREA_SOURCE = f"{DOMAIN}_monitoring_areas"
 NAME = "TerraLyra IGNIS"
 MANUFACTURER = "TerraLyra open-source project"
 SERVICE_PROBE_MSG_IODC = "probe_msg_iodc"

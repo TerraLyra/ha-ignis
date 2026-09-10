@@ -194,6 +194,33 @@ text label. Clicking a marker shows its exact latitude and longitude together
 with the fire attributes. FIRMS-only entity names begin with **NASA FIRMS ·**
 so the source is also visible in the entity dialog.
 
+To overlay the configured active-fire monitoring radii, also select the
+`terralyra_ignis_monitoring_areas` geolocation source. For consistent circle
+visibility, disable marker grouping and keep the area centers out of automatic
+map fitting:
+
+```yaml
+type: map
+geo_location_sources:
+  - source: terralyra_ignis
+    label_mode: icon
+  - source: terralyra_ignis_monitoring_areas
+    label_mode: icon
+    focus: false
+cluster: false
+hours_to_show: 24
+```
+
+Each enabled location receives a center marker and a circle whose radius follows
+its **Active-fire monitoring radius** setting. The circle updates after the
+integration reload triggered by a location or radius change. It represents only
+the configured search and alert boundary—not a fire perimeter, satellite
+coverage footprint, location uncertainty, evacuation area, or safety guarantee.
+Home Assistant's native map currently consumes its generic GPS-accuracy circle
+decoration for this overlay, so the raw compatibility attribute is named
+`gps_accuracy`; the explicit `monitoring_radius_km` and `map_circle_meaning`
+attributes state the actual meaning.
+
 The integration resolves the nearest settlement locally from its bundled
 GeoNames `cities500` database. It sends no fire or Home coordinates to an
 external geocoding service, has no lookup quota, and remains available without

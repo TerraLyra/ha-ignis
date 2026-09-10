@@ -5,21 +5,24 @@ from collections import Counter
 from typing import Any, override
 
 from homeassistant.components.geo_location import GeolocationEvent
-from homeassistant.const import UnitOfLength
+from homeassistant.const import ATTR_GPS_ACCURACY, UnitOfLength
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import IgnisConfigEntry
+from .clustering import haversine_km
 from .const import (
     ATTR_PRODUCT_TIME,
     ATTR_PROVIDER_ATTRIBUTION,
     ATTR_SOURCE_URL,
     DOMAIN,
+    MONITORING_AREA_SOURCE,
 )
 from .coordinator import FireCluster
 from .entity import IgnisEntity
 from .models import FireLifecycle
+from .monitoring import MonitoredLocation
 
 
 @callback
@@ -47,6 +50,11 @@ async def async_setup_entry(
     """Set up and maintain one map entity per active fire cluster."""
     coordinator = entry.runtime_data.coordinator
     entities: dict[str, IgnisFireLocation] = {}
+    monitored_locations = {
+        location.id: location
+        for location in coordinator.monitored_locations
+        if location.enabled
+    }
 
     def active_clusters() -> dict[str, FireCluster]:
         data = coordinator.data
@@ -61,18 +69,40 @@ async def async_setup_entry(
     active_unique_ids = {
         f"{entry.entry_id}_fire_{track_id}" for track_id in active_clusters()
     }
+    active_area_unique_ids = {
+        f"{entry.entry_id}_monitoring_area_{location_id}"
+        for location_id in monitored_locations
+    }
     prefix = f"{entry.entry_id}_fire_"
+    area_prefix = f"{entry.entry_id}_monitoring_area_"
     for registry_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
         if (
             registry_entry.domain != "geo_location"
             or registry_entry.platform != DOMAIN
-            or not registry_entry.unique_id.startswith(prefix)
         ):
             continue
-        if registry_entry.unique_id not in active_unique_ids:
+        if registry_entry.unique_id.startswith(prefix):
+            current_unique_ids = active_unique_ids
+        elif registry_entry.unique_id.startswith(area_prefix):
+            current_unique_ids = active_area_unique_ids
+        else:
+            continue
+        if registry_entry.unique_id not in current_unique_ids:
             registry.async_remove(registry_entry.entity_id)
         elif registry_entry.device_id is not None:
             registry.async_update_entity(registry_entry.entity_id, device_id=None)
+
+    area_entities = [
+        IgnisMonitoringArea(
+            entry,
+            location,
+            home_latitude=float(hass.config.latitude),
+            home_longitude=float(hass.config.longitude),
+        )
+        for location in monitored_locations.values()
+    ]
+    if area_entities:
+        async_add_entities(area_entities)
 
     @callback
     def async_sync_entities() -> None:
@@ -102,6 +132,66 @@ async def async_setup_entry(
 
     entry.async_on_unload(coordinator.async_add_listener(async_sync_entities))
     async_sync_entities()
+
+
+class IgnisMonitoringArea(IgnisEntity, GeolocationEvent):
+    """A monitored location whose GPS-accuracy decoration shows its radius."""
+
+    _attr_should_poll = False
+    _attr_source = MONITORING_AREA_SOURCE
+    _attr_unit_of_measurement = UnitOfLength.KILOMETERS
+    _attr_icon = "mdi:map-marker-radius-outline"
+    _attr_translation_key = "monitoring_area"
+
+    def __init__(
+        self,
+        entry: IgnisConfigEntry,
+        location: MonitoredLocation,
+        *,
+        home_latitude: float,
+        home_longitude: float,
+    ) -> None:
+        super().__init__(entry)
+        self._attr_device_info = None
+        self._location = location
+        self._distance_km = haversine_km(
+            home_latitude,
+            home_longitude,
+            location.latitude,
+            location.longitude,
+        )
+        self._attr_unique_id = (
+            f"{entry.entry_id}_monitoring_area_{location.id}"
+        )
+        self._attr_suggested_object_id = (
+            f"{DOMAIN}_monitoring_area_{location.id}"
+        )
+        self._attr_translation_placeholders = {"location_name": location.name}
+
+    @property
+    @override
+    def distance(self) -> float:
+        return self._distance_km
+
+    @property
+    @override
+    def latitude(self) -> float:
+        return self._location.latitude
+
+    @property
+    @override
+    def longitude(self) -> float:
+        return self._location.longitude
+
+    @property
+    @override
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            ATTR_GPS_ACCURACY: self._location.radius_km * 1000.0,
+            "monitoring_location_id": self._location.id,
+            "monitoring_radius_km": self._location.radius_km,
+            "map_circle_meaning": "active_fire_monitoring_area",
+        }
 
 
 class IgnisFireLocation(IgnisEntity, GeolocationEvent):
