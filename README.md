@@ -374,6 +374,15 @@ counts and stable provider-ID lists for Home Assistant automations. Each
 source-health entry also includes the last product and receipt timestamps,
 failure category, consecutive-failure count and next retry time when known.
 
+The additional **Location: &lt;name&gt; — Active-fire observation** sensor explains
+what the current map result means. It distinguishes active detections, no
+active detections with full source availability, no detections under limited
+coverage, startup and complete data unavailability. Attributes list the exact
+fresh, delayed, unavailable and initializing source counts plus stable reason
+codes. `No active detections` is explicitly an observation result, never an
+all-clear or confirmation that no fire exists; clouds, smoke, tree cover,
+satellite timing and detection thresholds can still hide a fire.
+
 Entity display names expose their scope before the metric so alphabetical Home
 Assistant lists remain readable. `Location: <name> —` identifies location-bound
 values, `Overview —` combines all enabled monitored locations, and `Sources —`

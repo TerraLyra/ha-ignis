@@ -263,6 +263,16 @@
           "unavailable": "No disponible"
         }
       },
+      "monitored_location_observation": {
+        "name": "Ubicación: {location_name} — Observación de incendios activos",
+        "state": {
+          "detections_present": "Se muestran detecciones activas",
+          "no_detections": "Sin detecciones activas",
+          "no_detections_limited_coverage": "Sin detecciones — cobertura limitada",
+          "awaiting_data": "Esperando datos de observación",
+          "data_unavailable": "Observación no disponible"
+        }
+      },
       "monitored_location_next_update": {
         "name": "Ubicación: {location_name} — Próxima actualización prevista de incendios activos"
       },

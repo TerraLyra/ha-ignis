@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.24.0
+
+- Add a location-scoped active-fire observation sensor that distinguishes
+  current detections, an observation with no active detections, reduced source
+  coverage, startup and complete data unavailability. Its stable reason codes
+  expose delayed, unavailable and initializing sources without treating an
+  empty map as an all-clear.
+- Align per-location active incident counts with the markers actually shown on
+  the map by excluding inactive and ended tracks from the active summary.
+
 ## 0.23.0
 
 - Add one map entity for every enabled monitored location. Its native Home

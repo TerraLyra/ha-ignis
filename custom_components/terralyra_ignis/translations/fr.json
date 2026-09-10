@@ -263,6 +263,16 @@
           "unavailable": "Indisponible"
         }
       },
+      "monitored_location_observation": {
+        "name": "Lieu : {location_name} — Observation des feux actifs",
+        "state": {
+          "detections_present": "Détections actives affichées",
+          "no_detections": "Aucune détection active",
+          "no_detections_limited_coverage": "Aucune détection — couverture limitée",
+          "awaiting_data": "En attente de données d’observation",
+          "data_unavailable": "Observation indisponible"
+        }
+      },
       "monitored_location_next_update": {
         "name": "Lieu : {location_name} — Prochaine mise à jour attendue des feux actifs"
       },

@@ -263,6 +263,16 @@
           "unavailable": "Nicht verfügbar"
         }
       },
+      "monitored_location_observation": {
+        "name": "Ort: {location_name} — Aktivbrandbeobachtung",
+        "state": {
+          "detections_present": "Aktive Erkennungen werden angezeigt",
+          "no_detections": "Keine aktiven Erkennungen",
+          "no_detections_limited_coverage": "Keine Erkennungen — eingeschränkte Abdeckung",
+          "awaiting_data": "Warten auf Beobachtungsdaten",
+          "data_unavailable": "Beobachtung nicht verfügbar"
+        }
+      },
       "monitored_location_next_update": {
         "name": "Ort: {location_name} — Nächste erwartete Aktualisierung aktiver Brände"
       },

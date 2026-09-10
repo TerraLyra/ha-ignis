@@ -234,6 +234,16 @@
         "name": "Location: {location_name} — Monitoring status",
         "state": {"available": "All sources available", "degraded": "Available with delays", "partial": "Partially available", "initializing": "Initializing", "unavailable": "Unavailable"}
       },
+      "monitored_location_observation": {
+        "name": "Location: {location_name} — Active-fire observation",
+        "state": {
+          "detections_present": "Active detections shown",
+          "no_detections": "No active detections",
+          "no_detections_limited_coverage": "No detections — limited coverage",
+          "awaiting_data": "Awaiting observation data",
+          "data_unavailable": "Observation unavailable"
+        }
+      },
       "monitored_location_next_update": {
         "name": "Location: {location_name} — Next expected active-fire update"
       },

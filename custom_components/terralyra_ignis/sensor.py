@@ -34,7 +34,7 @@ from .entity import (
     IgnisLandSurfaceTemperatureEntity,
 )
 from .evidence import FireEvidenceAssessment, assess_fire_evidence
-from .models import ProviderStatus
+from .models import FireLifecycle, ProviderStatus
 from .observation_schedule import location_update_estimates, next_usable_update
 from .products.fire_risk import WMS_URL
 from .products.lst import WMS_URL as LST_WMS_URL
@@ -71,6 +71,9 @@ async def async_setup_entry(
     ]
     entities.extend(MonitoredLocationSourcesSensor(entry, plan) for plan in location_plans)
     entities.extend(MonitoredLocationStatusSensor(entry, plan) for plan in location_plans)
+    entities.extend(
+        MonitoredLocationObservationSensor(entry, plan) for plan in location_plans
+    )
     locations_by_id = {
         location.id: location
         for location in entry.runtime_data.coordinator.monitored_locations
@@ -97,6 +100,7 @@ def _remove_orphaned_location_entities(
     prefixes = (
         f"{entry.entry_id}_location_sources_",
         f"{entry.entry_id}_location_status_",
+        f"{entry.entry_id}_location_observation_",
         f"{entry.entry_id}_location_next_update_",
     )
     expected_unique_ids = {
@@ -540,6 +544,63 @@ class MonitoredLocationStatusSensor(IgnisEntity, SensorEntity):
         }
 
 
+class MonitoredLocationObservationSensor(IgnisEntity, SensorEntity):
+    """Explain what an empty active-fire map means for one location."""
+
+    _attr_translation_key = "monitored_location_observation"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = [
+        "detections_present",
+        "no_detections",
+        "no_detections_limited_coverage",
+        "awaiting_data",
+        "data_unavailable",
+    ]
+    _attr_icon = "mdi:map-search-outline"
+
+    def __init__(self, entry: IgnisConfigEntry, plan: LocationSourcePlan) -> None:
+        super().__init__(entry)
+        self._plan = plan
+        self._attr_unique_id = (
+            f"{entry.entry_id}_location_observation_{plan.location_id}"
+        )
+        self._attr_translation_placeholders = {"location_name": plan.location_name}
+
+    def _assessment(self) -> tuple[str, str, list[dict[str, Any]], dict[str, Any]]:
+        status, assignments = _location_operational_status(
+            self._plan,
+            getattr(getattr(self.coordinator, "provider", None), "health", ()),
+        )
+        incidents = _location_incident_summary(
+            self._plan.location_id, self.coordinator.data
+        )
+        state = _location_observation_state(status, incidents["active_incidents"])
+        return state, status, assignments, incidents
+
+    @property
+    def native_value(self) -> str:
+        state, _, _, _ = self._assessment()
+        return state
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        state, status, assignments, incidents = self._assessment()
+        health = _location_health_summary(assignments)
+        reasons = _location_observation_reasons(state, health)
+        return {
+            "location_id": self._plan.location_id,
+            "location_name": self._plan.location_name,
+            "map_source": "terralyra_ignis",
+            "observation_state": state,
+            "coverage_status": status,
+            **incidents,
+            **health,
+            "reasons": reasons,
+            "absence_is_not_all_clear": incidents["active_incidents"] == 0,
+            "assessment": "satellite_observation_summary_not_fire_safety_status",
+        }
+
+
 class MonitoredLocationNextUpdateSensor(IgnisEntity, SensorEntity):
     """Expose a qualified next-update estimate for one monitored location."""
 
@@ -703,13 +764,14 @@ def _isoformat_or_none(value: Any) -> str | None:
 
 
 def _location_incident_summary(location_id: str, data: Any) -> dict[str, int]:
-    """Summarize visible incidents and independent corroboration for a location."""
+    """Summarize map-visible incidents and corroboration for a location."""
     if data is None:
         return {"active_incidents": 0, "multi_source_incidents": 0}
     incidents = [
         cluster
         for cluster in data.tracked_fires
-        if any(
+        if cluster.lifecycle in (FireLifecycle.NEW, FireLifecycle.CONTINUING)
+        and any(
             match.location_id == location_id and match.inside_radius
             for match in cluster.location_matches
         )
@@ -720,6 +782,38 @@ def _location_incident_summary(location_id: str, data: Any) -> dict[str, int]:
             cluster.confirmation_level.value == "multi_source" for cluster in incidents
         ),
     }
+
+
+def _location_observation_state(status: str, active_incidents: int) -> str:
+    """Return a cautious, map-oriented observation state."""
+    if active_incidents:
+        return "detections_present"
+    if status == "available":
+        return "no_detections"
+    if status in {"degraded", "partial"}:
+        return "no_detections_limited_coverage"
+    if status == "initializing":
+        return "awaiting_data"
+    return "data_unavailable"
+
+
+def _location_observation_reasons(
+    state: str, health: dict[str, Any]
+) -> list[str]:
+    """Return stable reason codes for dashboards and automations."""
+    if state == "detections_present":
+        return ["active_satellite_detections_present"]
+
+    reasons = ["no_active_satellite_detections"]
+    if health["fresh_source_count"] == 0:
+        reasons.append("no_fresh_sources")
+    if health["delayed_source_count"]:
+        reasons.append("delayed_sources")
+    if health["unavailable_source_count"]:
+        reasons.append("unavailable_sources")
+    if health["initializing_source_count"]:
+        reasons.append("sources_initializing")
+    return reasons
 
 
 def _location_source_plans(

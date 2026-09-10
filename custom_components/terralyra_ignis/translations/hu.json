@@ -263,6 +263,16 @@
           "unavailable": "Nem érhető el"
         }
       },
+      "monitored_location_observation": {
+        "name": "Hely: {location_name} — Aktívtűz-megfigyelés",
+        "state": {
+          "detections_present": "Aktív észlelések láthatók",
+          "no_detections": "Nincs aktív észlelés",
+          "no_detections_limited_coverage": "Nincs észlelés — korlátozott lefedettség",
+          "awaiting_data": "Megfigyelési adatokra vár",
+          "data_unavailable": "A megfigyelés nem érhető el"
+        }
+      },
       "monitored_location_next_update": {
         "name": "Hely: {location_name} — Következő várható aktívtűz-frissítés"
       },

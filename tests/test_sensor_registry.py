@@ -8,7 +8,7 @@ import pytest
 
 from custom_components.terralyra_ignis import sensor
 from custom_components.terralyra_ignis.coverage import LocationSourcePlan
-from custom_components.terralyra_ignis.models import ProviderStatus
+from custom_components.terralyra_ignis.models import FireLifecycle, ProviderStatus
 
 
 def test_remove_orphaned_location_source_entities(monkeypatch) -> None:
@@ -36,6 +36,10 @@ def test_remove_orphaned_location_source_entities(monkeypatch) -> None:
             entity_id="sensor.deleted_next_update",
         ),
         SimpleNamespace(
+            unique_id="entry_location_observation_deleted",
+            entity_id="sensor.deleted_observation",
+        ),
+        SimpleNamespace(
             unique_id="entry_location_sources_deleted_number",
             entity_id="number.unrelated",
         ),
@@ -57,6 +61,7 @@ def test_remove_orphaned_location_source_entities(monkeypatch) -> None:
         call("sensor.deleted_sources"),
         call("sensor.deleted_status"),
         call("sensor.deleted_next_update"),
+        call("sensor.deleted_observation"),
     ]
 
 
@@ -235,20 +240,133 @@ def test_location_health_summary_is_stable_for_automations() -> None:
 def test_location_incident_summary_counts_only_matching_incidents() -> None:
     """Per-location incident details do not leak counts from other locations."""
     matching = SimpleNamespace(
+        lifecycle=FireLifecycle.CONTINUING,
         location_matches=(SimpleNamespace(location_id="home", inside_radius=True),),
         confirmation_level=SimpleNamespace(value="multi_source"),
     )
     outside = SimpleNamespace(
+        lifecycle=FireLifecycle.CONTINUING,
         location_matches=(SimpleNamespace(location_id="home", inside_radius=False),),
         confirmation_level=SimpleNamespace(value="single_source"),
     )
     elsewhere = SimpleNamespace(
+        lifecycle=FireLifecycle.NEW,
         location_matches=(SimpleNamespace(location_id="remote", inside_radius=True),),
+        confirmation_level=SimpleNamespace(value="multi_source"),
+    )
+    inactive = SimpleNamespace(
+        lifecycle=FireLifecycle.INACTIVE,
+        location_matches=(SimpleNamespace(location_id="home", inside_radius=True),),
         confirmation_level=SimpleNamespace(value="multi_source"),
     )
 
     result = sensor._location_incident_summary(
-        "home", SimpleNamespace(tracked_fires=[matching, outside, elsewhere])
+        "home",
+        SimpleNamespace(tracked_fires=[matching, outside, elsewhere, inactive]),
     )
 
     assert result == {"active_incidents": 1, "multi_source_incidents": 1}
+
+
+@pytest.mark.parametrize(
+    ("status", "active_incidents", "expected"),
+    [
+        ("available", 1, "detections_present"),
+        ("unavailable", 1, "detections_present"),
+        ("available", 0, "no_detections"),
+        ("degraded", 0, "no_detections_limited_coverage"),
+        ("partial", 0, "no_detections_limited_coverage"),
+        ("initializing", 0, "awaiting_data"),
+        ("unavailable", 0, "data_unavailable"),
+    ],
+)
+def test_location_observation_state_is_cautious(
+    status: str, active_incidents: int, expected: str
+) -> None:
+    """No-detection states preserve source limitations instead of implying safety."""
+    assert (
+        sensor._location_observation_state(status, active_incidents) == expected
+    )
+
+
+def test_location_observation_reasons_explain_an_empty_map() -> None:
+    """Reason codes expose delayed and unavailable sources on an empty map."""
+    health = {
+        "fresh_source_count": 1,
+        "delayed_source_count": 2,
+        "unavailable_source_count": 1,
+        "initializing_source_count": 0,
+    }
+
+    assert sensor._location_observation_reasons(
+        "no_detections_limited_coverage", health
+    ) == [
+        "no_active_satellite_detections",
+        "delayed_sources",
+        "unavailable_sources",
+    ]
+
+
+def test_location_observation_reasons_report_no_fresh_sources() -> None:
+    """A total lack of fresh observations is explicit and automation-friendly."""
+    health = {
+        "fresh_source_count": 0,
+        "delayed_source_count": 0,
+        "unavailable_source_count": 0,
+        "initializing_source_count": 2,
+    }
+
+    assert sensor._location_observation_reasons("awaiting_data", health) == [
+        "no_active_satellite_detections",
+        "no_fresh_sources",
+        "sources_initializing",
+    ]
+
+
+def test_location_observation_sensor_explains_limited_empty_map() -> None:
+    """The user-facing entity combines map incidents with source health."""
+    plan = LocationSourcePlan(
+        "california",
+        "California",
+        ("nasa_firms", "noaa_goes"),
+        ("VIIRS", "G18"),
+    )
+    health = (
+        SimpleNamespace(
+            provider_id="nasa_firms",
+            label="NASA FIRMS",
+            satellite="VIIRS",
+            location_ids=("california",),
+            status=ProviderStatus.AVAILABLE,
+        ),
+        SimpleNamespace(
+            provider_id="noaa_goes",
+            label="NOAA GOES",
+            satellite="G18",
+            location_ids=("california",),
+            status=ProviderStatus.OUTAGE,
+        ),
+    )
+    coordinator = SimpleNamespace(
+        provider=SimpleNamespace(health=health),
+        data=SimpleNamespace(tracked_fires=[]),
+    )
+    entry = SimpleNamespace(
+        entry_id="entry",
+        runtime_data=SimpleNamespace(coordinator=coordinator),
+    )
+
+    entity = sensor.MonitoredLocationObservationSensor(entry, plan)
+
+    assert entity.native_value == "no_detections_limited_coverage"
+    assert entity.translation_placeholders == {"location_name": "California"}
+    attrs = entity.extra_state_attributes
+    assert attrs["coverage_status"] == "partial"
+    assert attrs["active_incidents"] == 0
+    assert attrs["fresh_source_count"] == 1
+    assert attrs["unavailable_source_count"] == 1
+    assert attrs["absence_is_not_all_clear"] is True
+    assert attrs["reasons"] == [
+        "no_active_satellite_detections",
+        "unavailable_sources",
+    ]

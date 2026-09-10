@@ -49,6 +49,7 @@ LOCATION_ENTITY_PREFIXES = {
 LOCATION_ENTITY_KEYS = {
     "monitored_location_sources",
     "monitored_location_status",
+    "monitored_location_observation",
     "monitored_location_next_update",
 }
 LOCATION_PLATFORM_ENTITIES = {
