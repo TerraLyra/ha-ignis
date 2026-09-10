@@ -360,6 +360,18 @@
     }
   },
   "services": {
+    "save_official_report_link": {
+      "name": "Save reviewed report link",
+      "description": "Save one manually approved candidate using its review token. Not official confirmation; satellite incidents remain unchanged."
+    },
+    "list_official_report_links": {
+      "name": "List reviewed report links",
+      "description": "Inspect saved links and their current validity in this configuration. Reads local archives only."
+    },
+    "remove_official_report_link": {
+      "name": "Remove reviewed report link",
+      "description": "Undo one link by its link ID. Does not delete the report or satellite incident."
+    },
     "import_official_report": {
       "name": "Import saved BM OKF report",
       "description": "Save a publication in the local 30-day archive as a manual import. Does not modify fire incidents."

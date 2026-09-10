@@ -15,6 +15,7 @@ from .coverage import SOURCE_DISPLAY_NAMES
 from .entity import IgnisEntity, IgnisFireRiskEntity
 from .official_report_calendar import OfficialReportCalendar
 from .products.fire_risk import FireRiskDay
+from .report_link_display import active_links, link_lines
 
 RISK_LABELS = {
     "en": {
@@ -209,6 +210,7 @@ class FireIncidentHistoryCalendar(IgnisEntity, CalendarEntity):
     def __init__(self, entry: IgnisConfigEntry) -> None:
         IgnisEntity.__init__(self, entry)
         self._attr_unique_id = f"{entry.entry_id}_fire_incident_history"
+        self._entry_id = entry.entry_id
 
     @property
     def event(self) -> CalendarEvent | None:
@@ -223,14 +225,15 @@ class FireIncidentHistoryCalendar(IgnisEntity, CalendarEntity):
         data = self.coordinator.data
         if data is None:
             return []
+        links = await active_links(hass, self._entry_id, data.incident_history)
         events = []
         for incident in data.incident_history:
-            event = self._calendar_event(incident)
+            event = self._calendar_event(incident, links)
             if event.end > start_date and event.start < end_date:
                 events.append(event)
         return sorted(events, key=lambda event: event.start)
 
-    def _calendar_event(self, incident: dict[str, Any]) -> CalendarEvent:
+    def _calendar_event(self, incident: dict[str, Any], links=()) -> CalendarEvent:
         labels = HISTORY_LABELS.get(self.hass.config.language, HISTORY_LABELS["en"])
         first_seen = _parse_history_time(incident["first_seen"])
         last_seen = _parse_history_time(incident["last_seen"])
@@ -269,6 +272,10 @@ class FireIncidentHistoryCalendar(IgnisEntity, CalendarEntity):
             lines.append(f"{labels['pixels']}: {int(incident['maximum_pixel_count'])}")
         if "detections_total" in incident:
             lines.append(f"{labels['detections']}: {int(incident['detections_total'])}")
+        lines.append(f"Incident ID: {incident.get('track_id', '')}")
+        for link in links:
+            if link["review"]["candidate"]["incident_id"] == incident.get("track_id"):
+                lines.extend(["", *link_lines(link, self.hass.config.language)])
         return CalendarEvent(
             summary=labels["title"].format(place=place),
             start=first_seen,

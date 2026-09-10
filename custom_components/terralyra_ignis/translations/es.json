@@ -394,6 +394,18 @@
     }
   },
   "services": {
+    "save_official_report_link": {
+      "name": "Guardar vínculo revisado de aviso",
+      "description": "Guardar un candidato aprobado manualmente con su token de revisión. No es confirmación oficial; los incidentes satelitales no cambian."
+    },
+    "list_official_report_links": {
+      "name": "Listar vínculos revisados de avisos",
+      "description": "Consultar los vínculos guardados y su validez en esta configuración. Solo lee archivos locales."
+    },
+    "remove_official_report_link": {
+      "name": "Eliminar vínculo revisado de aviso",
+      "description": "Deshacer un vínculo mediante su ID. No elimina el aviso ni el incidente satelital."
+    },
     "import_official_report": {
       "name": "Importar aviso guardado del BM OKF",
       "description": "Guarda un aviso como importación manual en el archivo local de 30 días. No modifica incendios."

@@ -394,6 +394,18 @@
     }
   },
   "services": {
+    "save_official_report_link": {
+      "name": "Salva collegamento verificato dell’avviso",
+      "description": "Salva un candidato approvato manualmente con il suo token di verifica. Non è una conferma ufficiale; gli eventi satellitari restano invariati."
+    },
+    "list_official_report_links": {
+      "name": "Elenca collegamenti verificati degli avvisi",
+      "description": "Consulta i collegamenti salvati e la loro validità per questa configurazione. Legge solo gli archivi locali."
+    },
+    "remove_official_report_link": {
+      "name": "Rimuovi collegamento verificato dell’avviso",
+      "description": "Annulla un collegamento tramite il suo ID. Non elimina l’avviso né l’evento satellitare."
+    },
     "import_official_report": {
       "name": "Importa avviso BM OKF salvato",
       "description": "Salva un avviso come importazione manuale nell’archivio locale di 30 giorni. Non modifica gli incendi."

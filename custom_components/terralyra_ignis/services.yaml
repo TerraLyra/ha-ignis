@@ -79,6 +79,92 @@ review_official_report:
       description: Optional ISO timestamp including timezone. Requires start; this is a review window, not necessarily extinction time.
       selector:
         text:
+save_official_report_link:
+  name: Save reviewed report link
+  description: Save one explicitly reviewed candidate. Repeat the exact review inputs and token. This is manual context, not official confirmation, and never changes satellite incidents.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    report_url:
+      required: true
+      selector:
+        text:
+    incident_id:
+      required: true
+      selector:
+        text:
+    review_token:
+      required: true
+      description: Copy the token for this individual candidate from a fresh review response.
+      selector:
+        text:
+    confirm_fire_report:
+      required: true
+      name: I checked that the notice describes a fire
+      selector:
+        boolean:
+    confirm_association:
+      required: true
+      name: I approve this individual link, not an official confirmation
+      selector:
+        boolean:
+    latitude:
+      required: true
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: any
+          mode: box
+    longitude:
+      required: true
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: any
+          mode: box
+    location_uncertainty_km:
+      required: true
+      selector:
+        number:
+          min: 0.1
+          max: 25
+          step: 0.1
+          mode: box
+    event_start:
+      description: Repeat the reviewed timezone-aware interval start, if supplied.
+      selector:
+        text:
+    event_end:
+      description: Repeat the reviewed timezone-aware interval end, if supplied.
+      selector:
+        text:
+list_official_report_links:
+  name: List reviewed report links
+  description: Inspect this entry's saved manual links and whether the source and incident still exist. Reads local archives only.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+remove_official_report_link:
+  name: Remove reviewed report link
+  description: Undo one saved link using its link ID. Does not delete the news item or satellite incident.
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: terralyra_ignis
+    link_id:
+      required: true
+      selector:
+        text:
 probe_msg_iodc:
   fields:
     config_entry_id:

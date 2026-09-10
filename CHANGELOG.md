@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Enrich official-report review candidates with coordinates, actual first/last
+  detection times, providers, satellites and a per-candidate review token.
+- Add explicit, reversible manual report links in a separate bounded local
+  store. Saving rechecks one candidate and its token; changed reviews are rejected.
+  Links are entry-scoped, survive restarts, and expire within 30 days of publication.
+- Show active manually reviewed links in both calendars with source attribution
+  and a clear non-confirmation label. Missing or revised reports and reused incident
+  identities are not displayed as active links. Satellite evidence, counts, event
+  identities and notifications remain unchanged.
+
 ## 0.20.1
 
 - Filter the BM OKF publication calendar using bounded, local Hungarian fire-

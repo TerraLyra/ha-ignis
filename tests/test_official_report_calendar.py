@@ -116,3 +116,79 @@ async def test_calendar_filters_nonfire_without_deleting_archive(hass):
     assert reports == original
     assert entity.coordinator.data["notices"] == original
     await entity.coordinator.async_shutdown()
+
+
+async def test_reviewed_link_is_context_only_and_disappears_after_undo(hass, freezer):
+    from copy import deepcopy
+    from types import SimpleNamespace
+
+    from custom_components.terralyra_ignis.calendar import FireIncidentHistoryCalendar
+    from custom_components.terralyra_ignis.report_links import ReportLinks
+    from custom_components.terralyra_ignis.report_review import review_notice
+
+    freezer.move_to("2026-09-10T00:00:00Z")
+    hass.config.language = "hu"
+    report = notice()
+    incident = {
+        "track_id": "test-link", "latitude": 47.6, "longitude": 21.0,
+        "first_seen": "2026-09-09T09:00:00+00:00", "last_seen": "2026-09-09T09:10:00+00:00",
+        "providers": ["nasa_firms"], "satellites": ["N20"],
+    }
+    original = deepcopy(incident)
+    inputs = {"latitude": 47.6, "longitude": 21.0, "location_uncertainty_km": 5}
+    candidate = review_notice([incident], report, **inputs)["candidates"][0]
+    entity, client = calendar(hass, {"status": "available", "notices": [report]})
+    entity._entry.runtime_data = SimpleNamespace(coordinator=SimpleNamespace(data=SimpleNamespace(incident_history=[incident])))
+    store = AsyncMock()
+    store.async_load.return_value = None
+    links = ReportLinks(store)
+    saved = await links.async_add(entity._entry.entry_id, report, inputs, candidate)
+    hass.data["terralyra_ignis"] = {"official_report_links": links, "official_report_client": client}
+    dates = (datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC))
+    event, = await entity.async_get_events(hass, *dates)
+    assert "Kézzel jóváhagyott kapcsolat" in event.description
+    assert "nem hivatalos megerősítés" in event.description
+    assert "Nincs műholdas észleléshez párosítva" not in event.description
+    assert event.uid == report["url"]
+    assert event.summary == f"BM OKF · {report['title']}"
+    assert (event.end - event.start).total_seconds() == 60
+
+    history_calendar = object.__new__(FireIncidentHistoryCalendar)
+    history_calendar.hass = hass
+    before = history_calendar._calendar_event(incident)
+    linked = history_calendar._calendar_event(incident, [saved])
+    assert before.start == linked.start and before.end == linked.end
+    assert before.summary == linked.summary
+    assert report["url"] in linked.description
+    assert "Források: NASA FIRMS" in linked.description
+    assert incident == original
+
+    await links.async_remove(entity._entry.entry_id, saved["link_id"])
+    event, = await entity.async_get_events(hass, *dates)
+    assert "Nincs műholdas észleléshez párosítva" in event.description
+    assert "Kézzel jóváhagyott kapcsolat" not in event.description
+    await entity.coordinator.async_shutdown()
+
+
+async def test_changed_report_link_is_not_displayed(hass, freezer):
+    from types import SimpleNamespace
+
+    from custom_components.terralyra_ignis.report_links import ReportLinks
+    from custom_components.terralyra_ignis.report_review import review_notice
+
+    freezer.move_to("2026-09-10T00:00:00Z")
+    report = notice()
+    history = [{"track_id": "one", "latitude": 47.6, "longitude": 21.0,
+                "first_seen": "2026-09-09T09:00:00Z", "last_seen": "2026-09-09T09:10:00Z"}]
+    inputs = {"latitude": 47.6, "longitude": 21.0, "location_uncertainty_km": 5}
+    entity, _ = calendar(hass, {"status": "available", "notices": [report | {"description": "Changed fire report"}]})
+    entity._entry.runtime_data = SimpleNamespace(coordinator=SimpleNamespace(data=SimpleNamespace(incident_history=history)))
+    store = AsyncMock()
+    store.async_load.return_value = None
+    links = ReportLinks(store)
+    await links.async_add(entity._entry.entry_id, report, inputs, review_notice(history, report, **inputs)["candidates"][0])
+    hass.data["terralyra_ignis"] = {"official_report_links": links}
+    event, = await entity.async_get_events(hass, datetime(2026, 9, 9, tzinfo=UTC), datetime(2026, 9, 10, tzinfo=UTC))
+    assert "Manually reviewed link" not in event.description
+    assert "Not matched to satellite detections" in event.description
+    await entity.coordinator.async_shutdown()

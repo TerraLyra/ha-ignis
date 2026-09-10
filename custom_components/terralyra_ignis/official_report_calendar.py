@@ -18,6 +18,7 @@ from homeassistant.helpers.update_coordinator import (
 from . import IgnisConfigEntry
 from .const import DOMAIN
 from .official_reports import OfficialReportClient
+from .report_link_display import LABELS, active_links, link_lines
 from .report_relevance import classify_report
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,6 +57,7 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
         )
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_official_reports"
+        self._entry = entry
         self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, entry.entry_id)})
 
     async def async_added_to_hass(self) -> None:
@@ -75,6 +77,11 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
         if not self.coordinator.last_update_success or self.coordinator.data is None:
             raise HomeAssistantError("BM OKF RSS is temporarily unavailable")
         notes = PUBLICATION_NOTES.get(hass.config.language, PUBLICATION_NOTES["en"])
+        runtime = getattr(self._entry, "runtime_data", None)
+        data = runtime.coordinator.data if runtime is not None else None
+        links = await active_links(hass, self._entry.entry_id,
+                                   data.incident_history if data is not None else [],
+                                   self.coordinator.data["notices"])
         events = []
         for notice in self.coordinator.data["notices"]:
             relevance = classify_report(notice)
@@ -84,11 +91,16 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
             end = published + timedelta(minutes=1)
             if published >= end_date or end <= start_date:
                 continue
+            matching = [link for link in links if link["review"]["report_url"] == notice["url"]]
+            event_notes = notes
+            if matching:
+                event_notes = notes.replace(LABELS.get(hass.config.language, LABELS["en"])[1], "").strip()
+                event_notes += "\n\n" + "\n\n".join("\n".join(link_lines(link, hass.config.language)) for link in matching)
             events.append(CalendarEvent(
                 summary=f"BM OKF · {notice['title']}",
                 start=published,
                 end=end,
-                description=(f"{notice['publisher']}\n{notice['url']}\n\n{notice.get('description', '')}\n\n{notes}"
+                description=(f"{notice['publisher']}\n{notice['url']}\n\n{notice.get('description', '')}\n\n{event_notes}"
                              f"\nArchive origin: {notice.get('archive_origin', 'rss')}"
                              f"\nRelevance: {relevance['reason']}"
                              f"\nLive RSS: {self.coordinator.data.get('feed_status', 'available')}"),

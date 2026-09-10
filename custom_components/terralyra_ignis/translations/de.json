@@ -394,6 +394,18 @@
     }
   },
   "services": {
+    "save_official_report_link": {
+      "name": "Geprüfte Meldungszuordnung speichern",
+      "description": "Einen manuell genehmigten Kandidaten mit seinem Prüftoken speichern. Keine amtliche Bestätigung; Satellitenereignisse bleiben unverändert."
+    },
+    "list_official_report_links": {
+      "name": "Geprüfte Meldungszuordnungen auflisten",
+      "description": "Gespeicherte Zuordnungen und ihre Gültigkeit für diese Konfiguration anzeigen. Liest nur lokale Archive."
+    },
+    "remove_official_report_link": {
+      "name": "Geprüfte Meldungszuordnung entfernen",
+      "description": "Eine Zuordnung anhand ihrer ID zurücknehmen. Löscht weder Meldung noch Satellitenereignis."
+    },
     "import_official_report": {
       "name": "Gespeicherte BM-OKF-Meldung importieren",
       "description": "Meldung als manuellen Import im lokalen 30-Tage-Archiv speichern. Ändert keine Brandereignisse."

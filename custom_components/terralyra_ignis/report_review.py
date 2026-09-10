@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from .report_context import MAX_INCIDENTS, FireReport, IncidentContext, match_reports
+from .report_links import fingerprint, review_payload
 
 
 def review_notice(
@@ -25,6 +26,7 @@ def review_notice(
     incidents = []
     skipped = 0
     seen = set()
+    snapshots = {}
     for record in history:
         try:
             incident = IncidentContext(
@@ -40,8 +42,15 @@ def review_notice(
             skipped += 1
             continue
         incidents.append(incident)
+        snapshots[incident.incident_id] = {
+            "first_seen": incident.first_seen.isoformat(),
+            "last_seen": incident.last_seen.isoformat(),
+            "latitude": incident.latitude, "longitude": incident.longitude,
+            "providers": _labels(record.get("providers")),
+            "satellites": _labels(record.get("satellites")),
+        }
     matches = match_reports(tuple(incidents), (report,))
-    return {
+    response = {
         "status": "review_required",
         "report_url": report.url,
         "publisher": report.publisher,
@@ -57,6 +66,7 @@ def review_notice(
         "candidates": [
             {
                 "incident_id": match.incident_id,
+                **snapshots[match.incident_id],
                 "distance_km": round(match.distance_km, 3),
                 "relation": match.relation,
                 "reasons": list(match.reasons),
@@ -64,3 +74,18 @@ def review_notice(
             for match in sorted(matches, key=lambda item: (item.distance_km, item.incident_id))
         ],
     }
+    inputs = {
+        "latitude": latitude, "longitude": longitude,
+        "location_uncertainty_km": location_uncertainty_km,
+        "event_start": event_start, "event_end": event_end,
+    }
+    for candidate in response["candidates"]:
+        candidate["review_token"] = fingerprint(review_payload(notice, inputs, candidate))
+    return response
+
+
+def _labels(value: Any) -> list[str]:
+    """Optional display metadata must not invalidate a valid detection."""
+    if not isinstance(value, (list, tuple)):
+        return []
+    return sorted({item for item in value[:32] if isinstance(item, str) and len(item) <= 100})

@@ -394,6 +394,18 @@
     }
   },
   "services": {
+    "save_official_report_link": {
+      "name": "Ellenőrzött hírkapcsolat mentése",
+      "description": "Egy kézzel jóváhagyott jelölt mentése az ellenőrzési azonosítójával. Nem hivatalos megerősítés; a műholdas események változatlanok."
+    },
+    "list_official_report_links": {
+      "name": "Ellenőrzött hírkapcsolatok listázása",
+      "description": "A beállításhoz mentett kapcsolatok és érvényességük megtekintése. Csak helyi archívumokat olvas."
+    },
+    "remove_official_report_link": {
+      "name": "Ellenőrzött hírkapcsolat visszavonása",
+      "description": "Egy kapcsolat visszavonása a kapcsolat azonosítójával. Nem törli a hírt vagy a műholdas eseményt."
+    },
     "import_official_report": {
       "name": "Mentett BM OKF-közlemény importálása",
       "description": "Közlemény mentése a helyi, 30 napos archívumba kézi importként. Nem módosít tűzeseményeket."

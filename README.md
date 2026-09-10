@@ -815,11 +815,39 @@ an original BM OKF event URL from the current RSS response or local archive. Con
 describes a fire, then provide reviewed fire coordinates and assumed location
 uncertainty. Optional event start/end values must include a timezone; otherwise
 the action uses publication time. It returns candidate incident IDs, distances
-and reasons without changing incidents, markers or notifications.
+and reasons without changing incidents, markers or notifications. Candidates also
+include coordinates, actual first/last detection timestamps, providers, satellites
+and a per-candidate review token. Detection timestamps are not ignition/extinction
+times, and are not the calendar's one-minute display extension.
 
 Extracted previous-day date hints require review and are never applied
 automatically. This is not automatic news-to-fire matching. See the
 [review instructions](docs/HU_OFFICIAL_REPORT_SOURCE_REVIEW.md) for limitations.
+
+### Saving one manually reviewed link (unreleased)
+
+After inspecting a candidate, use `terralyra_ignis.save_official_report_link`.
+Repeat the exact review inputs, select its `incident_id`, copy its `review_token`,
+and explicitly set `confirm_association: true`. Save candidates individually;
+the review action itself never saves them. Changed report content, candidate
+metadata or review assumptions invalidate the token and require another review.
+
+Links are **manual context, not official confirmation**. The heuristic `possible`
+or `probable` assessment is preserved and is neither a probability nor proof.
+Active links appear in both calendar descriptions without merging events, changing
+timestamps, adding satellite sources, or affecting counts, confidence or alerts.
+They are stored separately per IGNIS configuration, survive restarts and expire
+no later than 30 days after publication (global cap: 1000 links; no silent eviction
+to make room). A revised/missing report or missing/reused incident identity makes
+the link inactive. A temporary missing source may become available again; the
+original report fingerprint and incident first-seen time must still match.
+
+Use `terralyra_ignis.list_official_report_links` with `config_entry_id` to inspect
+saved provenance and status locally. Use `terralyra_ignis.remove_official_report_link`
+with the configuration ID and returned `link_id` to undo one association, even if
+the entry is temporarily unloaded. Removal never deletes the report or incident.
+No live association is seeded automatically. See the
+[manual-link test procedure](docs/MANUAL_REPORT_LINKS.md).
 
 ### Importing a saved publication
 

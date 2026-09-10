@@ -394,6 +394,18 @@
     }
   },
   "services": {
+    "save_official_report_link": {
+      "name": "Enregistrer une association de bulletin vérifiée",
+      "description": "Enregistrer un candidat approuvé manuellement avec son jeton de vérification. Ce n’est pas une confirmation officielle ; les incidents satellitaires restent inchangés."
+    },
+    "list_official_report_links": {
+      "name": "Lister les associations de bulletins vérifiées",
+      "description": "Consulter les associations enregistrées et leur validité pour cette configuration. Lit uniquement les archives locales."
+    },
+    "remove_official_report_link": {
+      "name": "Supprimer une association de bulletin vérifiée",
+      "description": "Annuler une association par son identifiant. Ne supprime ni le bulletin ni l’incident satellitaire."
+    },
     "import_official_report": {
       "name": "Importer un avis BM OKF sauvegardé",
       "description": "Enregistre un avis comme importation manuelle dans les archives locales de 30 jours. Ne modifie pas les incendies."
