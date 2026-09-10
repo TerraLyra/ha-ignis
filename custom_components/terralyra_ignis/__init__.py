@@ -51,6 +51,8 @@ from .monitoring import (
     resolve_monitoring_center,
 )
 from .official_reports import OfficialReportClient
+from .gdacs_archive import GdacsArchive
+from .gdacs_client import GdacsClient
 from .products.fire_risk import FireRiskClient
 from .products.lst import LandSurfaceTemperatureClient
 from .products.msg_iodc import (
@@ -91,6 +93,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         ReportArchive(Store(hass, 1, f"{DOMAIN}.official_report_archive")),
     )
     hass.data.setdefault(DOMAIN, {})["official_report_client"] = official_reports
+    hass.data[DOMAIN]["gdacs_client"] = GdacsClient(
+        async_get_clientsession(hass),
+        GdacsArchive(Store(hass, 1, f"{DOMAIN}.gdacs_context_archive")),
+        fetch_geometry=True,
+    )
     report_links = ReportLinks(Store(hass, 1, f"{DOMAIN}.official_report_links"))
     hass.data[DOMAIN]["official_report_links"] = report_links
     register_report_review(hass, official_reports, report_links)

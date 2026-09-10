@@ -16,6 +16,7 @@ from .entity import IgnisEntity, IgnisFireRiskEntity
 from .official_report_calendar import OfficialReportCalendar
 from .products.fire_risk import FireRiskDay
 from .report_link_display import active_links, link_lines
+from .gdacs_calendar import GdacsCalendar
 
 RISK_LABELS = {
     "en": {
@@ -156,6 +157,7 @@ async def async_setup_entry(
             OfficialReportCalendar(
                 hass, entry, hass.data[DOMAIN]["official_report_client"]
             ),
+            GdacsCalendar(hass, entry, hass.data[DOMAIN]["gdacs_client"]),
         ]
     )
 
@@ -272,10 +274,11 @@ class FireIncidentHistoryCalendar(IgnisEntity, CalendarEntity):
             lines.append(f"{labels['pixels']}: {int(incident['maximum_pixel_count'])}")
         if "detections_total" in incident:
             lines.append(f"{labels['detections']}: {int(incident['detections_total'])}")
-        lines.append(f"Incident ID: {incident.get('track_id', '')}")
+        annotations = []
         for link in links:
             if link["review"]["candidate"]["incident_id"] == incident.get("track_id"):
-                lines.extend(["", *link_lines(link, self.hass.config.language)])
+                annotations.extend([*link_lines(link, self.hass.config.language, self.hass.config.time_zone), ""])
+        lines = annotations + lines
         return CalendarEvent(
             summary=labels["title"].format(place=place),
             start=first_seen,

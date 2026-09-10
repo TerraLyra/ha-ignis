@@ -38,6 +38,12 @@ are recorded in
 
 ## Product status
 
+Version 0.22.0 adds a disabled-by-default **Reports — GDACS wildfire context**
+calendar. It provides attributed international wildfire context, not independent
+satellite evidence or a replacement for local authority warnings. Coverage and
+spatial matching are deliberately limited; see [GDACS context](docs/GDACS_CONTEXT.md)
+before enabling it. Existing BM OKF links need no migration.
+
 | Product | Source / ID | Resolution / cadence | Integration status |
 |---|---|---|---|
 | MTG Fire Radiative Power Pixel | LSA-509 / MTFRPPIXEL | ~1 km / 10 min | **Implemented** |

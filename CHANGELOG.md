@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## 0.22.0
+
+- Add an isolated, tested GDACS wildfire-context parser with bounded page sizes,
+  stable event identifiers and explicit raw-time/centroid uncertainty. This is
+  context code only: no changes to satellite evidence.
+- Prepare a shared on-demand GDACS client and separate bounded archive: hourly
+  cache, serialized requests, bounded pagination/payloads, failure backoff and
+  preservation of previous records when a fetch is incomplete.
+- Add a disabled-by-default GDACS context calendar with all-day provider dates,
+  source attribution, stale-feed labels and conservative affected-area bounding
+  box filtering. Missing/unsupported geometry is explicitly uncertain. Geometry
+  requests are capped; this is not complete coverage or exact polygon matching.
+  Existing installations do not poll GDACS until the calendar is enabled.
+
+- Make reviewed calendar links easier to read: show the archived report title and
+  BM OKF source first, explain the possible association, and format observation
+  and review times in the Home Assistant time zone with explicit UTC offsets.
+  Keep technical link/incident identifiers in the review/list actions rather than
+  calendar descriptions. Existing saved links require no migration; matching,
+  incident times and satellite evidence remain unchanged.
+
 ## 0.21.0
 
 - Enrich official-report review candidates with coordinates, actual first/last

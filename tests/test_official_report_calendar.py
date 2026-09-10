@@ -129,6 +129,7 @@ async def test_reviewed_link_is_context_only_and_disappears_after_undo(hass, fre
     freezer.move_to("2026-09-10T00:00:00Z")
     hass.config.language = "hu"
     report = notice()
+    await hass.config.async_set_time_zone("Europe/Budapest")
     incident = {
         "track_id": "test-link", "latitude": 47.6, "longitude": 21.0,
         "first_seen": "2026-09-09T09:00:00+00:00", "last_seen": "2026-09-09T09:10:00+00:00",
@@ -156,7 +157,15 @@ async def test_reviewed_link_is_context_only_and_disappears_after_undo(hass, fre
     history_calendar = object.__new__(FireIncidentHistoryCalendar)
     history_calendar.hass = hass
     before = history_calendar._calendar_event(incident)
-    linked = history_calendar._calendar_event(incident, [saved])
+    from custom_components.terralyra_ignis.report_link_display import active_links
+    display_links = await active_links(hass, entity._entry.entry_id, [incident], [report])
+    linked = history_calendar._calendar_event(incident, display_links)
+    assert linked.description.startswith(f"Kapcsolódó hír: {report['title']}")
+    assert "2026-09-09 11:00 CEST (UTC+0200)" in linked.description
+    assert saved["link_id"] not in linked.description
+    assert incident["track_id"] not in linked.description
+    assert saved["link_id"] not in event.description
+    assert (await links.async_list(entity._entry.entry_id))[0] == saved
     assert before.start == linked.start and before.end == linked.end
     assert before.summary == linked.summary
     assert report["url"] in linked.description

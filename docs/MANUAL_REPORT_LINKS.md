@@ -14,7 +14,10 @@ Ez a funkció a 0.21.0 verziótól használható. Frissítés után indítsd új
 4. A `list_official_report_links` művelettel ellenőrizd a mentést. A `status: active`
    azt jelenti, hogy a hivatkozott adatok még megvannak, nem azt, hogy a tűz aktív.
 5. Frissítsd a naptárnézetet. A hír és a műholdas esemény leírásában jelenjen meg
-   a kézi kapcsolat, a BM OKF hivatkozás, az ellenőrzés ideje és a kapcsolat ID-je.
+   a hírcím, a kézi kapcsolat, a BM OKF hivatkozás és az ellenőrzés ideje.
+   Az időpontok a Home Assistant időzónájában jelennek meg, az UTC-eltolással együtt.
+   A technikai azonosítók a `list_official_report_links` művelet válaszában maradnak
+   elérhetők ellenőrzéshez és törléshez, a naptári leírásban nem szerepelnek.
    Az eredeti időpontok, forráslista és eseményszám maradjon változatlan.
 6. A `remove_official_report_link` műveletben add meg a konfiguráció és a kapcsolat
    azonosítóját. Frissítés után mindkét naptárból csak a kapcsolat jelölése tűnjön el;

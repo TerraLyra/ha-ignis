@@ -95,7 +95,7 @@ class OfficialReportCalendar(CoordinatorEntity, CalendarEntity):
             event_notes = notes
             if matching:
                 event_notes = notes.replace(LABELS.get(hass.config.language, LABELS["en"])[1], "").strip()
-                event_notes += "\n\n" + "\n\n".join("\n".join(link_lines(link, hass.config.language)) for link in matching)
+                event_notes = "\n\n".join("\n".join(link_lines(link, hass.config.language, hass.config.time_zone)) for link in matching) + "\n\n" + event_notes
             events.append(CalendarEvent(
                 summary=f"BM OKF · {notice['title']}",
                 start=published,
