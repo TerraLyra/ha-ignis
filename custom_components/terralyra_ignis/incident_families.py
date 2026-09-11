@@ -254,15 +254,27 @@ def _family_cluster(
         ),
         default=0.0,
     )
-    return FireCluster(
-        latitude=representative.latitude,
-        longitude=representative.longitude,
-        distance_km=haversine_km(
+    location_matches = _merge_location_matches(members)
+    nearest_location = next(
+        (match for match in location_matches if match.inside_radius), None
+    )
+    # Source tracks already carry location-scoped distances. Recomputing from
+    # HA Home here discarded those matches, even for single-source incidents.
+    # Use the same reference as FireCluster.attrs(), including overlap handling.
+    distance_km = (
+        nearest_location.distance_km
+        if nearest_location is not None
+        else haversine_km(
             home_latitude,
             home_longitude,
             representative.latitude,
             representative.longitude,
-        ),
+        )
+    )
+    return FireCluster(
+        latitude=representative.latitude,
+        longitude=representative.longitude,
+        distance_km=distance_km,
         confidence=max(item.confidence for item in members),
         frp_mw=max(item.frp_mw for item in members),
         acquired=last_seen,
@@ -302,7 +314,7 @@ def _family_cluster(
         satellites=satellites,
         corroborating_detections=sum(item.corroborating_detections for item in members),
         source_url=representative.source_url,
-        location_matches=_merge_location_matches(members),
+        location_matches=location_matches,
     )
 
 

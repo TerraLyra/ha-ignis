@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.24.2
+
+- Preserve distance from the nearest matching monitored location when merging
+  fire incidents for the map, instead of resetting it to Home distance. Overlap
+  selection agrees with the location name and distance in entity attributes.
+
 ## 0.24.1
 
 - Bound current fire clustering to a 30-minute acquisition window. Older

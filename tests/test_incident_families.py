@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
+import pytest
+
+from custom_components.terralyra_ignis.clustering import haversine_km
+from custom_components.terralyra_ignis.location_matching import match_incident_to_locations
+from custom_components.terralyra_ignis.monitoring import MonitoredLocation
 from custom_components.terralyra_ignis.incident_families import (
     consolidate_incident_families,
 )
@@ -52,6 +57,57 @@ def _consolidate(clusters: list[FireCluster]) -> list[FireCluster]:
         matching_radius_km=3.0,
         matching_window=timedelta(hours=6),
     )
+
+
+@pytest.mark.parametrize(
+    ("name", "latitude", "longitude"),
+    [("California", 38.6, -121.3), ("Tokyo", 35.7, 139.7), ("Home", 46.25, 20.15)],
+)
+def test_map_distance_survives_family_consolidation(name, latitude, longitude) -> None:
+    from tests.test_geo_location import _entity
+
+    location = MonitoredLocation("local", name, latitude, longitude, 100, True, "custom")
+    cluster = _cluster("fire", latitude=latitude + 0.1)
+    cluster.longitude = longitude
+    cluster.location_matches = match_incident_to_locations(
+        "fire", cluster.latitude, cluster.longitude, (location,)
+    )
+    expected = cluster.location_matches[0].distance_km
+    cluster.distance_km = expected
+
+    family = _consolidate([cluster])[0]
+    entity = _entity(family)
+    assert entity.distance == pytest.approx(expected)
+    assert entity.extra_state_attributes["location_name"] == name
+    assert entity.extra_state_attributes["distance_km"] == round(entity.distance, 2)
+
+
+def test_family_distance_uses_nearest_containing_location_not_nearest_outside() -> None:
+    locations = (
+        MonitoredLocation("outside", "Outside", 47.699, 21, 0.01, True, "custom"),
+        MonitoredLocation("farther", "Farther", 47.8, 21, 100, True, "custom"),
+        MonitoredLocation("near", "Near", 47.71, 21, 100, True, "custom"),
+        MonitoredLocation("disabled", "Disabled", 47.7, 21, 100, False, "custom"),
+    )
+    members = [_cluster("a"), _cluster("b", latitude=47.701)]
+    for member in members:
+        member.location_matches = match_incident_to_locations(
+            member.track_id, member.latitude, member.longitude, locations
+        )
+    family = _consolidate(members)[0]
+    expected = min(
+        match.distance_km for member in members for match in member.location_matches
+        if match.location_id == "near"
+    )
+    assert family.distance_km == expected
+    assert family.attrs()["location_id"] == "near"
+    assert family.attrs()["distance_km"] == round(expected, 2)
+
+
+def test_family_without_location_matches_retains_legacy_home_distance() -> None:
+    cluster = _cluster("legacy")
+    family = _consolidate([cluster])[0]
+    assert family.distance_km == haversine_km(46.25, 20.15, cluster.latitude, cluster.longitude)
 
 
 def test_duplicate_nearby_tracks_become_one_presentation_incident() -> None:
