@@ -65,7 +65,7 @@ def summarize_activity(
 
     def window(hours: int) -> list[dict[str, Any]]:
         cutoff = now - timedelta(hours=hours)
-        return [item for item in records if _parse_dt(item["timestamp"]) >= cutoff]
+        return [item for item in records if cutoff <= _parse_dt(item["timestamp"]) <= now]
 
     one_hour = window(1)
     three_hours = window(3)
@@ -111,4 +111,4 @@ def _valid_records(value: Any) -> list[dict[str, Any]]:
 
 def _parse_dt(value: Any) -> datetime:
     parsed = datetime.fromisoformat(str(value))
-    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC) if parsed.tzinfo else parsed.replace(tzinfo=UTC)

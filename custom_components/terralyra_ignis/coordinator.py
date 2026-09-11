@@ -14,6 +14,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .activity import ActivitySummary, summarize_activity, update_activity_history
+from .observation_counts import summarize_counts, update_counts
 from .clustering import cluster_detections, haversine_km
 from .const import (
     ATTR_AFFECTED_LOCATIONS,
@@ -151,6 +152,12 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self._tracks: list[dict[str, Any]] = []
         self._firms_tracks: list[dict[str, Any]] = []
         self._activity_history: list[dict[str, Any]] = []
+        self._observation_counts: dict[str, Any] = {}
+        self._count_scope = repr((
+            self.monitored_locations,
+            entry.options.get(CONF_MIN_CONFIDENCE, DEFAULT_MIN_CONFIDENCE),
+            entry.options.get(CONF_MIN_FRP_MW, DEFAULT_MIN_FRP_MW),
+        ))
         self._incident_history: list[dict[str, Any]] = []
         self._store_loaded = False
         self._initialized = False
@@ -194,6 +201,9 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 self._firms_tracks = stored["firms_tracks"]
             if isinstance(stored.get("activity_history"), list):
                 self._activity_history = stored["activity_history"]
+            if (stored.get("count_scope") == self._count_scope
+                and isinstance(stored.get("observation_counts"), dict)):
+                self._observation_counts = stored["observation_counts"]
             if isinstance(stored.get("incident_history"), list):
                 self._incident_history = stored["incident_history"]
             # A removed monitored location must not leave its recent incidents
@@ -301,7 +311,10 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self.unchanged_update_skips += 1
             self.last_processing_duration_ms = 0.0
             self.last_update_duration_ms = _elapsed_ms(update_started)
-            return self.data
+            activity = self._summarize_activity(datetime.now(UTC))
+            return self.data if activity == self.data.activity else replace(
+                self.data, activity=activity
+            )
 
         processing_started = perf_counter()
 
@@ -544,6 +557,18 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self._initialized = True
             changed = True
 
+        count_now = datetime.now(UTC)
+        updated_counts = update_counts(
+            self._observation_counts,
+            (detection for detection in (
+                *[item for item, _ in filtered], *secondary,
+            ) if (detection.confidence or 0.0) >= min_conf
+            and (detection.frp_mw or 0.0) >= min_frp),
+            now=count_now,
+        )
+        if updated_counts != self._observation_counts:
+            changed = True
+        self._observation_counts = updated_counts
         updated_activity_history = update_activity_history(
             self._activity_history,
             timestamp=snapshot.product_timestamp,
@@ -554,9 +579,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         if updated_activity_history != self._activity_history:
             changed = True
         self._activity_history = updated_activity_history
-        activity = summarize_activity(
-            self._activity_history, now=snapshot.product_timestamp
-        )
+        activity = self._summarize_activity(count_now)
         situation = assess_situation(
             active_clusters,
             provider_status=snapshot.status,
@@ -714,6 +737,14 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         finally:
             self._pending_place_ids.discard(track_id)
 
+    def _summarize_activity(self, now: datetime) -> ActivitySummary:
+        """Keep observation counts independent of snapshot FRP/incident history."""
+        counts = summarize_counts(self._observation_counts, now=now)["counts"]
+        return replace(
+            summarize_activity(self._activity_history, now=now),
+            detections_1h=counts[1], detections_3h=counts[3], detections_6h=counts[6],
+        )
+
     async def _async_save_state(self) -> None:
         """Persist incidents and bounded activity aggregates together."""
         await self._store.async_save(
@@ -722,6 +753,8 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 "tracks": self._tracks,
                 "firms_tracks": self._firms_tracks,
                 "activity_history": self._activity_history,
+                "observation_counts": self._observation_counts,
+                "count_scope": self._count_scope,
                 "incident_history": self._incident_history,
                 "monitoring_center": self.monitoring_center.storage_key,
             }

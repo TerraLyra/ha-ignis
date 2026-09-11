@@ -300,11 +300,15 @@ per-event-type cooldown prevents notification floods, including across restarts.
 
 ### Activity history
 
-The integration persists only a compact rolling 24-hour history, capped at 180
-product observations. It derives small Recorder-friendly sensor states from
-this history; raw observation arrays are never exposed as entity attributes.
-"Detections" means filtered provider fire detections contributing to processed
-products, while "new incidents" means newly created deduplicated incident IDs.
+The integration persists a compact rolling 24-hour FRP/incident history, capped
+at 180 product observations, and a separate six-hour observation ledger capped
+at 20,000 identities. Raw observation arrays are not exposed as entity attributes.
+Since 0.24.4, recent "detections" count distinct filtered source observations by
+acquisition time, not repeated product downloads. "New incidents" counts newly
+created deduplicated incident IDs. Collection-window and retention-limit flags
+describe incomplete counts; neither guarantees complete satellite coverage.
+Old aggregate counts are not converted and Recorder history is not deleted;
+see [0.24.4 upgrade notes](docs/RELEASE_0_24_4.md).
 FRP change is the difference between the first and last total clustered FRP in
 the selected window and remains unavailable until at least two samples exist.
 

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.24.4
+
+- Count distinct source observations by acquisition time with a bounded,
+  persisted six-hour ledger, instead of summing repeated snapshot sizes.
+- Exclude future records from activity windows and age observation counts on
+  unchanged-product refreshes. Keep FRP and incident history separate.
+- Expose collection-window and retention-limit metadata. Legacy aggregate
+  counts are not converted; existing Recorder history remains untouched.
+
 ## 0.24.3
 
 - Derive per-location latest product/receipt timestamps only from sources
