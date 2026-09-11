@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.24.3
+
+- Derive per-location latest product/receipt timestamps only from sources
+  assigned to that location, rather than the global coordinator timestamp.
+- Expose bounded source health, failure reasons and successful timestamps on
+  each location's observation sensor for investigating empty maps.
+
 ## 0.24.2
 
 - Preserve distance from the nearest matching monitored location when merging
