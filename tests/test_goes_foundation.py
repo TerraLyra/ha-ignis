@@ -211,6 +211,23 @@ async def _executor(function, *args, **kwargs):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("error,code", [
+    (ImportError("secret/native/path"), "goes_dependency_unavailable"),
+    (ValueError("secret/payload"), "goes_decode_failed"),
+])
+async def test_decoder_diagnostic_is_safe_and_file_is_removed(tmp_path, error, code):
+    def decoder(*args, **kwargs):
+        raise error
+    client = GoesProductClient(_Session([_Response(b"data")]), _executor,
+        decoder=decoder, temp_directory=str(tmp_path))
+    with pytest.raises(GoesProductError) as caught:
+        await client.async_fetch(_object())
+    assert caught.value.diagnostic_code == code
+    assert "secret" not in str(caught.value)
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.asyncio
 async def test_product_download_is_bounded_decoded_and_removed(tmp_path) -> None:
     item = _object()
     response = _Response(b"data")

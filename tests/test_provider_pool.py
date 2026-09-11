@@ -24,6 +24,34 @@ from custom_components.terralyra_ignis.providers.pool import (
 NOW = datetime(2026, 8, 31, 12, tzinfo=UTC)
 
 
+@pytest.mark.asyncio
+async def test_diagnostic_survives_retry_and_clears_after_recovery():
+    current = [NOW]
+    failed = _binding("goes", "G18", ProviderUnavailableError(
+        "private", diagnostic_code="goes_decode_failed"))
+    healthy = _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS"))
+    pool = MultiProviderPool((failed, healthy), now=lambda: current[0])
+    for _ in range(2):
+        await pool.async_fetch_latest()
+        assert pool.health[0].attrs()["diagnostic_code"] == "goes_decode_failed"
+        assert "private" not in str(pool.health[0].attrs())
+    assert failed.provider.async_fetch_latest.await_count == 1
+    current[0] += timedelta(hours=1)
+    failed.provider.async_fetch_latest.side_effect = None
+    failed.provider.async_fetch_latest.return_value = _snapshot("NOAA", "G18")
+    await pool.async_fetch_latest()
+    assert pool.health[0].diagnostic_code is None
+
+
+def test_diagnostic_rejects_arbitrary_text():
+    from custom_components.terralyra_ignis.providers.pool import ProviderHealth
+    error = ProviderUnavailableError(diagnostic_code="/private/token=secret")
+    assert error.diagnostic_code is None
+    health = ProviderHealth("goes", "GOES", "G18", (), ProviderStatus.OUTAGE,
+        diagnostic_code="https://private.invalid/token")
+    assert health.attrs()["diagnostic_code"] is None
+
+
 @pytest.mark.parametrize("failures", [5, 40, 1000, 10**100])
 def test_retry_delay_saturates_for_long_outages(failures):
     assert MultiProviderPool._retry_delay(failures) == timedelta(hours=1)

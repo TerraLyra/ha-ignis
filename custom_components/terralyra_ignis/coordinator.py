@@ -789,6 +789,7 @@ def _snapshot_signature(
                 item.provider_id,
                 item.status,
                 item.failure_type,
+                getattr(item, "diagnostic_code", None),
                 item.product_timestamp,
             )
             for item in provider_health

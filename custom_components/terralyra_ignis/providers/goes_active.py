@@ -74,19 +74,22 @@ class GoesActiveFireProvider:
             raise
         except (GoesDiscoveryError, GoesProductError) as err:
             message = "GOES active-fire data is temporarily unavailable"
+            diagnostic = ("goes_catalogue_failed" if isinstance(err, GoesDiscoveryError)
+                          else err.diagnostic_code)
             if err.failure_type == "rate_limit":
                 raise ProviderRateLimitError(
-                    message, retry_after=err.retry_after
+                    message, retry_after=err.retry_after, diagnostic_code=diagnostic
                 ) from err
             if err.failure_type == "timeout":
-                raise ProviderTimeoutError(message) from err
+                raise ProviderTimeoutError(message, diagnostic_code=diagnostic) from err
             if err.failure_type == "invalid_response":
-                raise ProviderInvalidResponseError(message) from err
+                raise ProviderInvalidResponseError(message, diagnostic_code=diagnostic) from err
             raise ProviderUnavailableError(
-                message, retry_after=err.retry_after
+                message, retry_after=err.retry_after, diagnostic_code=diagnostic
             ) from err
         if not isinstance(snapshot, ProviderSnapshot):
-            raise ProviderInvalidResponseError("GOES decoder returned invalid data")
+            raise ProviderInvalidResponseError("GOES decoder returned invalid data",
+                diagnostic_code="goes_decoder_result_invalid")
         expected = item.metadata
         if (
             snapshot.provider != "noaa_goes"
@@ -96,7 +99,8 @@ class GoesActiveFireProvider:
             or snapshot.filename != expected.filename
             or snapshot.source_url != item.public_url
         ):
-            raise ProviderInvalidResponseError("GOES decoder identity mismatch")
+            raise ProviderInvalidResponseError("GOES decoder identity mismatch",
+                diagnostic_code="goes_identity_mismatch")
         status = (
             ProviderStatus.DELAYED
             if current - snapshot.product_timestamp > DELAYED_AFTER

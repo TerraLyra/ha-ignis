@@ -687,6 +687,7 @@ def _location_operational_status(
                     "initializing": "awaiting_first_source_result",
                 }.get(state, "source_status_unknown"),
                 "failure_type": getattr(item, "failure_type", None),
+                "diagnostic_code": getattr(item, "diagnostic_code", None),
                 "consecutive_failures": getattr(item, "consecutive_failures", 0),
                 "retry_at": _isoformat_or_none(getattr(item, "retry_at", None)),
                 "product_timestamp": _isoformat_or_none(

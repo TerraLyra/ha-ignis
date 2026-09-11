@@ -41,6 +41,19 @@ def _provider() -> GoesActiveFireProvider:
     )
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("code", ["goes_download_failed", "goes_decode_failed", "goes_dependency_unavailable"])
+async def test_product_diagnostic_survives_adapter(code):
+    from custom_components.terralyra_ignis.products.goes import GoesProductError
+    provider = _provider()
+    provider._discovery.async_latest = AsyncMock(return_value=_item())
+    provider._products.async_fetch = AsyncMock(side_effect=GoesProductError("private", diagnostic_code=code))
+    with pytest.raises(ProviderInvalidResponseError) as caught:
+        await provider.async_fetch_latest()
+    assert caught.value.diagnostic_code == code
+    assert "private" not in str(caught.value)
+
+
 def _item(age: timedelta = timedelta(minutes=5)):
     metadata = parse_fdc_filename(FILENAME)
     metadata = metadata.__class__(

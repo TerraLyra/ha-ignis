@@ -15,6 +15,7 @@ from .base import (
     ProviderInvalidResponseError,
     ProviderNoDataError,
     ProviderUnavailableError,
+    safe_diagnostic_code,
 )
 
 PROVIDER_RETRY_BASE = timedelta(minutes=5)
@@ -46,6 +47,10 @@ class ProviderHealth:
     retry_at: datetime | None = None
     product_timestamp: datetime | None = None
     received_timestamp: datetime | None = None
+    diagnostic_code: str | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "diagnostic_code", safe_diagnostic_code(self.diagnostic_code))
 
     def attrs(self) -> dict[str, Any]:
         return {
@@ -55,6 +60,7 @@ class ProviderHealth:
             "location_ids": list(self.location_ids),
             "status": self.status.value,
             "failure_type": self.failure_type,
+            "diagnostic_code": self.diagnostic_code,
             "consecutive_failures": self.consecutive_failures,
             "retry_at": self.retry_at.isoformat() if self.retry_at else None,
             "product_timestamp": (
@@ -131,6 +137,7 @@ class MultiProviderPool:
                     self._retry_at.get(binding.provider_id),
                     last_success.product_timestamp if last_success else None,
                     last_success.received_timestamp if last_success else None,
+                    safe_diagnostic_code(getattr(last_error, "diagnostic_code", None)),
                 )
             )
         self.health = tuple(health)
