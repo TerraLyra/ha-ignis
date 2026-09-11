@@ -530,16 +530,7 @@ class MonitoredLocationStatusSensor(IgnisEntity, SensorEntity):
             "operational_status": status,
             "source_health": assignments,
             **_location_health_summary(assignments),
-            "last_received_at": (
-                self.coordinator.received_timestamp.isoformat()
-                if self.coordinator.received_timestamp
-                else None
-            ),
-            "last_product_at": (
-                self.coordinator.product_timestamp.isoformat()
-                if self.coordinator.product_timestamp
-                else None
-            ),
+            **_location_source_timestamps(assignments),
             **incidents,
         }
 
@@ -593,6 +584,8 @@ class MonitoredLocationObservationSensor(IgnisEntity, SensorEntity):
             "map_source": "terralyra_ignis",
             "observation_state": state,
             "coverage_status": status,
+            "source_health": assignments,
+            **_location_source_timestamps(assignments),
             **incidents,
             **health,
             "reasons": reasons,
@@ -684,6 +677,14 @@ def _location_operational_status(
                 "name": getattr(item, "label", None),
                 "satellite": satellite,
                 "status": state,
+                "reason": {
+                    "available": "source_data_available",
+                    "delayed": "source_data_delayed",
+                    "no_product": "source_product_not_available",
+                    "outage": "source_fetch_failed",
+                    "auth_error": "source_authentication_failed",
+                    "initializing": "awaiting_first_source_result",
+                }.get(state, "source_status_unknown"),
                 "failure_type": getattr(item, "failure_type", None),
                 "consecutive_failures": getattr(item, "consecutive_failures", 0),
                 "retry_at": _isoformat_or_none(getattr(item, "retry_at", None)),
@@ -710,6 +711,24 @@ def _location_operational_status(
     if all(state == "initializing" for state in states):
         return "initializing", assignments
     return "unavailable", assignments
+
+
+def _location_source_timestamps(
+    assignments: list[dict[str, Any]],
+) -> dict[str, str | None]:
+    """Use only assigned sources; a fresh peer elsewhere cannot refresh a place.
+
+    These are latest successful source timestamps, not proof that every source
+    is fresh or that the source observed every pixel in this location.
+    """
+    def latest(key: str) -> str | None:
+        values = [item[key] for item in assignments if item.get(key)]
+        return max(values, key=datetime.fromisoformat) if values else None
+
+    return {
+        "last_received_at": latest("received_timestamp"),
+        "last_product_at": latest("product_timestamp"),
+    }
 
 
 def _location_health_summary(

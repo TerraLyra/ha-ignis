@@ -1,6 +1,7 @@
 """Tests for TerraLyra IGNIS sensor entity-registry maintenance."""
 from __future__ import annotations
 
+from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import Mock, call
 
@@ -362,6 +363,8 @@ def test_location_observation_sensor_explains_limited_empty_map() -> None:
     assert entity.translation_placeholders == {"location_name": "California"}
     attrs = entity.extra_state_attributes
     assert attrs["coverage_status"] == "partial"
+    assert attrs["source_health"][1]["reason"] == "source_fetch_failed"
+    assert attrs["source_health"][1]["name"] == "NOAA GOES"
     assert attrs["active_incidents"] == 0
     assert attrs["fresh_source_count"] == 1
     assert attrs["unavailable_source_count"] == 1
@@ -370,3 +373,46 @@ def test_location_observation_sensor_explains_limited_empty_map() -> None:
         "no_active_satellite_detections",
         "unavailable_sources",
     ]
+
+
+@pytest.mark.parametrize("entity_class", [
+    sensor.MonitoredLocationStatusSensor,
+    sensor.MonitoredLocationObservationSensor,
+])
+def test_location_timestamps_do_not_use_fresh_unrelated_source(entity_class) -> None:
+    old = datetime.fromisoformat("2026-09-11T05:00:00+00:00")
+    fresh = datetime.fromisoformat("2026-09-11T12:00:00+00:00")
+    plan = LocationSourcePlan("tokyo", "Tokyo", ("sat",), ("S3",))
+    health = tuple(SimpleNamespace(
+        provider_id="sat", label="Satellite", satellite="S3",
+        location_ids=(location,), status=status,
+        product_timestamp=timestamp, received_timestamp=timestamp,
+    ) for location, status, timestamp in [
+        ("home", ProviderStatus.AVAILABLE, fresh),
+        ("tokyo", ProviderStatus.OUTAGE, old),
+    ])
+    coordinator = SimpleNamespace(
+        provider=SimpleNamespace(health=health),
+        data=SimpleNamespace(tracked_fires=[]),
+        received_timestamp=fresh, product_timestamp=fresh,
+    )
+    entry = SimpleNamespace(entry_id="test", runtime_data=SimpleNamespace(coordinator=coordinator))
+    entity = entity_class(entry, plan)
+    attrs = entity.extra_state_attributes
+    assert attrs["last_received_at"] == old.isoformat()
+    assert attrs["last_product_at"] == old.isoformat()
+    assert len(attrs["source_health"]) == 1
+    assert attrs["source_health"][0]["status"] == "outage"
+
+    coordinator.provider.health = health[:1]
+    attrs = entity.extra_state_attributes
+    assert attrs["last_product_at"] is None
+    assert attrs["last_received_at"] is None
+    assert attrs["source_health"][0]["reason"] == "awaiting_first_source_result"
+
+
+def test_source_timestamps_compare_instants_not_timezone_strings() -> None:
+    assert sensor._location_source_timestamps([
+        {"product_timestamp": "2026-09-11T12:00:00+09:00"},
+        {"product_timestamp": "2026-09-11T05:00:00+00:00"},
+    ]) == {"last_product_at": "2026-09-11T05:00:00+00:00", "last_received_at": None}
