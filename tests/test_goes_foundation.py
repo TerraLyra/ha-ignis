@@ -210,15 +210,25 @@ async def _executor(function, *args, **kwargs):
     return function(*args, **kwargs)
 
 
+def _future_executor(function, *args):
+    """Match hass.async_add_executor_job's Future-returning contract."""
+    return asyncio.get_running_loop().run_in_executor(None, function, *args)
+
+
+@pytest.fixture(params=[_executor, _future_executor], ids=["coroutine", "ha-future"])
+def product_executor(request):
+    return request.param
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("error,code", [
     (ImportError("secret/native/path"), "goes_dependency_unavailable"),
     (ValueError("secret/payload"), "goes_decode_failed"),
 ])
-async def test_decoder_diagnostic_is_safe_and_file_is_removed(tmp_path, error, code):
+async def test_decoder_diagnostic_is_safe_and_file_is_removed(tmp_path, error, code, product_executor):
     def decoder(*args, **kwargs):
         raise error
-    client = GoesProductClient(_Session([_Response(b"data")]), _executor,
+    client = GoesProductClient(_Session([_Response(b"data")]), product_executor,
         decoder=decoder, temp_directory=str(tmp_path))
     with pytest.raises(GoesProductError) as caught:
         await client.async_fetch(_object())
@@ -228,7 +238,7 @@ async def test_decoder_diagnostic_is_safe_and_file_is_removed(tmp_path, error, c
 
 
 @pytest.mark.asyncio
-async def test_product_download_is_bounded_decoded_and_removed(tmp_path) -> None:
+async def test_product_download_is_bounded_decoded_and_removed(tmp_path, product_executor) -> None:
     item = _object()
     response = _Response(b"data")
     seen = {}
@@ -242,7 +252,7 @@ async def test_product_download_is_bounded_decoded_and_removed(tmp_path) -> None
 
     result = await GoesProductClient(
         _Session([response]),
-        _executor,
+        product_executor,
         decoder=decoder,
         temp_directory=str(tmp_path),
     ).async_fetch(item)
@@ -254,7 +264,7 @@ async def test_product_download_is_bounded_decoded_and_removed(tmp_path) -> None
 
 @pytest.mark.asyncio
 async def test_product_download_rejects_changed_size_and_removes_file(
-    tmp_path,
+    tmp_path, product_executor,
 ) -> None:
     item = _object()
     response = _Response(b"too much", content_length=item.size)
@@ -262,7 +272,7 @@ async def test_product_download_rejects_changed_size_and_removes_file(
     with pytest.raises(GoesProductError, match="exceeds the safety limit"):
         await GoesProductClient(
             _Session([response]),
-            _executor,
+            product_executor,
             decoder=lambda *_args, **_kwargs: None,
             temp_directory=str(tmp_path),
         ).async_fetch(item)
@@ -271,14 +281,14 @@ async def test_product_download_rejects_changed_size_and_removes_file(
 
 
 @pytest.mark.asyncio
-async def test_product_download_rejects_redirect_before_decode(tmp_path) -> None:
+async def test_product_download_rejects_redirect_before_decode(tmp_path, product_executor) -> None:
     item = _object()
     response = _Response(b"", status=302, content_length=0)
 
     with pytest.raises(GoesProductError, match="returned an error"):
         await GoesProductClient(
             _Session([response]),
-            _executor,
+            product_executor,
             decoder=lambda *_args, **_kwargs: None,
             temp_directory=str(tmp_path),
         ).async_fetch(item)
@@ -287,7 +297,7 @@ async def test_product_download_rejects_redirect_before_decode(tmp_path) -> None
 
 
 @pytest.mark.asyncio
-async def test_product_download_cancellation_removes_file(tmp_path) -> None:
+async def test_product_download_cancellation_removes_file(tmp_path, product_executor) -> None:
     item = _object()
     response = _Response(b"data")
     response.content = _CancellingContent()
@@ -295,9 +305,36 @@ async def test_product_download_cancellation_removes_file(tmp_path) -> None:
     with pytest.raises(asyncio.CancelledError):
         await GoesProductClient(
             _Session([response]),
-            _executor,
+            product_executor,
             decoder=lambda *_args, **_kwargs: None,
             temp_directory=str(tmp_path),
         ).async_fetch(item)
 
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.asyncio
+async def test_cleanup_waits_for_future_when_caller_cancelled(tmp_path):
+    from custom_components.terralyra_ignis.products.goes import _async_cleanup
+    path = tmp_path / "temporary-product.nc"
+    path.touch()
+    started = asyncio.Event()
+    completion = asyncio.get_running_loop().create_future()
+    pending = []
+
+    def executor(function, *args):
+        pending.append((function, args))
+        started.set()
+        return completion
+
+    task = asyncio.create_task(_async_cleanup(executor, path))
+    await started.wait()
+    task.cancel()
+    await asyncio.sleep(0)
+    assert not completion.cancelled()
+    assert not task.done()
+    function, args = pending[0]
+    completion.set_result(function(*args))
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert not path.exists()

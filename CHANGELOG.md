@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.24.8
+
+- Fix GOES temporary-file cleanup accepting Home Assistant executor Futures,
+  preventing a cleanup TypeError from masking a successful product or its error.
+- Exercise both coroutine and Future executors for success, invalid downloads,
+  decoder failures and cancellation; verify cleanup completes on cancellation.
+
 ## 0.24.7
 
 - Classify unexpected provider exceptions with allowlisted diagnostic codes,

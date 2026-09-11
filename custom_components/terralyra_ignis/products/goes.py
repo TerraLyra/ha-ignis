@@ -379,7 +379,9 @@ async def _async_cleanup(
     run_in_executor: Callable[..., Awaitable[Any]], path: Path
 ) -> None:
     """Finish cleanup even when the caller is being cancelled."""
-    cleanup = asyncio.create_task(run_in_executor(_unlink_file, path))
+    # HA returns a Future; test/alternative executors may return a coroutine.
+    # create_task accepts only the latter and can mask a successful decode.
+    cleanup = asyncio.ensure_future(run_in_executor(_unlink_file, path))
     try:
         await asyncio.shield(cleanup)
     except asyncio.CancelledError:

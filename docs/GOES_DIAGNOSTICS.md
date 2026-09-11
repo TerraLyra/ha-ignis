@@ -1,5 +1,22 @@
 # Safe GOES failure diagnostics
 
+## Reproduced executor compatibility defect
+
+The deployed `provider_unexpected_type_error` led to a local reproduction in
+`_async_cleanup`: Home Assistant's `async_add_executor_job` returns a Future,
+whereas `asyncio.create_task` requires a coroutine. Previous product test doubles
+returned coroutines, so they did not exercise this contract. The cleanup error
+could replace either a successful decode result or the original product failure.
+
+The pending fix uses `asyncio.ensure_future`, accepting either kind of awaitable
+while retaining shielded cleanup. Both executor contracts now cover successful
+downloads, download validation, decoder errors and cancellation. An additional
+test cancels the caller during pending Future cleanup and checks completion.
+Local validation: 725 tests passed, configuration-flow coverage 100%. Restoration
+of GOES availability in the deployed Home Assistant still requires verification.
+
+## Diagnostic codes
+
 The existing per-location active-fire source/observation attributes and downloaded
 integration diagnostics expose `diagnostic_code` beside `failure_type`. No new
 entity, endpoint, request, logging setting or credential is required.
