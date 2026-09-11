@@ -19,6 +19,40 @@ from custom_components.terralyra_ignis.monitoring import MonitoringCenter
 NOW = datetime(2026, 9, 7, 12, tzinfo=UTC)
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("positions,expected", [((.80, .82, .84), "east"),
+                                               ((.84, .82, .80), "west")])
+async def test_location_movement_replay_through_published_events(hass, monkeypatch, positions, expected):
+    from custom_components.terralyra_ignis.monitoring import MonitoredLocation
+    for name in ("async_set_authentication_issue", "async_set_provider_outage_issue"):
+        monkeypatch.setattr(f"custom_components.terralyra_ignis.coordinator.{name}", lambda *a, **k: None)
+    provider = AsyncMock()
+    provider.health = ()
+    entry = MockConfigEntry(domain=DOMAIN, data={}, options={"dedup_radius_km": 5})
+    entry.add_to_hass(hass)
+    coordinator = IgnisCoordinator(hass, entry, provider,
+        monitoring_center=MonitoringCenter("West", 0, 0, False),
+        monitored_locations=(MonitoredLocation("west", "West", 0, 0, 200, True, "custom"),
+                             MonitoredLocation("east", "East", 0, 1, 200, True, "custom")))
+    coordinator._store_loaded = True
+    coordinator._async_save_state = AsyncMock()
+    coordinator._async_resolve_new_fire_place = AsyncMock()
+    events = []
+    for index, longitude in enumerate(positions):
+        acquired = NOW + timedelta(minutes=index * 10)
+        observation = FireDetection(provider="test", satellite="S3A", product="FRP",
+            timestamp=acquired, latitude=0, longitude=longitude, frp_mw=20, confidence=1)
+        provider.async_fetch_latest.return_value = replace(_snapshot(),
+            product_timestamp=acquired, detections=(observation,))
+        coordinator.data = await coordinator._async_update_data()
+        events.extend(coordinator.data.trend_events)
+    approaching = [event for event in events if event["event_type"] == "fire_approaching"]
+    assert len(approaching) == 1
+    assert approaching[0]["location_id"] == expected
+    assert approaching[0]["distance_trend"] == "approaching"
+    assert coordinator.data.tracked_fires[0].distance_km < 30
+
+
 def _snapshot() -> ProviderSnapshot:
     return ProviderSnapshot(
         provider="test_provider",
@@ -43,6 +77,17 @@ def test_snapshot_signature_identifies_product_not_fetch_time() -> None:
     assert _snapshot_signature(snapshot) != _snapshot_signature(
         replace(snapshot, product_timestamp=NOW + timedelta(minutes=5))
     )
+
+
+def test_snapshot_signature_detects_same_size_corrections() -> None:
+    detection = FireDetection(provider="test", satellite="test", product="fire",
+        timestamp=NOW, latitude=47.5, longitude=19, frp_mw=20)
+    snapshot = replace(_snapshot(), detections=(detection,))
+    for corrected in (replace(detection, latitude=47.6),
+                      replace(detection, timestamp=NOW - timedelta(minutes=5)),
+                      replace(detection, frp_mw=30)):
+        assert _snapshot_signature(snapshot) != _snapshot_signature(
+            replace(snapshot, detections=(corrected,)))
 
 
 @pytest.mark.asyncio

@@ -94,7 +94,6 @@ def cluster_detections(
             for new in newer
         ):
             continue
-        current_groups.append(group)
         # Measurement identity and evidence independence are different: two
         # views in the same algorithm family must not sum the same energy.
         source_frp: dict[tuple[str, str, str], float] = {}
@@ -104,11 +103,20 @@ def cluster_detections(
             latest_measurement[view] = max(
                 latest_measurement.get(view, item.timestamp), item.timestamp
             )
-        group = [
+        retained = [
             item for item in group
             if latest_measurement[(item.provider, item.satellite, item.product)]
             - item.timestamp <= SCAN_WINDOW
         ]
+        current_groups.append(retained)
+        if len(retained) != len(group):
+            # A discarded scan pixel must not remain a connectivity bridge.
+            clusters.extend(cluster_detections(
+                [(item, 0.0) for item in retained],
+                home_latitude, home_longitude, cluster_radius_km,
+            ))
+            continue
+        group = retained
         source_counts: dict[tuple[str, str], int] = {}
         for item in group:
             source = _independent_source_key(item)

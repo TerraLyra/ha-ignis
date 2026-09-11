@@ -83,7 +83,7 @@ class MetricTrend(StrEnum):
 
 
 class DistanceTrend(StrEnum):
-    """Trend of detected activity relative to Home."""
+    """Trend of detected activity relative to a monitored reference location."""
 
     APPROACHING = "approaching"
     STABLE = "stable"

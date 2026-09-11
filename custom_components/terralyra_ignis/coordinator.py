@@ -15,6 +15,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .activity import ActivitySummary, summarize_activity, update_activity_history
 from .observation_counts import summarize_counts, update_counts
+from .trends import add_observation_and_update_trends
 from .clustering import cluster_detections, haversine_km
 from .const import (
     ATTR_AFFECTED_LOCATIONS,
@@ -39,6 +40,7 @@ from .const import (
     DEFAULT_RADIUS_KM,
     DEFAULT_SCAN_INTERVAL_MINUTES,
     DOMAIN,
+    EVENT_FIRE_APPROACHING,
 )
 from .correlation import CorrelatedDetection, correlate_detections
 from .geocoding import (
@@ -421,12 +423,12 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             matching_radius_km=dedup_radius,
             matching_window=timedelta(hours=dedup_hours),
         )
-        _attach_location_matches(
+        location_events = _attach_location_matches(
             self._tracks, clusters, self.monitored_locations
         )
-        _attach_location_matches(
+        location_events.extend(_attach_location_matches(
             self._firms_tracks, firms_clusters, self.monitored_locations
-        )
+        ))
         changed = tracking.changed or firms_tracking.changed
         new_source_incidents = [
             *tracking.new_incidents,
@@ -523,15 +525,18 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             for incident in tracked_fires
             for source_id in incident.source_track_ids
         }
-        emitted_trends: set[tuple[str, str]] = set()
-        for event_type, track, _cluster in [
-            *tracking.trend_events,
-            *firms_tracking.trend_events,
+        emitted_trends: set[tuple[str, str, str | None]] = set()
+        for event_type, track, _cluster, location_match in [
+            *((kind, track, cluster, None)
+              for kind, track, cluster in [*tracking.trend_events, *firms_tracking.trend_events]
+              if kind != EVENT_FIRE_APPROACHING),
+            *location_events,
         ]:
             incident = family_lookup.get(str(track.get("track_id", "")))
             if incident is None or incident.track_id is None:
                 continue
-            event_key = (event_type, incident.track_id)
+            event_key = (event_type, incident.track_id,
+                         location_match.location_id if location_match else None)
             if event_key in emitted_trends:
                 continue
             emitted_trends.add(event_key)
@@ -540,6 +545,9 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 ATTR_SOURCE_URL: incident.source_url or snapshot.source_url,
                 ATTR_PRODUCT_TIME: snapshot.product_timestamp.isoformat(),
             }
+            if location_match is not None:
+                attrs.update(location_match.attrs())
+                attrs["incident_id"] = incident.track_id
             trend_events.append(attrs)
             self.hass.bus.async_fire(BUS_EVENT_FIRE_TREND, attrs)
 
@@ -765,7 +773,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
 def _snapshot_signature(
     snapshot: Any | None, provider_health: Any = ()
 ) -> tuple[Any, ...] | None:
-    """Return a cheap identity for immutable timestamped provider products."""
+    """Compare normalized observations, including corrections within a product."""
     if snapshot is None:
         return None
     return (
@@ -775,7 +783,7 @@ def _snapshot_signature(
         snapshot.product_timestamp,
         snapshot.status,
         snapshot.filename,
-        len(snapshot.detections),
+        tuple(sorted(snapshot.detections, key=repr)),
         tuple(
             (
                 item.provider_id,
@@ -1218,8 +1226,9 @@ def _attach_location_matches(
     tracks: list[dict[str, Any]],
     clusters: list[FireCluster],
     locations: tuple[MonitoredLocation, ...],
-) -> None:
+) -> list[tuple[str, dict[str, Any], FireCluster, IncidentLocationMatch]]:
     """Attach and persist current per-location relevance for live incidents."""
+    events = []
     tracks_by_id = {str(track.get("track_id", "")): track for track in tracks}
     for cluster in clusters:
         if cluster.track_id is None:
@@ -1227,10 +1236,19 @@ def _attach_location_matches(
         track = tracks_by_id.get(cluster.track_id)
         if track is None:
             continue
+        previous = dict(track.get("location_distance_trends", {}))
         _apply_location_matches(
             cluster,
             _matches_from_track(track, cluster, locations, update_state=True),
         )
+        times = track.setdefault("location_approaching_event_times", {})
+        for match in cluster.location_matches:
+            if (match.inside_radius and match.distance_trend is DistanceTrend.APPROACHING
+                and previous.get(match.location_id) != DistanceTrend.APPROACHING.value
+                and cluster.acquired - _parse_dt(times.get(match.location_id)) >= timedelta(hours=1)):
+                times[match.location_id] = cluster.acquired.isoformat()
+                events.append((EVENT_FIRE_APPROACHING, track, cluster, match))
+    return events
 
 
 def _apply_location_matches(
@@ -1241,6 +1259,7 @@ def _apply_location_matches(
     nearest = next((match for match in matches if match.inside_radius), None)
     if nearest is not None:
         cluster.distance_km = nearest.distance_km
+        cluster.distance_trend = nearest.distance_trend
 
 
 def _matches_from_track(
@@ -1285,7 +1304,24 @@ def _matches_from_track(
                 trend = DistanceTrend.UNKNOWN
             restored_matches.append(replace(match, distance_trend=trend))
         matches = tuple(restored_matches)
+    states = track.get("location_trend_samples", {})
+    sampled_matches = []
+    active_states = {}
+    for match in matches:
+        location = next(item for item in locations if item.id == match.location_id)
+        reference = (location.latitude, location.longitude)
+        state = states.get(match.location_id, {})
+        if tuple(state.get("reference", ())) != reference:
+            state = {"reference": reference}
+        if update_state:
+            add_observation_and_update_trends(
+                state, replace(cluster, distance_km=match.distance_km))
+        trend = DistanceTrend(state.get("distance_trend", "unknown"))
+        sampled_matches.append(replace(match, distance_trend=trend))
+        active_states[match.location_id] = state
+    matches = tuple(sampled_matches)
     if update_state:
+        track["location_trend_samples"] = active_states
         track["location_distances"] = {
             match.location_id: round(match.distance_km, 3) for match in matches
         }

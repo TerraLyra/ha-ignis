@@ -70,6 +70,14 @@ def test_remote_old_fire_is_not_removed_by_newer_elsewhere():
     assert len(result) == 2
 
 
+def test_discarded_scan_cannot_bridge_current_components():
+    fresh = (detection(latitude=46), detection(latitude=46.016))
+    assert len(clusters(*fresh)) == 2
+    result = clusters(*fresh, detection(-20, latitude=46.008))
+    assert len(result) == 2
+    assert all(item.pixel_count == 1 for item in result)
+
+
 def test_replaying_history_does_not_duplicate_live_incident():
     from custom_components.terralyra_ignis.tracking import update_incidents
 

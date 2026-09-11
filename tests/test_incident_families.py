@@ -59,6 +59,21 @@ def _consolidate(clusters: list[FireCluster]) -> list[FireCluster]:
     )
 
 
+def test_history_does_not_confirm_or_raise_current_power():
+    old = _cluster("old", minutes=-120)
+    old.frp_mw = 100
+    fresh = _cluster("fresh", latitude=47.75, provider="nasa_firms")
+    fresh.frp_mw = 20
+    result = _consolidate([old, fresh])
+    assert len(result) == 1
+    family = result[0]
+    assert family.frp_mw == 20
+    assert family.peak_frp_mw == 100
+    assert family.confirmation_level is ConfirmationLevel.SINGLE_SOURCE
+    assert family.latitude == fresh.latitude
+    assert family.source_track_ids == ("fresh", "old")
+
+
 @pytest.mark.parametrize(
     ("name", "latitude", "longitude"),
     [("California", 38.6, -121.3), ("Tokyo", 35.7, 139.7), ("Home", 46.25, 20.15)],
