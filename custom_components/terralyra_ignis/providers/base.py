@@ -6,6 +6,17 @@ from typing import Protocol
 
 from ..models import ProviderSnapshot
 
+DIAGNOSTIC_CODES = frozenset({
+    "goes_catalogue_failed", "goes_download_failed", "goes_decode_failed",
+    "goes_dependency_unavailable", "goes_temporary_file_failed",
+    "goes_identity_mismatch", "goes_decoder_result_invalid",
+})
+
+
+def safe_diagnostic_code(value: object) -> str | None:
+    """Never expose exception text, native paths or arbitrary provider values."""
+    return value if isinstance(value, str) and value in DIAGNOSTIC_CODES else None
+
 
 class ActiveFireProviderError(Exception):
     """Base error raised by a normalized active-fire provider."""
@@ -13,10 +24,12 @@ class ActiveFireProviderError(Exception):
     failure_type = "unknown"
 
     def __init__(
-        self, message: str = "", *, retry_after: timedelta | None = None
+        self, message: str = "", *, retry_after: timedelta | None = None,
+        diagnostic_code: str | None = None,
     ) -> None:
         super().__init__(message)
         self.retry_after = retry_after
+        self.diagnostic_code = safe_diagnostic_code(diagnostic_code)
 
 
 class ProviderAuthenticationError(ActiveFireProviderError):

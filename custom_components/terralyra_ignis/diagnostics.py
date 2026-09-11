@@ -75,6 +75,7 @@ async def async_get_config_entry_diagnostics(
                     "assigned_location_count": len(item.location_ids),
                     "status": item.status.value,
                     "failure_type": item.failure_type,
+                    "diagnostic_code": getattr(item, "diagnostic_code", None),
                     "consecutive_failures": item.consecutive_failures,
                     "retry_at": (
                         item.retry_at.isoformat() if item.retry_at else None

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.24.6
+
+- Expose allowlisted GOES failure-stage codes in source health and integration
+  diagnostics without raw exception text, native paths or credentials.
+- Preserve diagnostic codes during deferred retries and clear them on recovery.
+- Include diagnostic changes in product identity checks so source details refresh.
+- This is a diagnostic release, not a confirmed fix for the deployed GOES failure.
+
 ## 0.24.5
 
 - Publish location-specific approaching events with bounded, persisted trend

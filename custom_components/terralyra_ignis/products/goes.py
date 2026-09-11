@@ -54,10 +54,12 @@ class GoesProductError(Exception):
         *,
         failure_type: str = "invalid_response",
         retry_after: timedelta | None = None,
+        diagnostic_code: str = "goes_download_failed",
     ) -> None:
         super().__init__(message)
         self.failure_type = failure_type
         self.retry_after = retry_after
+        self.diagnostic_code = diagnostic_code
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,11 +178,15 @@ class GoesProductClient:
     async def async_fetch(self, item: GoesObject) -> Any:
         """Download, verify, decode and always remove one temporary object."""
         _validate_download_object(item)
-        path = await self._run_in_executor(
-            _create_temp_file, self._temp_directory
-        )
+        try:
+            path = await self._run_in_executor(_create_temp_file, self._temp_directory)
+        except OSError as err:
+            raise GoesProductError("GOES temporary storage is unavailable",
+                diagnostic_code="goes_temporary_file_failed") from err
+        stage = "goes_download_failed"
         try:
             await self._async_download(item, path)
+            stage = "goes_decode_failed"
             decoder = self._decoder
             if decoder is None:
                 from .goes_decoder import decode_goes_fdc
@@ -198,6 +204,9 @@ class GoesProductClient:
             raise
         except asyncio.CancelledError:
             raise
+        except ImportError as err:
+            raise GoesProductError("GOES dependency is unavailable",
+                diagnostic_code="goes_dependency_unavailable") from err
         except TimeoutError as err:
             raise GoesProductError(
                 "NOAA GOES product request timed out", failure_type="timeout"
@@ -209,7 +218,8 @@ class GoesProductClient:
         except Exception as err:
             # Decoder details can contain native-library internals and local
             # paths. Expose only a stable, non-sensitive provider error here.
-            raise GoesProductError("NOAA GOES product is invalid") from err
+            raise GoesProductError("NOAA GOES product is invalid",
+                diagnostic_code=stage) from err
         finally:
             await _async_cleanup(self._run_in_executor, path)
 
