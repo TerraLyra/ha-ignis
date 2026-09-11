@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.24.1
+
+- Bound current fire clustering to a 30-minute acquisition window. Older
+  overlapping passes no longer create duplicate current markers or independent
+  confirmation. The tracking layer retains history already observed over time.
+- Calculate FRP from the newest scan (with a one-minute scan-line tolerance)
+  per provider/satellite/product, taking the largest view total. Preserve sums
+  of adjacent pixels while avoiding repeated-pass and MTG/IODC view sums.
+- Saturate provider retry delays before timedelta multiplication, preventing
+  overflow during prolonged outages.
+
 ## 0.24.0
 
 - Add a location-scoped active-fire observation sensor that distinguishes

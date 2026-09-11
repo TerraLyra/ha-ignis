@@ -187,3 +187,4 @@ def test_mtg_and_iodc_are_not_independent_confirmation() -> None:
 
     assert len(clusters) == 1
     assert clusters[0].confirmation_level.value == "single_source"
+    assert clusters[0].frp_mw == 20.0

@@ -241,6 +241,9 @@ class MultiProviderPool:
 
     @staticmethod
     def _retry_delay(failure_count: int) -> timedelta:
+        # Saturate before multiplying timedelta (which has a finite range).
+        if failure_count >= 5:
+            return PROVIDER_RETRY_MAX
         multiplier = 2 ** max(0, failure_count - 1)
         return min(PROVIDER_RETRY_BASE * multiplier, PROVIDER_RETRY_MAX)
 
