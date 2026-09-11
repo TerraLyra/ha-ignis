@@ -219,6 +219,12 @@ def test_runtime_persists_and_restores_per_location_trend() -> None:
         track_id="incident-runtime",
     )
     _attach_location_matches([track], [closer], locations)
+    assert closer.location_matches[0].distance_trend is DistanceTrend.UNKNOWN
+    # Noise-resistant trends need three acquisitions spanning twenty minutes.
+    track["last_seen"] = "2026-08-30T10:20:00+00:00"
+    closer.acquired = datetime(2026, 8, 30, 10, 20, tzinfo=UTC)
+    closer.longitude = 19.3
+    _attach_location_matches([track], [closer], locations)
     assert closer.location_matches[0].distance_trend is DistanceTrend.APPROACHING
 
     restored = FireCluster(
@@ -233,3 +239,26 @@ def test_runtime_persists_and_restores_per_location_trend() -> None:
     )
     _attach_location_matches([track], [restored], locations)
     assert restored.location_matches[0].distance_trend is DistanceTrend.APPROACHING
+
+
+def test_opposite_location_trends_emit_only_for_approached_location():
+    import json
+    from datetime import timedelta
+    locations = (_location("west", "West", 0, 0, 200),
+                 _location("east", "East", 0, 1, 200))
+    tracks = [{"track_id": "moving"}]
+    events = []
+    start = datetime(2026, 8, 30, 10, tzinfo=UTC)
+    for index, longitude in enumerate((0.80, 0.82, 0.84)):
+        acquired = start + timedelta(minutes=10 * index)
+        tracks[0]["last_seen"] = acquired.isoformat()
+        cluster = FireCluster(latitude=0, longitude=longitude, distance_km=90,
+            confidence=1, frp_mw=20, acquired=acquired, pixel_count=1, track_id="moving")
+        events.extend(_attach_location_matches(tracks, [cluster], locations))
+        tracks = json.loads(json.dumps(tracks))
+    assert [(event[0], event[3].location_id) for event in events] == [("fire_approaching", "east")]
+    assert cluster.distance_trend is DistanceTrend.APPROACHING
+    trends = {match.location_id: match.distance_trend for match in cluster.location_matches}
+    assert trends["west"] is DistanceTrend.RECEDING
+    assert trends["east"] is DistanceTrend.APPROACHING
+    assert not _attach_location_matches(tracks, [cluster], locations)

@@ -215,17 +215,22 @@ def _family_cluster(
     home_latitude: float,
     home_longitude: float,
 ) -> FireCluster:
+    # Family membership is historical; current evidence has a shorter window.
+    history = members
+    newest = max(item.acquired for item in history)
+    members = [item for item in history
+               if newest - item.acquired <= timedelta(minutes=30)]
     representative = max(
         members,
         key=lambda item: (
-            item.confirmation_level is ConfirmationLevel.MULTI_SOURCE,
             _last_seen(item),
+            item.confirmation_level is ConfirmationLevel.MULTI_SOURCE,
             item.confidence,
         ),
     )
     providers = tuple(sorted({value for item in members for value in item.providers}))
     satellites = tuple(sorted({value for item in members for value in item.satellites}))
-    source_track_ids = tuple(sorted(item.track_id or "unknown" for item in members))
+    source_track_ids = tuple(sorted(item.track_id or "unknown" for item in history))
     evidence_families = {
         value for member in members for value in _evidence_families(member)
     }
@@ -238,7 +243,7 @@ def _family_cluster(
         )
         else _weakest_available_confirmation(members)
     )
-    first_seen = min(_first_seen(item) for item in members)
+    first_seen = min(_first_seen(item) for item in history)
     last_seen = max(_last_seen(item) for item in members)
     lifecycle = _family_lifecycle(members)
     extent = max(
@@ -283,7 +288,7 @@ def _family_cluster(
         family_id=family_id,
         source_track_ids=source_track_ids,
         incident_extent_km=extent,
-        peak_frp_mw=max(item.peak_frp_mw or item.frp_mw for item in members),
+        peak_frp_mw=max(item.peak_frp_mw or item.frp_mw for item in history),
         place_name=representative.place_name,
         nearest_settlement=representative.nearest_settlement,
         location_description=representative.location_description,
@@ -292,21 +297,22 @@ def _family_cluster(
         first_seen=first_seen,
         last_seen=last_seen,
         minimum_distance_km=min(
-            item.minimum_distance_km or item.distance_km for item in members
+            item.minimum_distance_km or item.distance_km for item in history
         ),
-        maximum_frp_mw=max(item.maximum_frp_mw or item.frp_mw for item in members),
+        maximum_frp_mw=max(item.maximum_frp_mw or item.frp_mw for item in history),
         maximum_pixel_count=max(
-            item.maximum_pixel_count or item.pixel_count for item in members
+            item.maximum_pixel_count or item.pixel_count for item in history
         ),
         detections_total=max(
-            item.detections_total or item.pixel_count for item in members
+            item.detections_total or item.pixel_count for item in history
         ),
         maximum_confidence=max(
-            item.maximum_confidence or item.confidence for item in members
+            item.maximum_confidence or item.confidence for item in history
         ),
         frp_trend=_strongest_metric_trend(members, "frp_trend"),
         activity_trend=_strongest_metric_trend(members, "activity_trend"),
-        distance_trend=_strongest_distance_trend(members),
+        distance_trend=(nearest_location.distance_trend if nearest_location
+                        else representative.distance_trend),
         trend_samples=max(item.trend_samples or 0 for item in members),
         trend_window_minutes=max(item.trend_window_minutes or 0.0 for item in members),
         confirmation_level=confirmation_level,

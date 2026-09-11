@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.24.5
+
+- Publish location-specific approaching events with bounded, persisted trend
+  samples and per-location cooldowns; align map distance and distance trend.
+- Separate historical family membership and peak power from current power,
+  position and independent-source confirmation.
+- Reprocess corrected observations even when product timestamps and counts
+  are unchanged; regroup retained pixels after obsolete scan filtering.
+- Add regressions including coordinator-level opposite-motion event replays.
+
 ## 0.24.4
 
 - Count distinct source observations by acquisition time with a bounded,
