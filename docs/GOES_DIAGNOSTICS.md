@@ -13,6 +13,18 @@ entity, endpoint, request, logging setting or credential is required.
 | `goes_decode_failed` | Product decoding |
 | `goes_decoder_result_invalid` | Decoder did not return a normalized snapshot |
 | `goes_identity_mismatch` | Snapshot identity differs from the selected product |
+| `provider_unexpected_import_error` | Unnormalized import/dependency exception |
+| `provider_unexpected_runtime_error` | Unnormalized runtime exception |
+| `provider_unexpected_type_error` | Unnormalized type exception |
+| `provider_unexpected_value_error` | Unnormalized value exception |
+| `provider_unexpected_os_error` | Unnormalized OS/I/O exception |
+| `provider_unexpected_error` | Other unnormalized exception |
+
+The `provider_unexpected_*` fallback applies to all providers. It identifies a
+broad exception category, not a GOES processing stage or a root cause. Runtime
+errors, for example, must not automatically be interpreted as blocking-I/O errors.
+No arbitrary exception class names or messages are exported. This fallback does
+not catch task cancellation or record it as a failed fetch.
 
 Codes locate a failing boundary; they do not establish the underlying cause.
 They are allowlisted at the provider-error and health-model boundaries. Raw

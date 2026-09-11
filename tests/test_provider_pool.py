@@ -25,6 +25,46 @@ NOW = datetime(2026, 8, 31, 12, tzinfo=UTC)
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("error_type,code", [
+    (ModuleNotFoundError, "provider_unexpected_import_error"),
+    (RuntimeError, "provider_unexpected_runtime_error"),
+    (TypeError, "provider_unexpected_type_error"),
+    (ValueError, "provider_unexpected_value_error"),
+    (PermissionError, "provider_unexpected_os_error"),
+    (Exception, "provider_unexpected_error"),
+])
+async def test_unexpected_failure_has_safe_diagnostic_and_recovers(error_type, code):
+    current = [NOW]
+    failed = _binding("noaa_goes", "G18", error_type("/private/token=secret"))
+    healthy = _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS"))
+    pool = MultiProviderPool((failed, healthy), now=lambda: current[0])
+    for _ in range(2):
+        result = await pool.async_fetch_latest()
+        assert len(result.detections) == 1
+        assert pool.health[0].diagnostic_code == code
+        assert pool.health[0].failure_type == "invalid_response"
+        assert "secret" not in str(pool.health[0].attrs())
+    assert failed.provider.async_fetch_latest.await_count == 1
+    current[0] += timedelta(hours=1)
+    failed.provider.async_fetch_latest.side_effect = None
+    failed.provider.async_fetch_latest.return_value = _snapshot("NOAA", "G18")
+    await pool.async_fetch_latest()
+    assert pool.health[0].diagnostic_code is None
+    assert pool.health[0].consecutive_failures == 0
+
+
+@pytest.mark.asyncio
+async def test_provider_cancellation_is_not_converted_to_failure():
+    import asyncio
+    binding = _binding("noaa_goes", "G18", _snapshot("NOAA", "G18"))
+    binding.provider.async_fetch_latest.side_effect = asyncio.CancelledError()
+    pool = MultiProviderPool((binding,), now=lambda: NOW)
+    with pytest.raises(asyncio.CancelledError):
+        await pool._async_fetch_binding(binding)
+    assert not pool._failure_counts
+
+
+@pytest.mark.asyncio
 async def test_diagnostic_survives_retry_and_clears_after_recovery():
     current = [NOW]
     failed = _binding("goes", "G18", ProviderUnavailableError(

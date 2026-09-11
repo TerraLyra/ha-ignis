@@ -16,6 +16,7 @@ from .base import (
     ProviderNoDataError,
     ProviderUnavailableError,
     safe_diagnostic_code,
+    unexpected_diagnostic_code,
 )
 
 PROVIDER_RETRY_BASE = timedelta(minutes=5)
@@ -221,9 +222,10 @@ class MultiProviderPool:
         except ActiveFireProviderError as err:
             self._record_failure(binding.provider_id, err, now)
             return err
-        except Exception:
+        except Exception as err:
             error = ProviderInvalidResponseError(
-                "Provider raised an unexpected error while fetching data"
+                "Provider raised an unexpected error while fetching data",
+                diagnostic_code=unexpected_diagnostic_code(err),
             )
             self._record_failure(binding.provider_id, error, now)
             return error
