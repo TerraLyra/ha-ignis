@@ -2,10 +2,14 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime, timedelta
 
 from .models import ConfirmationLevel, FireCluster, FireDetection
 
 EARTH_RADIUS_KM = 6371.0088
+OBSERVATION_WINDOW = timedelta(minutes=30)
+# Adjacent scan lines may carry slightly different acquisition timestamps.
+SCAN_WINDOW = timedelta(minutes=1)
 
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -33,18 +37,23 @@ def cluster_detections(
     because its outermost pixels are farther apart than the configured radius.
     Every pixel must still be connected to another pixel in the same group by
     a hop no longer than ``cluster_radius_km``.
+    Groups span at most 30 minutes, anchored to their newest observation so
+    intermediate samples cannot bridge arbitrarily distant acquisition times.
+    Incident history is maintained separately by the tracking layer.
     """
     groups: list[list[FireDetection]] = []
     ordered = sorted(
         detections,
-        key=lambda item: item[0].frp_mw or 0.0,
+        key=lambda item: (item[0].timestamp, item[0].frp_mw or 0.0),
         reverse=True,
     )
     for detection, _distance in ordered:
         connected = [
             group
             for group in groups
-            if any(
+            if max(member.timestamp for member in group) - detection.timestamp
+            <= OBSERVATION_WINDOW
+            and any(
                 haversine_km(
                     detection.latitude,
                     detection.longitude,
@@ -72,17 +81,44 @@ def cluster_detections(
                 groups.remove(other)
 
     clusters: list[FireCluster] = []
+    current_groups: list[list[FireDetection]] = []
     for group in groups:
-        source_frp: dict[tuple[str, str], float] = {}
+        # A provider may return a full day of observations. Publish only the
+        # newest temporal group for an overlapping footprint; otherwise the
+        # tracker would create a second live incident for an older pass.
+        if any(
+            haversine_km(old.latitude, old.longitude, new.latitude, new.longitude)
+            <= _connection_radius_km(old, new, cluster_radius_km)
+            for newer in current_groups
+            for old in group
+            for new in newer
+        ):
+            continue
+        current_groups.append(group)
+        # Measurement identity and evidence independence are different: two
+        # views in the same algorithm family must not sum the same energy.
+        source_frp: dict[tuple[str, str, str], float] = {}
+        latest_measurement: dict[tuple[str, str, str], datetime] = {}
+        for item in group:
+            view = (item.provider, item.satellite, item.product)
+            latest_measurement[view] = max(
+                latest_measurement.get(view, item.timestamp), item.timestamp
+            )
+        group = [
+            item for item in group
+            if latest_measurement[(item.provider, item.satellite, item.product)]
+            - item.timestamp <= SCAN_WINDOW
+        ]
         source_counts: dict[tuple[str, str], int] = {}
         for item in group:
             source = _independent_source_key(item)
-            source_frp[source] = source_frp.get(source, 0.0) + (
+            measurement = (item.provider, item.satellite, item.product)
+            source_frp[measurement] = source_frp.get(measurement, 0.0) + (
                 item.frp_mw or 0.0
             )
             source_counts[source] = source_counts.get(source, 0) + 1
-        # Independent satellites can observe the same energy. Use the largest
-        # source total instead of adding equal observations twice.
+        # Use each view's newest scan, then take the largest view total.
+        # This is a conservative cluster-level estimate, not a pixel union.
         total_frp = max(source_frp.values(), default=0.0)
         if total_frp > 0:
             weights = [max(item.frp_mw or 0.0, 0.000001) for item in group]

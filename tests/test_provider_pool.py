@@ -24,6 +24,30 @@ from custom_components.terralyra_ignis.providers.pool import (
 NOW = datetime(2026, 8, 31, 12, tzinfo=UTC)
 
 
+@pytest.mark.parametrize("failures", [5, 40, 1000, 10**100])
+def test_retry_delay_saturates_for_long_outages(failures):
+    assert MultiProviderPool._retry_delay(failures) == timedelta(hours=1)
+
+
+@pytest.mark.asyncio
+async def test_long_outage_preserves_healthy_peer_and_recovers():
+    current = [NOW]
+    failed = _binding("mtg", "MTG", ProviderUnavailableError())
+    healthy = _binding("firms", "VIIRS", _snapshot("NASA FIRMS", "VIIRS"))
+    pool = MultiProviderPool((failed, healthy), now=lambda: current[0])
+    for _ in range(45):
+        result = await pool.async_fetch_latest()
+        assert len(result.detections) == 1
+        assert pool.health[0].retry_at <= current[0] + timedelta(hours=1)
+        current[0] += timedelta(hours=1)
+    assert pool.health[0].consecutive_failures == 45
+    failed.provider.async_fetch_latest.side_effect = None
+    failed.provider.async_fetch_latest.return_value = _snapshot("LSA SAF", "MTG")
+    assert len((await pool.async_fetch_latest()).detections) == 2
+    assert pool.health[0].consecutive_failures == 0
+    assert pool.health[0].retry_at is None
+
+
 def _snapshot(provider: str, satellite: str) -> ProviderSnapshot:
     detection = FireDetection(
         provider=provider,
