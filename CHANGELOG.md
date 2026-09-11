@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.24.1
+
 - Bound current fire clustering to a 30-minute acquisition window. Older
   overlapping passes no longer create duplicate current markers or independent
   confirmation. The tracking layer retains history already observed over time.
