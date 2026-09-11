@@ -13,7 +13,7 @@ from custom_components.terralyra_ignis.coordinator import (
     IgnisCoordinator,
     _snapshot_signature,
 )
-from custom_components.terralyra_ignis.models import ProviderSnapshot, ProviderStatus
+from custom_components.terralyra_ignis.models import FireDetection, ProviderSnapshot, ProviderStatus
 from custom_components.terralyra_ignis.monitoring import MonitoringCenter
 
 NOW = datetime(2026, 9, 7, 12, tzinfo=UTC)
@@ -78,6 +78,67 @@ async def test_unchanged_product_skips_processing_and_storage(
 
     assert second is first
     assert coordinator.unchanged_update_skips == 1
+    coordinator._store = AsyncMock()
+    await IgnisCoordinator._async_save_state(coordinator)
+    saved = coordinator._store.async_save.call_args.args[0]
+    restored = IgnisCoordinator(hass, entry, provider,
+        monitoring_center=MonitoringCenter("Home", 47.5, 19.0, False))
+    restored._store = AsyncMock()
+    restored._store.async_load.return_value = saved
+    await restored._async_setup()
+    assert restored._observation_counts == coordinator._observation_counts
+    restored._count_scope = "changed location or filters"
+    restored._observation_counts = {}
+    await restored._async_setup()
+    assert restored._observation_counts == {}
     assert coordinator.last_processing_duration_ms == 0.0
     assert coordinator.last_input_detection_count == 0
     coordinator._async_save_state.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_observation_counter_replay_through_coordinator(hass, monkeypatch):
+    """Fresh peer products cannot recount a cached acquisition; idle polls age it."""
+    instant = [NOW]
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return instant[0]
+
+    monkeypatch.setattr("custom_components.terralyra_ignis.coordinator.datetime", Clock)
+    for name in ("async_set_authentication_issue", "async_set_provider_outage_issue"):
+        monkeypatch.setattr(f"custom_components.terralyra_ignis.coordinator.{name}", lambda *a, **k: None)
+    provider = AsyncMock()
+    provider.health = ()
+    entry = MockConfigEntry(domain=DOMAIN, data={}, options={})
+    entry.add_to_hass(hass)
+    coordinator = IgnisCoordinator(hass, entry, provider,
+        monitoring_center=MonitoringCenter("Home", 47.5, 19.0, False))
+    coordinator._store_loaded = True
+    coordinator._async_save_state = AsyncMock()
+    observation = FireDetection(provider="test", satellite="S3A", product="FRP",
+        timestamp=NOW, latitude=47.5, longitude=19.0, frp_mw=20, confidence=1,
+        source_detection_id="same-pixel")
+    for minute in (0, 10, 20, 30, 40, 50):
+        instant[0] = NOW + timedelta(minutes=minute)
+        provider.async_fetch_latest.return_value = replace(_snapshot(),
+            product_timestamp=instant[0], detections=(observation,))
+        coordinator.data = await coordinator._async_update_data()
+        assert coordinator.data.activity.detections_1h == 1
+    instant[0] = NOW + timedelta(minutes=61)
+    coordinator.data = await coordinator._async_update_data()
+    assert coordinator.data.activity.detections_1h == 0
+    assert coordinator.data.activity.detections_3h == 1
+    assert coordinator.unchanged_update_skips == 1
+    coordinator._store = AsyncMock()
+    await IgnisCoordinator._async_save_state(coordinator)
+    saved = coordinator._store.async_save.call_args.args[0]
+    restored = IgnisCoordinator(hass, entry, provider,
+        monitoring_center=MonitoringCenter("Home", 47.5, 19.0, False))
+    restored._store = AsyncMock()
+    restored._store.async_load.return_value = saved
+    await restored._async_setup()
+    restored.data = await restored._async_update_data()
+    assert restored.data.activity.detections_1h == 0
+    assert restored.data.activity.detections_3h == 1

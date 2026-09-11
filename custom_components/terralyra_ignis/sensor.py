@@ -36,6 +36,7 @@ from .entity import (
 from .evidence import FireEvidenceAssessment, assess_fire_evidence
 from .models import FireLifecycle, ProviderStatus
 from .observation_schedule import location_update_estimates, next_usable_update
+from .observation_counts import summarize_counts
 from .products.fire_risk import WMS_URL
 from .products.lst import WMS_URL as LST_WMS_URL
 from .situation import MAX_PRODUCT_AGE
@@ -872,11 +873,16 @@ class RecentDetectionsSensor(IgnisEntity, SensorEntity):
         return data.activity.detections_1h if data else 0
 
     @property
-    def extra_state_attributes(self) -> dict[str, int]:
+    def extra_state_attributes(self) -> dict[str, Any]:
         data = self.coordinator.data
         if data is None:
             return {"detections_last_3h": 0, "detections_last_6h": 0}
+        details = summarize_counts(
+            getattr(self.coordinator, "_observation_counts", {}), now=datetime.now(UTC)
+        )
+        details.pop("counts")
         return {
+            **details,
             "detections_last_3h": data.activity.detections_3h,
             "detections_last_6h": data.activity.detections_6h,
             "history_samples_24h": data.activity.samples_24h,
