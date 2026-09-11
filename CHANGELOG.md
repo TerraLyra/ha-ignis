@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.24.7
+
+- Classify unexpected provider exceptions with allowlisted diagnostic codes,
+  without exposing exception messages, class names, paths or credentials.
+- Test fallback diagnostics, healthy peers, retry retention and recovery.
+- Diagnostic extension only; the deployed GOES root cause is not yet confirmed.
+
 ## 0.24.6
 
 - Expose allowlisted GOES failure-stage codes in source health and integration
