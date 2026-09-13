@@ -17,3 +17,17 @@ Compare the completion time and duration with observed disconnections. The JSON
 does not contain per-observation data, coordinates, credentials, or new logs.
 This is instrumentation only: no clustering, notification, scheduling, retention,
 or provider polling policy is changed.
+
+## Incident-family optimization
+
+The subsequent family fix indexes fixed group anchors in Earth-centred spatial
+cells. This only shortlists candidates: the original temporal, source, complete-
+link diameter and stable-ID rules still decide membership in the original order.
+It avoids testing obviously distant families and handles poles and the date line.
+
+Both consolidation calls run in the HA executor on deep copies. Workers cannot
+mutate live coordinator state, including after cancellation. Their CPU usage is
+not included in the coordinator's `thread_cpu_ms`; compare stage wall time and
+actual frontend responsiveness after deployment, not thread CPU alone. Dense
+groups can still require pairwise work. Synthetic timing is not a prediction for
+the Raspberry Pi or the user's data.

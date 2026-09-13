@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from copy import deepcopy
+from dataclasses import replace
+import random
 
 import pytest
 
@@ -19,6 +22,45 @@ from custom_components.terralyra_ignis.models import (
 )
 
 NOW = datetime(2026, 9, 8, 19, 0, tzinfo=UTC)
+
+
+@pytest.mark.parametrize("seed", [3, 19, 42])
+def test_spatial_shortlist_matches_exhaustive_grouping(monkeypatch, seed):
+    """Constant cells recreate the exhaustive algorithm as a reference."""
+    from custom_components.terralyra_ignis import incident_families as module
+    rng = random.Random(seed)
+    points = []
+    for index in range(240):
+        lat, lon = rng.choice([(47, 19), (38, -122), (89.95, 179.98),
+                               (-89.95, -179.98), (0, 179.98)])
+        lat = max(-90, min(90, lat + rng.uniform(-.2, .2)))
+        lon = (lon + rng.uniform(-.2, .2) + 180) % 360 - 180
+        points.append(replace(_cluster(
+            str(index), latitude=lat, minutes=rng.randrange(-600, 60),
+            provider=rng.choice(["nasa_firms", "eumetsat_lsa_saf_iodc"]),
+            family_id=rng.choice([None, "inherited-a", "inherited-b"]),
+        ), longitude=lon))
+    indexed = _consolidate(deepcopy(points))
+    monkeypatch.setattr(module, "_anchor_cell", lambda *args: (0, 0, 0))
+    exhaustive = _consolidate(deepcopy(points))
+    assert indexed == exhaustive
+
+
+def test_spatial_shortlist_avoids_global_pair_comparisons(monkeypatch):
+    from custom_components.terralyra_ignis import incident_families as module
+    original = module._can_join
+    calls = 0
+
+    def counted(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(module, "_can_join", counted)
+    points = [replace(_cluster(str(i), latitude=-60 + i // 100 * 5),
+                      longitude=-175 + i % 100 * 3.5) for i in range(2400)]
+    assert len(_consolidate(points)) == len(points)
+    assert calls < len(points) * 4
 
 
 def _cluster(

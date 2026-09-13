@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
+from functools import partial
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 from time import perf_counter, thread_time
@@ -478,13 +480,16 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
                 monitored_locations=self.monitored_locations,
             )
         )
-        tracked_fires = consolidate_incident_families(
-            source_fires,
+        # Workers own their copies: cancellation or concurrent place updates
+        # must not mutate published/main-thread state from an executor thread.
+        tracked_fires = await self.hass.async_add_executor_job(partial(
+            consolidate_incident_families,
+            deepcopy(source_fires),
             home_latitude=home_lat,
             home_longitude=home_lon,
             matching_radius_km=dedup_radius,
             matching_window=timedelta(hours=dedup_hours),
-        )
+        ))
         family_by_source = {
             source_id: incident.track_id
             for incident in tracked_fires
@@ -496,13 +501,14 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         for cluster in [*clusters, *firms_clusters]:
             if cluster.track_id in family_by_source:
                 cluster.family_id = family_by_source[cluster.track_id]
-        active_clusters = consolidate_incident_families(
-            [*clusters, *firms_clusters],
+        active_clusters = await self.hass.async_add_executor_job(partial(
+            consolidate_incident_families,
+            deepcopy([*clusters, *firms_clusters]),
             home_latitude=home_lat,
             home_longitude=home_lon,
             matching_radius_km=dedup_radius,
             matching_window=timedelta(hours=dedup_hours),
-        )
+        ))
 
         checkpoint("incident_families")
         new_fires: list[dict[str, Any]] = []
