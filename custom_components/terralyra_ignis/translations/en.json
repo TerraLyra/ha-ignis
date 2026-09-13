@@ -199,6 +199,10 @@
       "title": "Fire-risk forecast service is repeatedly unavailable",
       "description": "The FRMv3 forecast service failed {failures} consecutive refreshes (last reason: {reason}). TerraLyra IGNIS is retrying automatically with a bounded delay; active-fire monitoring and other healthy products continue normally. This notice clears after recovery."
     },
+    "fire_risk_date_unavailable": {
+      "title": "The requested fire-risk forecast date is unavailable",
+      "description": "The service does not advertise data for {requested_date}. Its latest listed date is {latest_date}. Older data is not used as today's forecast. Automatic retries continue; satellite fire monitoring is independent. This notice clears after a successful refresh."
+    },
     "provider_coverage": {
       "title": "No configured active-fire source covers some monitored locations",
       "description": "TerraLyra IGNIS cannot currently assign a usable satellite source to: {locations}. Move or disable locations outside the supported observation footprints. Other covered locations continue updating."

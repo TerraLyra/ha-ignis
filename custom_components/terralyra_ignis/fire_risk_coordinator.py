@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import CONF_FIRE_RISK_RADIUS_KM, CONF_RADIUS_KM, DEFAULT_RADIUS_KM, DOMAIN
 from .products.fire_risk import (
     FireRiskClient,
+    FireRiskDateUnavailableError,
     FireRiskError,
     FireRiskForecast,
     FireRiskRateLimitError,
@@ -21,6 +22,7 @@ from .products.fire_risk import (
     FireRiskTemporaryServiceError,
     analyze_risk_map,
     map_bounds,
+    safe_fire_risk_reason,
 )
 from .repairs import async_set_fire_risk_outage_issue
 
@@ -99,13 +101,20 @@ class FireRiskCoordinator(DataUpdateCoordinator[FireRiskForecast]):
             self.update_interval = _retry_interval(
                 self._consecutive_failures, error=err
             )
+            date_context = (
+                {"requested_date": err.requested.isoformat(),
+                 "latest_date": err.latest.isoformat()}
+                if isinstance(err, FireRiskDateUnavailableError) else {}
+            )
+            reason = safe_fire_risk_reason(err)
             async_set_fire_risk_outage_issue(
                 self.hass,
                 self.entry,
                 consecutive_failures=self._consecutive_failures,
-                reason=str(err),
+                reason=reason,
+                **date_context,
             )
-            raise UpdateFailed(str(err)) from err
+            raise UpdateFailed(reason) from err
 
 
 def _staggered_interval(entry_id: str) -> timedelta:
@@ -131,5 +140,7 @@ def _retry_interval(
             return min(max(retry_after, FIRE_RISK_RETRY_BASE), FIRE_RISK_RETRY_MAX)
 
     failures = max(1, consecutive_failures)
+    if failures >= 3:
+        return FIRE_RISK_RETRY_MAX
     seconds = FIRE_RISK_RETRY_BASE.total_seconds() * (2 ** (failures - 1))
     return min(timedelta(seconds=seconds), FIRE_RISK_RETRY_MAX)
