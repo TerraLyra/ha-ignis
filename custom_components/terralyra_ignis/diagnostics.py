@@ -125,6 +125,9 @@ async def async_get_config_entry_diagnostics(
                 else None
             ),
             "performance": {
+                "last_completed_processing": getattr(
+                    active, "last_completed_processing", None
+                ),
                 "last_update_duration_ms": getattr(
                     active, "last_update_duration_ms", None
                 ),

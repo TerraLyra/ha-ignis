@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
-from time import perf_counter
+from time import perf_counter, thread_time
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -170,6 +170,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self.last_update_duration_ms: float | None = None
         self.last_fetch_duration_ms: float | None = None
         self.last_processing_duration_ms: float | None = None
+        self.last_completed_processing: dict[str, Any] | None = None
         self.last_input_detection_count = 0
         self.unchanged_update_skips = 0
         self.state_write_count = 0
@@ -319,6 +320,23 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             )
 
         processing_started = perf_counter()
+        stage_started = processing_started
+        stage_cpu_started = thread_time()
+        stages: dict[str, dict[str, float]] = {}
+
+        def checkpoint(name: str) -> None:
+            """Bounded timings; thread CPU excludes executor worker CPU.
+
+            Across awaits, thread CPU may include other HA tasks. Neither
+            metric alone measures continuous event-loop blocking.
+            """
+            nonlocal stage_started, stage_cpu_started
+            wall, cpu = perf_counter(), thread_time()
+            stages[name] = {
+                "wall_ms": round((wall - stage_started) * 1000, 2),
+                "thread_cpu_ms": round((cpu - stage_cpu_started) * 1000, 2),
+            }
+            stage_started, stage_cpu_started = wall, cpu
 
         min_conf = float(self.entry.options.get(CONF_MIN_CONFIDENCE, DEFAULT_MIN_CONFIDENCE))
         min_frp = float(self.entry.options.get(CONF_MIN_FRP_MW, DEFAULT_MIN_FRP_MW))
@@ -344,12 +362,14 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             if _inside_any_location(detection, self.monitored_locations):
                 filtered.append((detection, distance))
 
+        checkpoint("filtering")
         clusters = cluster_detections(
             filtered,
             home_lat,
             home_lon,
             max(0.5, dedup_radius * 0.66),
         )
+        checkpoint("clustering")
         correlated: tuple[CorrelatedDetection, ...] = ()
         secondary: tuple[FireDetection, ...] = ()
         if corroboration_snapshot is not None:
@@ -368,6 +388,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             provider_available=corroboration_snapshot is not None,
             cluster_radius_km=max(0.5, dedup_radius * 0.66),
         )
+        checkpoint("corroboration")
         first_snapshot = not self._initialized
         tracking = update_incidents(
             self._tracks,
@@ -434,10 +455,12 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             *tracking.new_incidents,
             *firms_tracking.new_incidents,
         ]
+        checkpoint("tracking_and_location_matches")
         if not first_snapshot:
             for track, cluster in new_source_incidents:
                 await self._async_resolve_new_fire_place(track, cluster)
 
+        checkpoint("new_fire_place_names")
         visible_since = snapshot.product_timestamp - timedelta(hours=history_hours)
         source_fires = _tracked_fire_clusters(
             self._tracks,
@@ -481,6 +504,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             matching_window=timedelta(hours=dedup_hours),
         )
 
+        checkpoint("incident_families")
         new_fires: list[dict[str, Any]] = []
         new_source_ids = {
             str(track.get("track_id", ""))
@@ -551,6 +575,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             trend_events.append(attrs)
             self.hass.bus.async_fire(BUS_EVENT_FIRE_TREND, attrs)
 
+        checkpoint("events")
         updated_incident_history = update_incident_history(
             self._incident_history,
             [incident.attrs() for incident in tracked_fires],
@@ -565,6 +590,7 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             self._initialized = True
             changed = True
 
+        checkpoint("incident_history")
         count_now = datetime.now(UTC)
         updated_counts = update_counts(
             self._observation_counts,
@@ -594,9 +620,11 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
             product_time=snapshot.product_timestamp,
             now=snapshot.received_timestamp,
         )
+        checkpoint("counts_and_situation")
         if changed and self._store_loaded:
             await self._async_save_state()
 
+        checkpoint("state_save")
         if self._place_resolver is not None:
             for track in [*self._tracks, *self._firms_tracks]:
                 self._schedule_place_lookup(track)
@@ -620,6 +648,15 @@ class IgnisCoordinator(DataUpdateCoordinator[CoordinatorData]):
         self._last_snapshot_signature = snapshot_signature
         self.last_processing_duration_ms = _elapsed_ms(processing_started)
         self.last_update_duration_ms = _elapsed_ms(update_started)
+        checkpoint("result_and_background_scheduling")
+        # Retain the last actual processing run even if a later poll is skipped.
+        self.last_completed_processing = {
+            "completed_at": datetime.now(UTC).isoformat(),
+            "wall_ms": self.last_processing_duration_ms,
+            "input_detection_count": self.last_input_detection_count,
+            "new_source_incident_count": len(new_source_incidents),
+            "stages": stages,
+        }
         return result
 
     def _set_provider_failure_status(self, status: ProviderStatus) -> None:

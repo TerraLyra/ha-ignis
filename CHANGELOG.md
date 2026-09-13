@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.24.10
+
+- Add bounded, per-stage processing timings to downloaded diagnostics, including
+  elapsed time and coordinator-thread CPU time for eleven stages.
+- Retain the last completed processing run across unchanged-product skips.
+- Document asynchronous-wait and CPU-attribution limits; these measurements do
+  not by themselves prove continuous event-loop blocking.
+- Diagnostic release only: no changes to detection, alerts, or polling behavior.
+- All 740 tests pass locally.
+
 ## 0.24.9
 
 - Distinguish unavailable forecast dates from service failures using the Risk

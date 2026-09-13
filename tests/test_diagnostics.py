@@ -87,6 +87,9 @@ async def test_diagnostics_are_bounded_and_redacted(hass) -> None:
                 last_update_duration_ms=24.5,
                 last_fetch_duration_ms=20.0,
                 last_processing_duration_ms=4.5,
+                last_completed_processing={
+                    "stages": {"clustering": {"wall_ms": 4.0, "thread_cpu_ms": 3.5}},
+                },
                 last_input_detection_count=123,
                 unchanged_update_skips=7,
                 state_write_count=3,
@@ -123,6 +126,9 @@ async def test_diagnostics_are_bounded_and_redacted(hass) -> None:
     assert result["active_fire"]["provider_status"] == "available"
     assert result["active_fire"]["source_selection"] == "automatic_equal_peers"
     assert result["active_fire"]["performance"] == {
+        "last_completed_processing": {
+            "stages": {"clustering": {"wall_ms": 4.0, "thread_cpu_ms": 3.5}},
+        },
         "last_update_duration_ms": 24.5,
         "last_fetch_duration_ms": 20.0,
         "last_processing_duration_ms": 4.5,
