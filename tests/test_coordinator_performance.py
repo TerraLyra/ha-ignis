@@ -117,11 +117,38 @@ async def test_unchanged_product_skips_processing_and_storage(
     coordinator._store_loaded = True
     coordinator._async_save_state = AsyncMock()
 
+    wall_clock, cpu_clock = [100.0], [10.0]
+    monkeypatch.setattr(
+        "custom_components.terralyra_ignis.coordinator.perf_counter",
+        lambda: wall_clock[0],
+    )
+    monkeypatch.setattr(
+        "custom_components.terralyra_ignis.coordinator.thread_time",
+        lambda: cpu_clock[0],
+    )
+
+    async def measured_save():
+        wall_clock[0] += 2.0
+        cpu_clock[0] += 0.125
+
+    coordinator._async_save_state.side_effect = measured_save
     first = await coordinator._async_update_data()
+    measurement = coordinator.last_completed_processing
+    assert measurement["stages"]["state_save"] == {
+        "wall_ms": 2000.0, "thread_cpu_ms": 125.0,
+    }
+    assert measurement["wall_ms"] == 2000.0
+    assert set(measurement["stages"]) == {
+        "filtering", "clustering", "corroboration",
+        "tracking_and_location_matches", "new_fire_place_names",
+        "incident_families", "events", "incident_history",
+        "counts_and_situation", "state_save", "result_and_background_scheduling",
+    }
     coordinator.data = first
     second = await coordinator._async_update_data()
 
     assert second is first
+    assert coordinator.last_completed_processing is measurement
     assert coordinator.unchanged_update_skips == 1
     coordinator._store = AsyncMock()
     await IgnisCoordinator._async_save_state(coordinator)
