@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.24.11
+
+- Shortlist incident-family candidates using Earth-centred spatial cells while
+  retaining existing temporal, diameter, ordering, and stable-ID rules.
+- Run both family consolidation passes in the HA executor on private copies,
+  preventing workers from mutating live coordinator state.
+- Add randomized equivalence tests including poles and the date line, a bounded
+  comparison-count regression, and an event-loop responsiveness test.
+- All 745 tests pass locally. A synthetic 2400-track benchmark returned identical
+  results in 0.078 s versus 4.922 s; deployed performance still needs verification.
+
 ## 0.24.10
 
 - Add bounded, per-stage processing timings to downloaded diagnostics, including

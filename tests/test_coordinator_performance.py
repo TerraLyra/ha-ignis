@@ -20,6 +20,45 @@ NOW = datetime(2026, 9, 7, 12, tzinfo=UTC)
 
 
 @pytest.mark.asyncio
+async def test_family_worker_keeps_loop_responsive_and_owns_inputs(hass, monkeypatch):
+    import asyncio
+    import threading
+    from custom_components.terralyra_ignis import coordinator as module
+
+    for name in ("async_set_authentication_issue", "async_set_provider_outage_issue"):
+        monkeypatch.setattr(module, name, lambda *args, **kwargs: None)
+    provider = AsyncMock()
+    provider.health = ()
+    observation = FireDetection(provider="test", satellite="S3A", product="FRP",
+        timestamp=NOW, latitude=47.5, longitude=19, frp_mw=20, confidence=1)
+    provider.async_fetch_latest.return_value = replace(_snapshot(), detections=(observation,))
+    entry = MockConfigEntry(domain=DOMAIN, data={}, options={})
+    entry.add_to_hass(hass)
+    instance = IgnisCoordinator(hass, entry, provider,
+        monitoring_center=MonitoringCenter("Home", 47.5, 19, False))
+    main_thread = threading.get_ident()
+    original = module.consolidate_incident_families
+    loop = asyncio.get_running_loop()
+    worker_inputs = []
+
+    def worker(clusters, **kwargs):
+        assert threading.get_ident() != main_thread
+        released = threading.Event()
+        loop.call_soon_threadsafe(released.set)
+        assert released.wait(2), "HA event loop could not respond during worker execution"
+        worker_inputs.append(clusters)
+        return original(clusters, **kwargs)
+
+    monkeypatch.setattr(module, "consolidate_incident_families", worker)
+    result = await instance._async_update_data()
+    assert len(worker_inputs) == 2
+    assert result.active_clusters
+    assert worker_inputs[0][0] is not worker_inputs[1][0]
+    assert all(result.active_clusters[0] is not item
+               for batch in worker_inputs for item in batch)
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("positions,expected", [((.80, .82, .84), "east"),
                                                ((.84, .82, .80), "west")])
 async def test_location_movement_replay_through_published_events(hass, monkeypatch, positions, expected):

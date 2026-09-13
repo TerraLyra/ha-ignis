@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from datetime import timedelta
+import math
 
-from .clustering import haversine_km
+from .clustering import EARTH_RADIUS_KM, haversine_km
 from .models import (
     ConfirmationLevel,
     DistanceTrend,
@@ -38,18 +39,33 @@ def consolidate_incident_families(
         key=lambda item: (_first_seen(item), item.track_id or ""),
     )
     groups: list[list[FireCluster]] = []
+    # A valid candidate must be within the diameter limit of every member,
+    # including the first. Index that fixed anchor in Earth-centred cells.
+    # Chord distance never exceeds arc distance: adjacent cells form a
+    # conservative shortlist even at the poles and across the date line.
+    cell_size = max(MAX_FAMILY_DIAMETER_KM, matching_radius_km * 4)
+    anchors: dict[tuple[int, int, int], list[int]] = {}
     for cluster in ordered:
+        cell = _anchor_cell(cluster, cell_size)
+        nearby = sorted(
+            index
+            for dx in (-1, 0, 1)
+            for dy in (-1, 0, 1)
+            for dz in (-1, 0, 1)
+            for index in anchors.get((cell[0] + dx, cell[1] + dy, cell[2] + dz), ())
+        )
         candidates = [
-            group
-            for group in groups
+            groups[index]
+            for index in nearby
             if _can_join(
                 cluster,
-                group,
+                groups[index],
                 matching_radius_km=matching_radius_km,
                 matching_window=matching_window,
             )
         ]
         if not candidates:
+            anchors.setdefault(cell, []).append(len(groups))
             groups.append([cluster])
             continue
         # Joining more than one group could bridge two distinct incidents.
@@ -71,6 +87,16 @@ def consolidate_incident_families(
             )
         )
     return sorted(result, key=lambda item: item.distance_km)
+
+
+def _anchor_cell(cluster: FireCluster, size: float) -> tuple[int, int, int]:
+    latitude, longitude = math.radians(cluster.latitude), math.radians(cluster.longitude)
+    radius = EARTH_RADIUS_KM / size
+    return (
+        math.floor(radius * math.cos(latitude) * math.cos(longitude)),
+        math.floor(radius * math.cos(latitude) * math.sin(longitude)),
+        math.floor(radius * math.sin(latitude)),
+    )
 
 
 def _can_join(
