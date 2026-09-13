@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import hashlib
+import math
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from .clustering import haversine_km
+from .clustering import EARTH_RADIUS_KM, haversine_km
 from .const import (
     EVENT_FIRE_ACTIVITY_DECREASING,
     EVENT_FIRE_ACTIVITY_INCREASING,
@@ -69,9 +70,32 @@ def update_incidents(
     new_incidents: list[tuple[dict[str, Any], FireCluster]] = []
     trend_events: list[tuple[str, dict[str, Any], FireCluster]] = []
     matched_ids: set[str] = set()
+    # Only unmatched, recent tracks can be reused in this snapshot. Fixed
+    # positions are safe: a moved or newly created track is immediately marked
+    # matched and cannot be selected again until the next update.
+    spatial_index: dict[tuple[int, int, int], list[int]] = {}
+    cell_size = max(matching_radius_km, 0.001)
+    for index, incident in enumerate(retained):
+        if _parse_dt(incident.get("last_seen")) >= dedup_cutoff:
+            cell = _tracking_cell(
+                float(incident["latitude"]), float(incident["longitude"]), cell_size
+            )
+            spatial_index.setdefault(cell, []).append(index)
     for cluster in clusters:
+        cell = _tracking_cell(cluster.latitude, cluster.longitude, cell_size)
+        # Preserve original order for equal-distance ties. Chord distance is
+        # no greater than surface distance, including across the date line.
+        nearby = sorted(
+            index
+            for dx in (-1, 0, 1)
+            for dy in (-1, 0, 1)
+            for dz in (-1, 0, 1)
+            for index in spatial_index.get(
+                (cell[0] + dx, cell[1] + dy, cell[2] + dz), ()
+            )
+        )
         matched = _nearest_match(
-            retained,
+            [retained[index] for index in nearby],
             cluster,
             matching_radius_km,
             matched_ids,
@@ -89,6 +113,17 @@ def update_incidents(
         changed = True
 
     return TrackingResult(retained, new_incidents, ended, trend_events, changed)
+
+
+def _tracking_cell(latitude: float, longitude: float, size: float) -> tuple[int, int, int]:
+    """Conservative Earth-centred candidate cell, not a matching decision."""
+    lat, lon = math.radians(latitude), math.radians(longitude)
+    radius = EARTH_RADIUS_KM / size
+    return (
+        math.floor(radius * math.cos(lat) * math.cos(lon)),
+        math.floor(radius * math.cos(lat) * math.sin(lon)),
+        math.floor(radius * math.sin(lat)),
+    )
 
 
 def apply_incident_metadata(cluster: FireCluster, incident: dict[str, Any]) -> None:

@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from copy import deepcopy
+import random
+
+import pytest
 
 from custom_components.terralyra_ignis.const import (
     EVENT_FIRE_ACTIVITY_INCREASING,
@@ -12,6 +16,76 @@ from custom_components.terralyra_ignis.models import FireCluster, FireLifecycle
 from custom_components.terralyra_ignis.tracking import _trend_events, update_incidents
 
 BASE = datetime(2026, 8, 27, 12, 0, tzinfo=UTC)
+
+
+@pytest.mark.parametrize("seed", [3, 19, 42])
+def test_indexed_tracking_matches_exhaustive_replay(monkeypatch, seed):
+    from custom_components.terralyra_ignis import tracking as module
+
+    rng = random.Random(seed)
+    batches = []
+    for step in range(4):
+        batch = []
+        for index in range(120):
+            lat, lon = [(46, 20), (38, -122), (89.99, 179.99),
+                        (-89.99, -179.99), (0, 179.99)][index % 5]
+            batch.append(_cluster(
+                BASE + timedelta(minutes=step * 20 - rng.choice([0, 0, 500])),
+                latitude=max(-90, min(90, lat + rng.uniform(-.1, .1))),
+                longitude=(lon + rng.uniform(-.1, .1) + 180) % 360 - 180,
+                frp_mw=rng.uniform(1, 50),
+            ))
+        batches.append(batch)
+
+    def replay():
+        tracks, results = [], []
+        for step, batch in enumerate(deepcopy(batches)):
+            result = update_incidents(
+                tracks, batch, now=BASE + timedelta(minutes=step * 20),
+                matching_radius_km=3, memory_hours=6, history_hours=24,
+            )
+            tracks = result.incidents
+            results.append(deepcopy((result, batch)))
+        return results
+
+    indexed = replay()
+    # A constant cell includes all eligible tracks, restoring exhaustive search.
+    monkeypatch.setattr(module, "_tracking_cell", lambda *args: (0, 0, 0))
+    assert indexed == replay()
+
+
+def test_tracking_shortlist_bounds_distance_comparisons(monkeypatch):
+    from custom_components.terralyra_ignis import tracking as module
+
+    clusters = [_cluster(latitude=-60 + i // 100 * 5,
+                         longitude=-175 + i % 100 * 3.5) for i in range(2400)]
+    tracks = [module._new_incident(cluster) for cluster in clusters]
+    original = module.haversine_km
+    calls = 0
+
+    def counted(*args):
+        nonlocal calls
+        calls += 1
+        return original(*args)
+
+    monkeypatch.setattr(module, "haversine_km", counted)
+    result = update_incidents(tracks, clusters, now=BASE,
+                              matching_radius_km=3, memory_hours=6)
+    assert not result.new_incidents
+    assert calls == len(clusters)
+
+
+def test_tracking_equal_distance_tie_and_single_use():
+    from custom_components.terralyra_ignis.tracking import _new_incident
+
+    first = _new_incident(_cluster())
+    second = deepcopy(first)
+    second["track_id"] = "second"
+    clusters = [_cluster(), _cluster()]
+    result = update_incidents([first, second], clusters, now=BASE,
+                              matching_radius_km=0, memory_hours=6)
+    assert not result.new_incidents
+    assert [cluster.track_id for cluster in clusters] == [first["track_id"], "second"]
 
 
 def _cluster(at: datetime = BASE, **changes) -> FireCluster:

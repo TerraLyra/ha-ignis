@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.24.12
+
+- Shortlist persistent tracking matches with Earth-centred spatial cells,
+  preserving nearest-match tie order and one-match-per-snapshot semantics.
+- Add multi-cycle randomized equivalence tests (poles, date line and delayed
+  observations), a 2400-track comparison-count regression and a zero-radius tie
+  test. This reduces candidate-search work; tracking still runs on the HA loop.
+
 ## 0.24.11
 
 - Shortlist incident-family candidates using Earth-centred spatial cells while
