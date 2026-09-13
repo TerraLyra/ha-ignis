@@ -91,6 +91,20 @@ def test_fire_risk_issue_is_warning_and_clears_after_recovery(
         hass, "terralyra_ignis", "entry-1_fire_risk_outage"
     )
 
+    async_set_fire_risk_outage_issue(
+        hass, entry, consecutive_failures=OUTAGE_REPAIR_THRESHOLD,
+        requested_date="2026-09-13", latest_date="2026-09-11",
+    )
+    assert create_issue.call_args.kwargs["translation_key"] == "fire_risk_date_unavailable"
+    assert create_issue.call_args.kwargs["translation_placeholders"] == {
+        "requested_date": "2026-09-13", "latest_date": "2026-09-11",
+    }
+    delete_issue.reset_mock()
+    async_set_fire_risk_outage_issue(hass, entry, consecutive_failures=0)
+    delete_issue.assert_called_once_with(
+        hass, "terralyra_ignis", "entry-1_fire_risk_outage"
+    )
+
 
 @patch("custom_components.terralyra_ignis.repairs.ir.async_delete_issue")
 @patch("custom_components.terralyra_ignis.repairs.ir.async_create_issue")

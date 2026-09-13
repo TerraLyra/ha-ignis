@@ -156,6 +156,8 @@ async def test_forecast_fails_when_today_404() -> None:
             pass
 
         async def _async_get(self, params, limit):
+            if params.get("REQUEST") == "GetCapabilities":
+                return b"<WMS_Capabilities/>"
             valid_date = date.fromisoformat(params["TIME"].replace("T12:00:00Z", ""))
             if valid_date == today:
                 raise FireRiskHTTPError("FRMv3 service returned an error", 404)
@@ -625,7 +627,7 @@ async def test_fire_risk_coordinator_retries_with_backoff_on_forecast_failure_th
     assert coordinator.update_interval == timedelta(minutes=15)
     assert calls.call_args.kwargs == {
         "consecutive_failures": 1,
-        "reason": "temporary outage",
+        "reason": "Forecast data could not be retrieved or validated",
     }
 
     result = await coordinator._async_update_data()
@@ -669,7 +671,7 @@ async def test_fire_risk_coordinator_uses_server_retry_after_when_available(
     assert coordinator.update_interval == timedelta(minutes=40)
     assert calls.call_args.kwargs == {
         "consecutive_failures": 1,
-        "reason": "too many requests",
+        "reason": "Forecast service HTTP error (429)",
     }
 
 

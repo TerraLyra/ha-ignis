@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.24.9
+
+- Distinguish unavailable forecast dates from service failures using the Risk
+  layer's bounded, safely parsed WMS date catalogue after a non-future 404.
+- Show localized missing-date notices and safe error summaries instead of raw
+  upstream XML; retain automatic retry and self-clearing recovery notices.
+- Never substitute an old forecast for today's data; satellite fire monitoring
+  remains independent. This fix does not restore missing upstream forecasts.
+- Bound forecast retry calculation before exponentiation for prolonged outages.
+- Add date-catalogue and coordinator regressions; 740 tests pass locally.
+
 ## 0.24.8
 
 - Fix GOES temporary-file cleanup accepting Home Assistant executor Futures,

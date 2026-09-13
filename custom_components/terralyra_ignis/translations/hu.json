@@ -199,6 +199,10 @@
       "title": "A tűzkockázati előrejelzés szolgáltatása ismételten nem érhető el",
       "description": "Az FRMv3 előrejelzési szolgáltatás {failures} egymást követő frissítésnél hibázott (utolsó ok: {reason}). A TerraLyra IGNIS korlátozott késleltetéssel automatikusan újrapróbálkozik; az aktívtűz-figyelés és a többi működő termék közben folytatódik. Az értesítés helyreállás után eltűnik."
     },
+    "fire_risk_date_unavailable": {
+      "title": "A kért napi tűzkockázati előrejelzés még nem érhető el",
+      "description": "A szolgáltatás nem kínál adatot erre a napra: {requested_date}. A legutóbbi felsorolt dátum: {latest_date}. A régi adatot nem használjuk mai előrejelzésként. Automatikusan újrapróbálkozunk; a műholdas tűzészlelés ettől függetlenül működik. Az értesítés sikeres frissítés után eltűnik."
+    },
     "provider_coverage": {
       "title": "Néhány figyelt helyet egyetlen beállított tűzforrás sem fed le",
       "description": "A TerraLyra IGNIS jelenleg nem tud használható műholdas forrást rendelni ezekhez: {locations}. Helyezd át vagy kapcsold ki a támogatott megfigyelési területeken kívüli helyeket. A többi hely frissítése folytatódik."

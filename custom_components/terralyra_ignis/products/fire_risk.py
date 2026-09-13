@@ -13,6 +13,8 @@ from io import BytesIO
 from typing import Any
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
+from defusedxml import ElementTree as ET
+from defusedxml.common import DefusedXmlException
 from PIL import Image, UnidentifiedImageError
 
 from .http import parse_retry_after
@@ -26,6 +28,7 @@ TIMEOUT = ClientTimeout(total=20, connect=5, sock_read=15)
 MAX_JSON_BYTES = 32 * 1024
 MAX_MAP_BYTES = 2 * 1024 * 1024
 MAX_ERROR_BYTES = 1024
+MAX_CAPABILITIES_BYTES = 1024 * 1024
 MAP_CACHE_TTL = timedelta(hours=1)
 MAP_STALE_TTL = timedelta(hours=24)
 USER_AGENT = "ha-ignis (https://github.com/TerraLyra/ha-ignis)"
@@ -47,6 +50,15 @@ RISK_RGB = {
 
 class FireRiskError(Exception):
     """An FRMv3 request or response was invalid."""
+
+
+class FireRiskDateUnavailableError(FireRiskError):
+    """The Risk layer explicitly does not advertise the requested date."""
+
+    def __init__(self, requested: date, latest: date) -> None:
+        self.requested = requested
+        self.latest = latest
+        super().__init__(f"Forecast date {requested.isoformat()} is unavailable; latest advertised date: {latest.isoformat()}")
 
 
 class FireRiskHTTPError(FireRiskError):
@@ -236,6 +248,17 @@ class FireRiskClient:
         except FireRiskHTTPError as err:
             if err.status == 404 and valid_date > datetime.now(UTC).date():
                 return None
+            if err.status == 404:
+                try:
+                    payload = await self._async_get(
+                        {"DATASET": WMS_DATASET, "SERVICE": "WMS", "VERSION": "1.1.1",
+                         "REQUEST": "GetCapabilities"}, MAX_CAPABILITIES_BYTES,
+                    )
+                    available = _risk_dates(payload)
+                except FireRiskError:
+                    available = frozenset()
+                if available and valid_date not in available:
+                    raise FireRiskDateUnavailableError(valid_date, max(available)) from err
             raise
         return parse_feature_info(payload, valid_date)
 
@@ -343,6 +366,59 @@ class FireRiskClient:
             raise
         except (ClientError, TimeoutError) as err:
             raise FireRiskServiceUnavailableError("FRMv3 service is unavailable") from err
+
+
+def _risk_dates(payload: bytes) -> frozenset[date]:
+    """Parse bounded WMS Risk time extents; fail closed on unknown formats."""
+    if len(payload) > MAX_CAPABILITIES_BYTES:
+        raise FireRiskError("Invalid forecast date catalogue")
+    try:
+        root = ET.fromstring(payload)
+        extents = []
+        for layer in root.iter():
+            if layer.tag.split("}")[-1] != "Layer":
+                continue
+            children = list(layer)
+            if not any(c.tag.split("}")[-1] == "Name" and c.text == "Risk" for c in children):
+                continue
+            extents.extend(c.text or "" for c in children
+                           if c.tag.split("}")[-1] in ("Extent", "Dimension")
+                           and c.attrib.get("name") == "time" and (c.text or "").strip())
+        dates = set()
+        for extent in extents:
+            for value in extent.split(","):
+                parts = value.strip().split("/")
+                def day(raw):
+                    dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                    if dt.utcoffset() != timedelta(0) or (dt.hour, dt.minute, dt.second) != (12, 0, 0):
+                        raise ValueError("Unexpected validity time")
+                    return dt.date()
+                start = day(parts[0])
+                end = start
+                if len(parts) == 3 and parts[2] == "P1D":
+                    end = day(parts[1])
+                elif len(parts) != 1:
+                    raise ValueError("Unsupported date interval")
+                span = (end - start).days
+                if not 0 <= span <= 366:
+                    raise ValueError("Date interval too large")
+                dates.update(start + timedelta(days=n) for n in range(span + 1))
+                if len(dates) > 400:
+                    raise ValueError("Too many dates")
+        return frozenset(dates)
+    except (ET.ParseError, DefusedXmlException, ValueError, OverflowError) as err:
+        raise FireRiskError("Invalid forecast date catalogue") from err
+
+
+def safe_fire_risk_reason(error: FireRiskError) -> str:
+    """Keep upstream payloads and arbitrary exception text out of HA notices."""
+    if isinstance(error, FireRiskDateUnavailableError):
+        return str(error)
+    if isinstance(error, FireRiskHTTPError):
+        return f"Forecast service HTTP error ({int(error.status)})"
+    if isinstance(error, FireRiskServiceUnavailableError):
+        return "Forecast service connection failed"
+    return "Forecast data could not be retrieved or validated"
 
 
 def _parse_retry_after(value: str | None) -> timedelta | None:

@@ -199,6 +199,10 @@
       "title": "Il servizio di previsione del rischio incendi è ripetutamente non disponibile",
       "description": "Il servizio di previsione FRMv3 non è riuscito in {failures} aggiornamenti consecutivi (ultima causa: {reason}). TerraLyra IGNIS riprova automaticamente con un ritardo limitato; il monitoraggio degli incendi attivi e gli altri prodotti disponibili continuano normalmente. L'avviso scompare dopo il ripristino."
     },
+    "fire_risk_date_unavailable": {
+      "title": "La data richiesta per la previsione del rischio incendi non è disponibile",
+      "description": "Il servizio non indica dati per {requested_date}. L’ultima data elencata è {latest_date}. I dati precedenti non vengono utilizzati come previsione odierna. I tentativi automatici continuano; il monitoraggio satellitare degli incendi è indipendente. Questo avviso scompare dopo un aggiornamento riuscito."
+    },
     "provider_coverage": {
       "title": "Nessuna fonte configurata copre alcune località",
       "description": "TerraLyra IGNIS non può assegnare una fonte satellitare utilizzabile a: {locations}. Sposta o disattiva le località fuori dalle aree di osservazione supportate. Le altre località continuano ad aggiornarsi."

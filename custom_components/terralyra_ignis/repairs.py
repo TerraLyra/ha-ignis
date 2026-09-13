@@ -125,6 +125,8 @@ def async_set_fire_risk_outage_issue(
     *,
     consecutive_failures: int,
     reason: str | None = None,
+    requested_date: str | None = None,
+    latest_date: str | None = None,
 ) -> None:
     """Create a self-clearing issue after repeated FRMv3 failures."""
     issue_id = _issue_id(entry, "fire_risk_outage")
@@ -139,11 +141,12 @@ def async_set_fire_risk_outage_issue(
         is_fixable=False,
         is_persistent=False,
         severity=ir.IssueSeverity.WARNING,
-        translation_key="fire_risk_outage",
-        translation_placeholders={
+        translation_key=("fire_risk_date_unavailable" if requested_date and latest_date else "fire_risk_outage"),
+        translation_placeholders=({"requested_date": requested_date, "latest_date": latest_date}
+                                 if requested_date and latest_date else {
             "failures": str(consecutive_failures),
             "reason": reason or "service issue",
-        },
+        }),
     )
 
 

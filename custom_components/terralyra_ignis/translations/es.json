@@ -199,6 +199,10 @@
       "title": "El servicio de previsión del riesgo de incendio no está disponible repetidamente",
       "description": "El servicio de previsión FRMv3 falló en {failures} actualizaciones consecutivas (última causa: {reason}). TerraLyra IGNIS vuelve a intentarlo automáticamente con una demora limitada; la vigilancia de incendios activos y los demás productos disponibles continúan con normalidad. El aviso desaparece al recuperarse."
     },
+    "fire_risk_date_unavailable": {
+      "title": "La fecha solicitada del pronóstico de riesgo de incendio no está disponible",
+      "description": "El servicio no anuncia datos para {requested_date}. La última fecha publicada es {latest_date}. Los datos antiguos no se utilizan como pronóstico de hoy. Los reintentos automáticos continúan; la vigilancia de incendios por satélite es independiente. Este aviso desaparece tras una actualización correcta."
+    },
     "provider_coverage": {
       "title": "Ninguna fuente configurada cubre algunas ubicaciones",
       "description": "TerraLyra IGNIS no puede asignar una fuente satelital utilizable a: {locations}. Mueve o desactiva las ubicaciones fuera de las áreas de observación compatibles. Las demás siguen actualizándose."
