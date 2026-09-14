@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.26.0 (prerelease)
 
 - Add a disabled-by-default Queensland QFD report calendar with a shared,
   bounded conditional-cache client and worker-based geometry/rendering. Keep
@@ -11,7 +11,7 @@
   expiry times and disclose filtered, invalid and conflicting records.
 - Validate warning polygon topology with Shapely 2.1.2 and use bounded spherical
   circle intersection. Unsupported geometry and ambiguous boundaries stay unknown.
-  Add geometry tests to both Linux architecture jobs; deployment checks pending.
+  Geometry tests pass on Linux ARM64 and x86-64; live HA checks remain pending.
 - Refresh next-update sensor states at their estimated deadline using local timers,
   without extra provider requests. Preserve source selection and estimate labels.
 - Show only in-radius locations in map entities' `location_matches`; expose all
