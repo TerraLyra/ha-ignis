@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.25.0
+
+- Add an opt-in NSW RFS fire-report calendar using the official GeoJSON feed.
+  Filter publisher points against enabled monitored-location radii; overlapping
+  locations share one incident entry. Keep publisher report dates and labels,
+  exclude explicitly planned/non-fire reports and unmapped LGA placeholders.
+- Share a bounded 30-minute feed cache, parse outside the event loop, and mark
+  retained snapshots stale during failures. No satellite matching, public-alert
+  automation, or persistent NSW archive is introduced.
+
 ## 0.24.12
 
 - Shortlist persistent tracking matches with Earth-centred spatial cells,

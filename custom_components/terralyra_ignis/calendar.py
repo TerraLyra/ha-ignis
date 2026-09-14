@@ -17,6 +17,7 @@ from .official_report_calendar import OfficialReportCalendar
 from .products.fire_risk import FireRiskDay
 from .report_link_display import active_links, link_lines
 from .gdacs_calendar import GdacsCalendar
+from .nsw_rfs_calendar import NswRfsCalendar
 
 RISK_LABELS = {
     "en": {
@@ -158,6 +159,7 @@ async def async_setup_entry(
                 hass, entry, hass.data[DOMAIN]["official_report_client"]
             ),
             GdacsCalendar(hass, entry, hass.data[DOMAIN]["gdacs_client"]),
+            NswRfsCalendar(hass, entry, hass.data[DOMAIN]["nsw_rfs_client"]),
         ]
     )
 
