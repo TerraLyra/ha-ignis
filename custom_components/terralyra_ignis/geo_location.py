@@ -13,6 +13,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import IgnisConfigEntry
 from .clustering import haversine_km
 from .const import (
+    ATTR_LOCATION_MATCHES,
     ATTR_PRODUCT_TIME,
     ATTR_PROVIDER_ATTRIBUTION,
     ATTR_SOURCE_URL,
@@ -250,6 +251,15 @@ class IgnisFireLocation(IgnisEntity, GeolocationEvent):
     def extra_state_attributes(self) -> dict[str, Any]:
         data = self.coordinator.data
         attrs = self._cluster.attrs()
+        if self._cluster.location_matches:
+            # Keep full comparisons available without labelling outsiders matches.
+            # Do not change cluster serialization used by events and history.
+            attrs["location_comparisons"] = attrs[ATTR_LOCATION_MATCHES]
+            attrs[ATTR_LOCATION_MATCHES] = [
+                match.attrs()
+                for match in self._cluster.location_matches
+                if match.inside_radius
+            ]
         attrs["source_selection"] = "automatic_equal_peers"
         attrs[ATTR_PROVIDER_ATTRIBUTION] = _provider_attribution(
             self._cluster.providers

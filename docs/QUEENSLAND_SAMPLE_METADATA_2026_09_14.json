@@ -1,0 +1,63 @@
+{
+  "checked_at": "2026-09-14T19:22:56.568073+00:00",
+  "endpoint": "https://publiccontent-gis-psba-qld-gov-au.s3.amazonaws.com/content/Feeds/BushfireCurrentIncidents/bushfireAlert.json",
+  "bytes": 90629,
+  "headers": {
+    "Content-Type": "binary/octet-stream",
+    "Last-Modified": "Mon, 14 Sep 2026 19:18:27 GMT",
+    "ETag": "\"6829227840770a999cca58d9570c16b7\""
+  },
+  "collection_name": "QFDWarnings",
+  "feature_count": 37,
+  "geometry_types": {
+    "Polygon": 4,
+    "Point": 33
+  },
+  "property_keys": [
+    "CallToAction",
+    "CurrentStatus",
+    "EventType",
+    "FurtherInformation",
+    "GroupedType",
+    "Header",
+    "Impacts",
+    "ItemDateTimeLocal_ISO",
+    "ItemDateTimeUTM",
+    "ItemExpiryDateTimeLocal_ISO",
+    "Jurisdiction",
+    "Latitude",
+    "LeaveSafely",
+    "Locality",
+    "Location",
+    "Longitude",
+    "MessageSent",
+    "MultipleWarnings",
+    "OBJECTID",
+    "PublishDateLocal_ISO",
+    "SendEmailSubscription",
+    "ShouldDo",
+    "UniqueID",
+    "VehiclesAssigned",
+    "VehiclesOnRoute",
+    "VehiclesOnScene",
+    "WarningArea",
+    "WarningLevel",
+    "WarningLevelSort",
+    "WarningText",
+    "WarningTitle",
+    "WarningType_Level"
+  ],
+  "warning_levels": {
+    "Advice": 4,
+    "Information": 33
+  },
+  "event_types": {
+    "Fire": 37
+  },
+  "distinct_ids": 37,
+  "time_examples": {
+    "ItemDateTimeLocal_ISO": "2026-09-14T18:19:03+10:00",
+    "PublishDateLocal_ISO": "2026-09-15T05:18:04+10:00",
+    "ItemExpiryDateTimeLocal_ISO": "2026-09-15T18:19:03.73+10:00"
+  }
+}

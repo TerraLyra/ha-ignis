@@ -9,6 +9,6 @@
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/TerraLyra/ha-ignis/issues",
-  "requirements": ["defusedxml==0.7.1", "h5py==3.16.0"],
+  "requirements": ["defusedxml==0.7.1", "h5py==3.16.0", "shapely==2.1.2"],
   "version": "0.25.0"
 }

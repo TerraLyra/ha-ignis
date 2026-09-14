@@ -1,6 +1,7 @@
 """Sensors for TerraLyra IGNIS."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -10,10 +11,11 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import UnitOfLength, UnitOfPower, UnitOfTemperature
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.event import async_track_point_in_utc_time
 
 from . import IgnisConfigEntry
 from .const import (
@@ -611,10 +613,43 @@ class MonitoredLocationNextUpdateSensor(IgnisEntity, SensorEntity):
         super().__init__(entry)
         self._plan = plan
         self._location = location
+        self._cancel_estimate_timer: Callable[[], None] | None = None
         self._attr_unique_id = (
             f"{entry.entry_id}_location_next_update_{plan.location_id}"
         )
         self._attr_translation_placeholders = {"location_name": plan.location_name}
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.async_on_remove(self._cancel_scheduled_estimate)
+        self._schedule_estimate_refresh()
+
+    @callback
+    def _cancel_scheduled_estimate(self) -> None:
+        if self._cancel_estimate_timer is not None:
+            self._cancel_estimate_timer()
+            self._cancel_estimate_timer = None
+
+    @callback
+    def _schedule_estimate_refresh(self) -> None:
+        self._cancel_scheduled_estimate()
+        expected = self.native_value
+        if expected is not None:
+            self._cancel_estimate_timer = async_track_point_in_utc_time(
+                self.hass, self._refresh_expired_estimate, expected
+            )
+
+    @callback
+    def _refresh_expired_estimate(self, _now: datetime) -> None:
+        # Refresh the published timestamp even if no provider update arrives.
+        self._cancel_estimate_timer = None
+        self._schedule_estimate_refresh()
+        self.async_write_ha_state()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._schedule_estimate_refresh()
+        super()._handle_coordinator_update()
 
     @property
     def available(self) -> bool:

@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-09-14T19:31:36.917354+00:00",
+  "endpoint": "https://publiccontent-gis-psba-qld-gov-au.s3.amazonaws.com/content/Feeds/BushfireCurrentIncidents/bushfireAlert.json",
+  "last_modified": "Mon, 14 Sep 2026 19:28:06 GMT",
+  "bytes": 90629,
+  "fetched": 37,
+  "accepted": 37,
+  "filtered": 0,
+  "invalid": 0,
+  "conflicted_ids": 0,
+  "kinds": {
+    "incident": 33,
+    "warning": 4
+  },
+  "planned_burns": 5,
+  "explicitly_expired": 29,
+  "note": "Point-in-time parser validation only; no HA activation or satellite matching."
+}
