@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Add a disabled-by-default Queensland QFD report calendar with a shared,
+  bounded conditional-cache client and worker-based geometry/rendering. Keep
+  incidents, warnings, planned burns and source-time uncertainty explicit; no
+  satellite matching, warning events or persistent QFD archive is introduced.
+- Add immutable official-report models, a compatibility-preserving NSW conversion
+  and a mixed QFD parser. Preserve source identities, separate event/publication/
+  expiry times and disclose filtered, invalid and conflicting records.
+- Validate warning polygon topology with Shapely 2.1.2 and use bounded spherical
+  circle intersection. Unsupported geometry and ambiguous boundaries stay unknown.
+  Add geometry tests to both Linux architecture jobs; deployment checks pending.
+- Refresh next-update sensor states at their estimated deadline using local timers,
+  without extra provider requests. Preserve source selection and estimate labels.
+- Show only in-radius locations in map entities' `location_matches`; expose all
+  comparisons separately as `location_comparisons`. Event/history serialization,
+  internal matching and alerts are unchanged.
+- Document the Australia-first roadmap, source evidence and outstanding checks.
+
 ## 0.25.0
 
 - Add an opt-in NSW RFS fire-report calendar using the official GeoJSON feed.

@@ -30,3 +30,11 @@ scale. This is distinct from browser cache and from the corrected current state.
   monitoring reference do not silently mix incomparable distances.
 - The screenshot alone does not independently validate the California center
   coordinates or the numerical 163.5 km distance.
+
+## Roadmap continuation — 2026-09-14
+
+See [delivery roadmap](ROADMAP_2026_09.md) and
+[official-source register](OFFICIAL_SOURCE_REGISTER.md).
+The local map-only Location matches correction is documented in
+[the attribute contract](LOCATION_MATCH_DISPLAY.md); release and HA validation are pending.
+The next-update timestamp issue and location summary card remain open.

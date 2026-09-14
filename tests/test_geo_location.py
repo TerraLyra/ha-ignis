@@ -5,6 +5,8 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+import pytest
+
 from custom_components.terralyra_ignis.activity import ActivitySummary
 from custom_components.terralyra_ignis.const import (
     ATTR_ACTIVITY_TREND,
@@ -41,6 +43,7 @@ from custom_components.terralyra_ignis.geo_location import (
 )
 from custom_components.terralyra_ignis.models import (
     DistanceTrend,
+    IncidentLocationMatch,
     FireLifecycle,
     MetricTrend,
     ProviderStatus,
@@ -491,3 +494,33 @@ def test_unregistered_expired_map_entity_is_removed_from_platform() -> None:
     registry.async_remove.assert_not_called()
     entity.async_remove.assert_called_once_with(force_remove=True)
     hass.async_create_task.assert_called_once_with("remove-task")
+
+
+@pytest.mark.parametrize("inside", [(True, False, True), (False, False, False), ()])
+def test_map_matches_exclude_outsiders_without_changing_cluster_contract(inside) -> None:
+    """Map presentation filters comparisons while event/history data stay intact."""
+    matches = tuple(
+        IncidentLocationMatch(
+            incident_id="abcdef123456", location_id=f"location-{index}",
+            location_name=f"Location {index}", distance_km=float(index + 1),
+            radius_km=10 if affected else 0.5, direction="N",
+            inside_radius=affected,
+        )
+        for index, affected in enumerate(inside)
+    )
+    cluster = _cluster(location_matches=matches)
+    original = cluster.attrs()
+    attrs = _entity(cluster).extra_state_attributes
+    if matches:
+        assert attrs["location_matches"] == [m.attrs() for m in matches if m.inside_radius]
+        assert attrs["location_comparisons"] == [m.attrs() for m in matches]
+        for key, value in original.items():
+            if key != "location_matches":
+                assert attrs[key] == value
+        # Modifying a returned diagnostic representation cannot change the model.
+        attrs["location_comparisons"][0]["inside_radius"] = not inside[0]
+    else:
+        assert "location_matches" not in attrs
+        assert "location_comparisons" not in attrs
+    assert cluster.location_matches == matches
+    assert cluster.attrs() == original

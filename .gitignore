@@ -3,3 +3,8 @@ __pycache__/
 .pytest_cache/
 .venv*/
 .DS_Store
+
+# Local test output; preserve files but exclude from publication.
+.coverage
+.coverage.*
+htmlcov/

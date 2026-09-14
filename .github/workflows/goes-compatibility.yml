@@ -39,14 +39,18 @@ jobs:
           import platform
           import h5py
           import numpy
+          import shapely
 
           print(f"machine={platform.machine()}")
           print(f"h5py={h5py.__version__}")
           print(f"numpy={numpy.__version__}")
+          print(f"shapely={shapely.__version__}")
           PY
-      - name: Test GOES discovery, download and decoder
+      - name: Test native decoder and official geometry
         run: |
           pytest -q \
             tests/test_goes_foundation.py \
             tests/test_goes_decoder.py \
-            tests/test_goes_provider.py
+            tests/test_goes_provider.py \
+            tests/test_official_geometry.py \
+            tests/test_official_presentation.py

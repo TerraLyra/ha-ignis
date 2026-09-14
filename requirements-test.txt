@@ -4,3 +4,4 @@ pytest-homeassistant-custom-component
 PyTurboJPEG==1.8.3
 defusedxml==0.7.1
 h5py==3.16.0
+shapely==2.1.2
