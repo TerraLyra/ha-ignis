@@ -38,6 +38,11 @@ are recorded in
 
 ## Product status
 
+Version 0.25.0 adds an opt-in **Reports — NSW RFS fires** calendar for
+regional fire reports inside enabled monitored-location radii. This uses the
+current official feed, not a historical archive or automatic satellite matching.
+See [NSW RFS reports](docs/NSW_RFS_REPORTS.md) for setup and limitations.
+
 Version 0.22.0 adds a disabled-by-default **Reports — GDACS wildfire context**
 calendar. It provides attributed international wildfire context, not independent
 satellite evidence or a replacement for local authority warnings. Coverage and
