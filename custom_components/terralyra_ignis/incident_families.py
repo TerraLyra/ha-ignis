@@ -322,9 +322,11 @@ def _family_cluster(
         lifecycle=lifecycle,
         first_seen=first_seen,
         last_seen=last_seen,
-        minimum_distance_km=min(
-            item.minimum_distance_km or item.distance_km for item in history
-        ),
+        minimum_distance_km=(min(
+            (match.minimum_distance_km for item in history for match in item.location_matches
+             if match.location_id == nearest_location.location_id and match.minimum_distance_km is not None),
+            default=None,
+        ) if nearest_location is not None else None),
         maximum_frp_mw=max(item.maximum_frp_mw or item.frp_mw for item in history),
         maximum_pixel_count=max(
             item.maximum_pixel_count or item.pixel_count for item in history

@@ -1,5 +1,7 @@
 """Tests for incident-to-location relevance matching."""
 from datetime import UTC, datetime
+from dataclasses import replace
+import json
 
 import pytest
 
@@ -7,6 +9,7 @@ from custom_components.terralyra_ignis.coordinator import (
     _apply_location_matches,
     _attach_location_matches,
     _inside_any_location,
+    _matches_from_track,
 )
 from custom_components.terralyra_ignis.location_matching import (
     match_incident_to_locations,
@@ -262,3 +265,32 @@ def test_opposite_location_trends_emit_only_for_approached_location():
     assert trends["west"] is DistanceTrend.RECEDING
     assert trends["east"] is DistanceTrend.APPROACHING
     assert not _attach_location_matches(tracks, [cluster], locations)
+
+
+def test_location_minimum_survives_restart_and_resets_on_reference_change():
+    cluster = FireCluster(latitude=38.3, longitude=-122.75, distance_km=9917.4,
+        confidence=0.8, frp_mw=5, acquired=datetime(2026, 9, 15, tzinfo=UTC),
+        pixel_count=1, track_id="minimum-test", minimum_distance_km=9917.4)
+    locations = (_location("california", "California", 38.3, -121, 250),
+                 _location("home", "Home", 47, 19, 300))
+    track = {"track_id": "minimum-test", "last_seen": cluster.acquired.isoformat(),
+             "minimum_distance_km": 9917.4}
+    initial = _matches_from_track(track, cluster, locations, update_state=False)
+    _apply_location_matches(cluster, initial)
+    assert cluster.minimum_distance_km is None  # No invented migration.
+    matches = _matches_from_track(track, cluster, locations, update_state=True)
+    _apply_location_matches(cluster, matches)
+    first = cluster.minimum_distance_km
+    assert first == cluster.distance_km and first < 250
+    assert track["minimum_distance_km"] == 9917.4  # Legacy data preserved.
+    restored = json.loads(json.dumps(track))
+    moved = replace(cluster, longitude=-123)
+    matches = _matches_from_track(restored, moved, locations, update_state=True)
+    _apply_location_matches(moved, matches)
+    assert moved.minimum_distance_km == first < moved.distance_km
+    changed = (replace(locations[0], longitude=-123), locations[1])
+    unknown = _matches_from_track(restored, moved, changed)
+    assert unknown[0].minimum_distance_km is None
+    reset = _matches_from_track(restored, moved, changed, update_state=True)
+    _apply_location_matches(moved, reset)
+    assert moved.minimum_distance_km == 0

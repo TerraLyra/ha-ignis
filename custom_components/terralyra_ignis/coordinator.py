@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from copy import deepcopy
 from functools import partial
 from dataclasses import dataclass, field, replace
@@ -1304,6 +1305,7 @@ def _apply_location_matches(
     if nearest is not None:
         cluster.distance_km = nearest.distance_km
         cluster.distance_trend = nearest.distance_trend
+        cluster.minimum_distance_km = nearest.minimum_distance_km
 
 
 def _matches_from_track(
@@ -1354,14 +1356,21 @@ def _matches_from_track(
     for match in matches:
         location = next(item for item in locations if item.id == match.location_id)
         reference = (location.latitude, location.longitude)
-        state = states.get(match.location_id, {})
+        state = dict(states.get(match.location_id, {}))
         if tuple(state.get("reference", ())) != reference:
             state = {"reference": reference}
         if update_state:
             add_observation_and_update_trends(
                 state, replace(cluster, distance_km=match.distance_km))
+            previous_minimum = state.get("minimum_distance_km")
+            if not isinstance(previous_minimum, (int, float)) or not math.isfinite(previous_minimum) or previous_minimum < 0:
+                previous_minimum = match.distance_km
+            state["minimum_distance_km"] = min(previous_minimum, match.distance_km)
         trend = DistanceTrend(state.get("distance_trend", "unknown"))
-        sampled_matches.append(replace(match, distance_trend=trend))
+        minimum = state.get("minimum_distance_km")
+        if not isinstance(minimum, (int, float)) or not math.isfinite(minimum) or minimum < 0:
+            minimum = None
+        sampled_matches.append(replace(match, distance_trend=trend, minimum_distance_km=minimum))
         active_states[match.location_id] = state
     matches = tuple(sampled_matches)
     if update_state:
