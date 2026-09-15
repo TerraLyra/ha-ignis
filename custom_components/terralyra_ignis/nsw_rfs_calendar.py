@@ -72,7 +72,13 @@ class NswRfsCalendar(CoordinatorEntity, CalendarEntity):
                 continue
             start = date.fromisoformat(record["date"])
             end = start + timedelta(days=1)
-            if datetime.combine(start, time.min, zone) >= end_date or datetime.combine(end, time.min, zone) <= start_date:
+            timed = bool(record.get("updated_at"))
+            if timed:
+                start = datetime.fromisoformat(record["updated_at"])
+                end = start + timedelta(minutes=1)
+            range_start = start if timed else datetime.combine(start, time.min, zone)
+            range_end = end if timed else datetime.combine(end, time.min, zone)
+            if range_start >= end_date or range_end <= start_date:
                 continue
             hu = hass.config.language == "hu"
             note = ("A jelentés forrás szerinti frissítési napja, nem a tűz kezdete vagy időtartama.\n"
@@ -89,6 +95,11 @@ class NswRfsCalendar(CoordinatorEntity, CalendarEntity):
                 f"Publisher update: {record['updated_raw']}\nFeed: {data['status']}\n"
                 f"Current feed snapshot only; not a historical archive.\nIncident ID: {record['uid']}\n\n{ATTRIBUTION}"
             )
+            if timed:
+                description += "\nReport update time; one-minute display slot, not fire duration."
+            else:
+                description += "\nAll-day fallback: exact update timezone could not be verified."
             result.append(CalendarEvent(summary=f"NSW RFS · {record['title']}", start=start, end=end,
                                         description=description, uid=record["uid"]))
-        return sorted(result, key=lambda event: (event.start, event.uid))
+        return sorted(result, key=lambda event: (
+            event.start if isinstance(event.start, datetime) else datetime.combine(event.start, time.min, zone), event.uid))

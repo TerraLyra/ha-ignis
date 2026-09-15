@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.26.1 (prerelease)
+
+- Show NSW RFS reports at their update time when the UTC publication field agrees
+  with the Sydney-local UPDATED field. Use a one-minute display slot, not fire
+  duration, and retain all-day fallback for uncertain timestamps.
+- Preserve report identities and history; verify standard/daylight-saving offsets
+  and calendar query boundaries.
+
 ## 0.26.0 (prerelease)
 
 - Add a disabled-by-default Queensland QFD report calendar with a shared,

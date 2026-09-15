@@ -161,6 +161,32 @@ def location(name, lat=-30, lon=151, radius=50, enabled=True):
     return MonitoredLocation(name.lower(), name, lat, lon, radius, enabled, "manual")
 
 
+@pytest.mark.parametrize("stamp,pub,expected", [
+    ("14 Sep 2026 19:48", "14/09/2026 9:48:00 AM", "2026-09-14T09:48:00+00:00"),
+    ("14 Jan 2026 19:48", "14/01/2026 8:48:00 AM", "2026-01-14T08:48:00+00:00"),
+    ("14 Sep 2026 19:48", "14/09/2026 8:48:00 AM", None),
+])
+def test_report_time_requires_matching_utc_and_sydney(stamp, pub, expected):
+    record = feature(pubDate=pub, description=f"TYPE: Bush Fire<br>FIRE: Yes<br>UPDATED: {stamp}")
+    assert parse_feed(payload(record))["events"][0].get("updated_at") == expected
+
+
+async def test_calendar_timed_update_and_query_boundary(hass):
+    entry = MockConfigEntry(domain="terralyra_ignis")
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    client.async_get_events.return_value = {**parse_feed(payload(feature(pubDate="14/09/2026 9:48:00 AM"))), "status": "available"}
+    entity = NswRfsCalendar(hass, entry, client)
+    try:
+        with patch("custom_components.terralyra_ignis.nsw_rfs_calendar.resolve_monitored_locations", return_value=[location("Near")]):
+            events = await entity.async_get_events(hass, datetime(2026, 9, 14, tzinfo=UTC), datetime(2026, 9, 15, tzinfo=UTC))
+            assert events[0].start == datetime(2026, 9, 14, 9, 48, tzinfo=UTC)
+            assert events[0].end == datetime(2026, 9, 14, 9, 49, tzinfo=UTC)
+            assert not await entity.async_get_events(hass, datetime(2026, 9, 14, 9, 49, tzinfo=UTC), datetime(2026, 9, 15, tzinfo=UTC))
+    finally:
+        await entity.coordinator.async_shutdown()
+
+
 async def test_calendar_radius_overlap_disabled_and_date_bounds(hass):
     hass.config.time_zone = "Europe/Budapest"
     entry = MockConfigEntry(domain="terralyra_ignis")

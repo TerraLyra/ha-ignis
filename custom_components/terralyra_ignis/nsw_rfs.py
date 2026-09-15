@@ -8,6 +8,7 @@ import json
 import math
 import re
 from time import monotonic
+from zoneinfo import ZoneInfo
 
 import aiohttp
 
@@ -121,6 +122,15 @@ def parse_feed(body):
                      "status": fields.get("STATUS", "Unknown"),
                      "location": fields.get("LOCATION", ""), "size": fields.get("SIZE", ""),
                      "agency": fields.get("RESPONSIBLE AGENCY", "NSW RFS")}
+            # CAP sent timestamps corroborate JSON pubDate as UTC and UPDATED
+            # as Sydney local time. Require both representations to agree.
+            try:
+                published = datetime.strptime(props.get("pubDate", ""), "%d/%m/%Y %I:%M:%S %p").replace(tzinfo=UTC)
+                local = published.astimezone(ZoneInfo("Australia/Sydney"))
+                if local.strftime("%Y-%m-%dT%H:%M") == event["update_order"]:
+                    event["updated_at"] = published.isoformat()
+            except (ValueError, TypeError):
+                pass
             if uid not in events or event["update_order"] > events[uid]["update_order"]:
                 events[uid] = event
         except (ValueError, TypeError, KeyError, AttributeError):
