@@ -1,28 +1,15 @@
 """Provider-neutral spatial helpers for active-fire detections."""
 from __future__ import annotations
 
-import math
 from datetime import datetime, timedelta
 
+# Preserve the established import path for existing consumers.
+from .core.geo import EARTH_RADIUS_KM, haversine_km
 from .models import ConfirmationLevel, FireCluster, FireDetection
 
-EARTH_RADIUS_KM = 6371.0088
 OBSERVATION_WINDOW = timedelta(minutes=30)
 # Adjacent scan lines may carry slightly different acquisition timestamps.
 SCAN_WINDOW = timedelta(minutes=1)
-
-
-def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Return great-circle distance in kilometres."""
-    p1 = math.radians(lat1)
-    p2 = math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
-    a = (
-        math.sin(dphi / 2) ** 2
-        + math.cos(p1) * math.cos(p2) * math.sin(dlambda / 2) ** 2
-    )
-    return EARTH_RADIUS_KM * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
 def cluster_detections(
