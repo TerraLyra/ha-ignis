@@ -256,7 +256,13 @@ def _family_cluster(
     )
     providers = tuple(sorted({value for item in members for value in item.providers}))
     satellites = tuple(sorted({value for item in members for value in item.satellites}))
-    source_track_ids = tuple(sorted(item.track_id or "unknown" for item in history))
+    source_track_ids = tuple(sorted({item.track_id or "unknown" for item in history}))
+    # Historical duplicate records remain stored, but cannot multiply evidence.
+    corroboration_by_track = {}
+    for item in members:
+        key = (item.track_id, tuple(sorted(item.providers)), tuple(sorted(item.satellites)))
+        corroboration_by_track[key] = max(
+            corroboration_by_track.get(key, 0), item.corroborating_detections)
     evidence_families = {
         value for member in members for value in _evidence_families(member)
     }
@@ -346,7 +352,7 @@ def _family_cluster(
         confirmation_level=confirmation_level,
         providers=providers,
         satellites=satellites,
-        corroborating_detections=sum(item.corroborating_detections for item in members),
+        corroborating_detections=sum(corroboration_by_track.values()),
         source_url=representative.source_url,
         location_matches=location_matches,
     )

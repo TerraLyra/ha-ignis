@@ -296,3 +296,14 @@ def test_family_minimum_uses_selected_location_and_preserves_zero():
     assert result[0].distance_km == 10
     left.location_matches = right.location_matches = matches(None)
     assert _consolidate([left, right])[0].minimum_distance_km is None
+
+
+def test_duplicate_tracks_do_not_multiply_source_count_or_corroboration():
+    a, b = _cluster("a"), _cluster("b")
+    b.corroborating_detections = 2
+    inputs = [a, b, deepcopy(b), deepcopy(b), deepcopy(b)]
+    result = _consolidate(inputs)[0]
+    assert result.source_track_ids == ("a", "b")
+    assert result.corroborating_detections == 2
+    assert len(inputs) == 5
+    assert result.frp_mw == b.frp_mw
