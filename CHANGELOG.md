@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.26.2 (prerelease)
+
+- Track minimum distance per monitored location and use the selected location
+  for both current and historical minimum distances, including merged incidents.
+- Preserve legacy Home-based history without reinterpreting it. Scoped minima
+  begin with observed samples and reset when reference coordinates change.
+
 ## 0.26.1 (prerelease)
 
 - Show NSW RFS reports at their update time when the UTC publication field agrees
