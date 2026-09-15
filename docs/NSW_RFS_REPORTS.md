@@ -81,3 +81,20 @@ logos are bundled. Each event includes the required credit:
 
 This is an unofficial integration, not an endorsed warning service. Do not rely
 on it for personal safety decisions; follow current official advice.
+# Report update times (development)
+
+Timed entries use JSON `pubDate` interpreted as UTC only when conversion to
+`Australia/Sydney` exactly matches the separate `UPDATED` date and minute.
+Otherwise the report retains its all-day date. Timed entries have a one-minute
+display slot, not an incident duration. Existing report UIDs remain unchanged.
+
+Evidence checked on 2026-09-15: official CAP incident 676231 reports
+`sent=2026-09-15T12:14:00+10:00`, JSON `pubDate=15/09/2026 2:14:00 AM`
+and `UPDATED=15 Sep 2026 12:14`. This supports the UTC/Sydney interpretation;
+it is an inference from matching official feeds, not a published field contract.
+Runtime agreement checking and all-day fallback protect against inconsistent data.
+RSS item pubDate in this sample equals feed publication time and is not used.
+
+Sources: https://www.rfs.nsw.gov.au/feeds/majorIncidents.json and
+https://www.rfs.nsw.gov.au/feeds/majorIncidentsCAP.xml, linked from
+https://www.rfs.nsw.gov.au/news-and-media/stay-up-to-date/feeds.
