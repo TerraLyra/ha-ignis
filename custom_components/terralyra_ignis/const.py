@@ -4,6 +4,21 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+# Compatibility exports for the unchanged persisted location schema.
+from .core.locations import (
+    LOCATION_ENABLED,
+    LOCATION_ID,
+    LOCATION_LATITUDE,
+    LOCATION_LONGITUDE,
+    LOCATION_NAME,
+    LOCATION_RADIUS_KM,
+    LOCATION_SOURCE,
+    LOCATION_SOURCE_HOME_ASSISTANT,
+    LOCATION_SOURCE_MANUAL,
+    MAX_RADIUS_KM,
+    MIN_RADIUS_KM,
+)
+
 DOMAIN = "terralyra_ignis"
 MONITORING_AREA_SOURCE = f"{DOMAIN}_monitoring_areas"
 NAME = "TerraLyra IGNIS"
@@ -36,15 +51,6 @@ CONF_MONITORED_LOCATIONS = "monitored_locations"
 CONF_MANAGE_MONITORED_LOCATIONS = "manage_monitored_locations"
 CONF_LOCATION_ID = "location_id"
 
-LOCATION_ID = "id"
-LOCATION_NAME = "name"
-LOCATION_LATITUDE = "latitude"
-LOCATION_LONGITUDE = "longitude"
-LOCATION_RADIUS_KM = "radius_km"
-LOCATION_ENABLED = "enabled"
-LOCATION_SOURCE = "source"
-LOCATION_SOURCE_HOME_ASSISTANT = "home_assistant"
-LOCATION_SOURCE_MANUAL = "manual"
 HOME_LOCATION_ID = "home"
 LEGACY_CUSTOM_LOCATION_ID = "legacy-custom"
 
@@ -81,8 +87,6 @@ DEFAULT_ENABLE_LAND_SURFACE_TEMPERATURE = False
 DEFAULT_ENABLE_FIRMS = False
 DEFAULT_USE_CUSTOM_MONITORING_CENTER = False
 DEFAULT_MONITORING_CENTER_NAME = "Home"
-MIN_RADIUS_KM = 1.0
-MAX_RADIUS_KM = 500.0
 MAX_MONITORED_LOCATIONS = 10
 DEFAULT_UPDATE_INTERVAL = timedelta(minutes=DEFAULT_SCAN_INTERVAL_MINUTES)
 

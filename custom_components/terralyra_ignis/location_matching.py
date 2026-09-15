@@ -6,7 +6,7 @@ from collections.abc import Mapping
 
 from .clustering import haversine_km
 from .models import DistanceTrend, IncidentLocationMatch
-from .monitoring import MonitoredLocation
+from .core.locations import MonitoredLocation
 
 DISTANCE_TREND_TOLERANCE_KM = 1.0
 _DIRECTIONS = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
