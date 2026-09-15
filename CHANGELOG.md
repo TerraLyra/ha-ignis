@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.26.2 (prerelease)
+## 0.26.2
 
 - Track minimum distance per monitored location and use the selected location
   for both current and historical minimum distances, including merged incidents.

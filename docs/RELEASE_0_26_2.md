@@ -1,4 +1,4 @@
-# 0.26.2 — Location-specific minimum distance (prerelease)
+# 0.26.2 — Location-specific minimum distance
 
 A California incident now uses California for both its current distance and its
 minimum observed distance. Previously the historical minimum could still refer
@@ -13,7 +13,7 @@ cover observations since this tracking began, not the full pre-upgrade lifetime.
 Validation: 873 local tests passed; all PR #23 GitHub checks passed, including
 HACS, Hassfest, full pytest/coverage, security and Linux ARM64/x86-64 tests.
 
-In HACS, allow prereleases, download v0.26.2 and restart Home Assistant. Keep the
+In HACS, download v0.26.2 and restart Home Assistant. Keep the
 existing backup and integration configuration. No history deletion is required.
 After a fresh observation, inspect an incident belonging to a non-Home location.
 Optimization remains paused.
