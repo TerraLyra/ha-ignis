@@ -52,3 +52,17 @@ retention change or new validation policy is introduced.
 An isolated no-site-packages test covers stored Home/manual records, radius
 bounds, invalid records and duplicate IDs. Existing HA config tests and the
 cross-layer restart/history/event contracts continue exercising the adapters.
+
+## Third boundary: HA attribute serialization
+
+`ha/attributes.py` owns the existing location and fire attribute projection.
+The public `attrs()` methods remain compatibility wrappers with lazy imports;
+model construction no longer imports HA attribute constants. The whole parent
+package is still HA-dependent, and invoking `attrs()` intentionally enters the
+presentation adapter. This is an intermediate boundary, not a standalone SDK.
+
+Nine frozen synthetic outputs were captured before extraction. They cover
+minimal/full records, zero/empty values, missing times, duration clamping, remote
+location selection and nested location attributes. Tests also verify that
+mutating returned containers cannot mutate model state. No scoring, matching,
+retention, ID or event semantics are changed.
