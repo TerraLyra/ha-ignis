@@ -12,7 +12,7 @@ from .const import (
     ACTIVE_FIRE_PROVIDER_SENTINEL3A,
     ACTIVE_FIRE_PROVIDER_SENTINEL3B,
 )
-from .monitoring import MonitoredLocation
+from .core.locations import MonitoredLocation
 from .providers.goes import select_goes_satellite
 from .providers.himawari import select_himawari_satellite
 from .providers.msg_iodc import select_msg_iodc_satellite

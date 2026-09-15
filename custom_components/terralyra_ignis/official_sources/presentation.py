@@ -5,7 +5,7 @@ import math
 
 from ..clustering import haversine_km
 from .geometry import check_area, circle_relation
-from ..monitoring import MonitoredLocation
+from ..core.locations import MonitoredLocation
 from .models import GeometryRole, OfficialReport
 from .qld_client import QfdSnapshot
 from .temporal import ReportTimeAssessment, assess_report_time

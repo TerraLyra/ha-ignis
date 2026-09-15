@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from .monitoring import MonitoredLocation
+from .core.locations import MonitoredLocation
 from .products.fire_risk import EUROPE_BOUNDS, FORECAST_DAYS, PRODUCT_ID
 
 FIRE_RISK_PROVIDER_LSA_SAF = "eumetsat_lsa_saf_frmv3"

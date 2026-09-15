@@ -7,7 +7,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from .clustering import haversine_km
-from .monitoring import MonitoredLocation
+from .core.locations import MonitoredLocation
 
 HISTORY_RETENTION = timedelta(days=30)
 MAX_HISTORY_INCIDENTS = 500

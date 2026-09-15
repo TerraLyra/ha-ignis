@@ -34,3 +34,21 @@ not address that policy or alter the legacy Home wording in situation reasons.
 Next: separate the location model and validation from HA configuration access,
 keeping existing serialized keys, IDs and public imports. An independently
 installable Core and any new incident-ID scheme remain later work.
+
+## Second boundary: location models
+
+`core/locations.py` owns the location/center value objects, validators and
+existing JSON field names/radius bounds. `monitoring.py` re-exports the public
+classes/functions and retains HA configuration resolution, Home coordinate
+refresh, legacy center adaptation, manual ID creation and option updates.
+`const.py` re-exports the moved schema constants with unchanged values.
+
+Location matching, incident history, coverage and official-report presentation
+now import the value object directly without importing HA configuration helpers.
+The model/validation bodies are unchanged. JSON serialization, source labels,
+center storage keys and ID generation semantics are preserved. No migration,
+retention change or new validation policy is introduced.
+
+An isolated no-site-packages test covers stored Home/manual records, radius
+bounds, invalid records and duplicate IDs. Existing HA config tests and the
+cross-layer restart/history/event contracts continue exercising the adapters.
