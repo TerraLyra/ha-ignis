@@ -113,6 +113,7 @@ class IncidentLocationMatch:
     direction: str
     inside_radius: bool
     distance_trend: DistanceTrend = DistanceTrend.UNKNOWN
+    minimum_distance_km: float | None = None
 
     def attrs(self) -> dict[str, str | float | bool]:
         """Return a bounded, privacy-local representation for HA attributes."""

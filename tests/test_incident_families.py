@@ -275,3 +275,24 @@ def test_family_metadata_is_exposed_without_double_counting_intensity() -> None:
     assert attrs["source_track_ids"] == ["firms", "iodc"]
     assert attrs["incident_extent_km"] > 0
     assert incidents[0].frp_mw == 12.0
+
+
+def test_family_minimum_uses_selected_location_and_preserves_zero():
+    from custom_components.terralyra_ignis.models import IncidentLocationMatch
+    left, right = _cluster("left"), _cluster("right", minutes=1)
+    def matches(california_min):
+        return (
+            IncidentLocationMatch("x", "california", "California", 10, 250, "N", True,
+                                  minimum_distance_km=california_min),
+            IncidentLocationMatch("x", "home", "Home", 9000, 300, "N", False,
+                                  minimum_distance_km=1),
+        )
+    left.location_matches = matches(0)
+    right.location_matches = matches(8)
+    left.minimum_distance_km = right.minimum_distance_km = 9000
+    result = _consolidate([left, right])
+    assert len(result) == 1
+    assert result[0].minimum_distance_km == 0
+    assert result[0].distance_km == 10
+    left.location_matches = right.location_matches = matches(None)
+    assert _consolidate([left, right])[0].minimum_distance_km is None
