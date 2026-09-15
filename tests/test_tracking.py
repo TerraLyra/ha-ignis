@@ -335,3 +335,17 @@ def test_trend_event_cooldown_survives_state_oscillation() -> None:
 
     assert first == [EVENT_FIRE_ACTIVITY_INCREASING]
     assert repeated == []
+
+
+def test_old_observation_replay_does_not_duplicate_retained_identity():
+    result = update_incidents([], [_cluster()], now=BASE,
+                              matching_radius_km=3, memory_hours=6, history_hours=24)
+    original = deepcopy(result.incidents[0])
+    for minutes in (420, 430, 440):
+        result = update_incidents(result.incidents, [_cluster()],
+            now=BASE + timedelta(minutes=minutes), matching_radius_km=3,
+            memory_hours=6, history_hours=24)
+        assert len(result.incidents) == 1
+        assert not result.new_incidents
+        assert result.incidents[0]["first_seen"] == original["first_seen"]
+        assert result.incidents[0]["detections_total"] == original["detections_total"]

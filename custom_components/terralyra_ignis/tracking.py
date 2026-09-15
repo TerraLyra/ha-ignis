@@ -70,6 +70,7 @@ def update_incidents(
     new_incidents: list[tuple[dict[str, Any], FireCluster]] = []
     trend_events: list[tuple[str, dict[str, Any], FireCluster]] = []
     matched_ids: set[str] = set()
+    retained_by_id = {str(item["track_id"]): item for item in retained}
     # Only unmatched, recent tracks can be reused in this snapshot. Fixed
     # positions are safe: a moved or newly created track is immediately marked
     # matched and cannot be selected again until the next update.
@@ -103,7 +104,16 @@ def update_incidents(
         )
         if matched is None:
             matched = _new_incident(cluster)
+            # A retained observation can be older than the matching window.
+            # Replaying it must not append the same deterministic ID or emit
+            # another new-fire event. Keep the original stored history intact.
+            existing = retained_by_id.get(str(matched["track_id"]))
+            if existing is not None:
+                apply_incident_metadata(cluster, existing)
+                matched_ids.add(str(existing["track_id"]))
+                continue
             retained.append(matched)
+            retained_by_id[str(matched["track_id"])] = matched
             new_incidents.append((matched, cluster))
         else:
             for event_type in _update_incident(matched, cluster):

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.26.3
+
+- Prevent replayed older observations from creating duplicate retained track IDs
+  and repeated new-incident events outside the matching window.
+- Count unique source track IDs and avoid multiplying corroboration counts from
+  duplicate records. Preserve stored history.
+
 ## 0.26.2
 
 - Track minimum distance per monitored location and use the selected location
